@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('language')->default('eng')->nullable();
+            $table->string('level')->nullable();
+            $table->json('notifications')->nullable();
+            $table->string('status')->default('standard')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

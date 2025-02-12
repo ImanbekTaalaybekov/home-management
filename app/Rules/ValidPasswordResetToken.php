@@ -22,7 +22,9 @@ class ValidPasswordResetToken implements ValidationRule
     {
         if ($value === null || $this->token === null) {
             $fail("Invalid token");
+            return;
         }
+
         $passwordResetTokens = DB::table('password_reset_tokens')
             ->where('email', '=', $value)
             ->orderByDesc('created_at')
@@ -30,16 +32,22 @@ class ValidPasswordResetToken implements ValidationRule
 
         if ($passwordResetTokens === null) {
             $fail("Invalid token validation");
-        } elseif ($passwordResetTokens->token === null) {
-            $fail("Token not found");
-        } elseif (!Hash::check($this->token, $passwordResetTokens->token)) {
-            $fail("The token is invalid.");
+            return;
         }
 
+        if ($passwordResetTokens->token === null) {
+            $fail("Token not found");
+            return;
+        }
+
+        if (!Hash::check($this->token, $passwordResetTokens->token)) {
+            $fail("The token is invalid.");
+        }
     }
 
     public function message()
     {
         return 'The token is invalid.';
     }
+
 }

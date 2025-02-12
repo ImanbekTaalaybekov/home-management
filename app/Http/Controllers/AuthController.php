@@ -43,15 +43,14 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9]{6,}$/'],
             'device' => 'required',
-            'city_id' => 'required|integer|exists:cities,id',
-            'language' => ['nullable', Rule::enum(Language::class)],
+            'language' => 'nullable',
         ]);
 
         $user = User::create([
             'email' => $request->email,
             'language' => $request->language,
             'password' => $request->password,
-            'city_id' => $request->city_id
+            'status' => 'standart'
         ]);
 
         $token = $user->createToken($request->device)->plainTextToken;

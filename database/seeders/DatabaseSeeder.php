@@ -13,14 +13,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-
         User::create([
             'email' => 'test@test.com',
             'password' => Hash::make('pass'),
-        ]);
-
-        $this->call([
-            AlkorExceptionSeeder::class,
+            'language' => 'en',
+            'status' => 'standard',
         ]);
     }
 
