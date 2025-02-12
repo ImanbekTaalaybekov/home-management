@@ -1,29 +1,52 @@
 <?php
-
 namespace App\Notifications;
 
-use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Support\Facades\Lang;
 
-class ResetPasswordNotification extends ResetPassword {
+class ResetPasswordNotification extends Notification
+{
+    /**
+     * Токен для сброса пароля.
+     *
+     * @var string
+     */
+    public $token;
 
     /**
-     * Build the mail representation of the notification.
+     * Создайте экземпляр уведомления.
      *
-     * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @param string $token
+     */
+    public function __construct($token)
+    {
+        $this->token = $token;
+    }
+
+    /**
+     * Укажите каналы доставки уведомления.
+     *
+     * @param mixed $notifiable
+     * @return array
+     */
+    public function via($notifiable)
+    {
+        return ['mail']; // Указываем, что уведомление будет отправлено по email
+    }
+
+    /**
+     * Уведомление отправляется по email.
+     *
+     * @param mixed $notifiable
+     * @return MailMessage
      */
     public function toMail($notifiable)
     {
-        if (static::$toMailCallback) {
-            return call_user_func(static::$toMailCallback, $notifiable, $this->token);
-        }
-
         return (new MailMessage)
-        ->subject(Lang::get('Reset Password Notification'))
-        ->line(Lang::get('You are receiving this email because we received a password reset request for your account.'))
-        ->line(Lang::get('This reset password code will expire in :count minutes.', ['count' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire')]))
-        ->line(Lang::get('Here is your password reset token: ' . $this->token));
+            ->subject('Ваш код для сброса пароля')
+            ->line('Вы запросили сброс пароля. Ваш код:')
+            ->line("**{$this->token}**")
+            ->line('Если вы не запрашивали сброс пароля, просто проигнорируйте это сообщение.');
     }
 }
+

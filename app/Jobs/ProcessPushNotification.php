@@ -1,7 +1,5 @@
 <?php
 
-// app/Jobs/ProcessPushNotification.php
-
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
