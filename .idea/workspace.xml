@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="First settings">
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Second settings" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -159,6 +156,7 @@
       <path value="$PROJECT_DIR$/vendor/nunomaduro/termwind" />
       <path value="$PROJECT_DIR$/vendor/darkaonline/l5-swagger" />
       <path value="$PROJECT_DIR$/vendor/maatwebsite/excel" />
+      <path value="$PROJECT_DIR$/vendor/srmklive/paypal" />
     </include_path>
   </component>
   <component name="ProjectColorInfo">{
@@ -215,6 +213,7 @@
       <workItem from="1739354887492" duration="702000" />
       <workItem from="1739355617376" duration="4178000" />
       <workItem from="1739429204048" duration="446000" />
+      <workItem from="1739430362715" duration="2547000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
@@ -224,7 +223,23 @@
       <option name="project" value="LOCAL" />
       <updated>1739355440999</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Second settings">
+      <option name="closed" value="true" />
+      <created>1739435746477</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1739435746477</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Second settings">
+      <option name="closed" value="true" />
+      <created>1739435754816</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1739435754816</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -243,6 +258,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First settings" />
-    <option name="LAST_COMMIT_MESSAGE" value="First settings" />
+    <MESSAGE value="Second settings" />
+    <option name="LAST_COMMIT_MESSAGE" value="Second settings" />
   </component>
 </project>
