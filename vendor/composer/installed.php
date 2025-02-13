@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'laravel/laravel',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => NULL,
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => 'c5b37501b7849154f526bc375aec2631c8be9889',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -398,9 +398,9 @@
             'dev_requirement' => false,
         ),
         'laravel/laravel' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => NULL,
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => 'c5b37501b7849154f526bc375aec2631c8be9889',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -1039,6 +1039,15 @@
             'replaced' => array(
                 0 => '*',
             ),
+        ),
+        'srmklive/paypal' => array(
+            'pretty_version' => '3.0.32',
+            'version' => '3.0.32.0',
+            'reference' => '031d69d7c99f9ef0874a34cb85326ede28cd7aed',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../srmklive/paypal',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'swagger-api/swagger-ui' => array(
             'pretty_version' => 'v5.13.0',
