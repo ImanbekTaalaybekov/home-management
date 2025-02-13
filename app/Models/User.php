@@ -14,12 +14,12 @@ class User extends Authenticatable implements CanResetPassword
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
-        'email',
+        'name',
+        'phone_number',
         'password',
-        'language',
-        'notifications',
-        'status',
-        'level',
+        'residential_complex_id',
+        'block_number',
+        'apartment_number'
     ];
 
     protected $hidden = [
@@ -34,5 +34,15 @@ class User extends Authenticatable implements CanResetPassword
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordNotification($token));
+    }
+
+    public function residentialComplex()
+    {
+        return $this->belongsTo(ResidentialComplex::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 }
