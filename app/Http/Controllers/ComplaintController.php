@@ -11,8 +11,8 @@ class ComplaintController extends Controller
     {
         $request->validate([
             'message' => 'required|string',
-            'photos' => 'nullable|array', // Массив фото
-            'photos.*' => 'image|mimes:jpeg,png,jpg|max:2048', // Валидация фото
+            'photos' => 'nullable|array',
+            'photos.*' => 'image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $complaint = Complaint::create([
