@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\InputDebtDataController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PollController;
 use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\SuggestionController;
 use Illuminate\Http\Request;
@@ -44,6 +46,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/suggestions', [SuggestionController::class, 'index']);
     Route::post('/suggestions', [SuggestionController::class, 'store']);
+
+    Route::get('/polls', [PollController::class, 'index']);
+    Route::post('/polls/{poll}/vote', [PollController::class, 'vote']);
+
+    Route::get('/announcements', [AnnouncementController::class, 'index']);
 });
 
 Route::post('/upload-debt-data', [InputDebtDataController::class, 'upload']);
