@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DebtController;
+use App\Http\Controllers\InputDebtDataController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\SuggestionController;
@@ -44,3 +45,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/suggestions', [SuggestionController::class, 'index']);
     Route::post('/suggestions', [SuggestionController::class, 'store']);
 });
+
+Route::post('/upload-debt-data', [InputDebtDataController::class, 'upload']);
