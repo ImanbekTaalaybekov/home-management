@@ -22,35 +22,33 @@ Route::group(['prefix' => 'v1'], function () {
     Route::put('user', [AuthController::class, 'update'])->middleware('auth:sanctum');
     Route::get('me', [AuthController::class, 'me'])->middleware('auth:sanctum');
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-
-    Route::get('/complaints', [ComplaintController::class, 'index']);
-    Route::post('/complaints', [ComplaintController::class, 'store']);
-
-    Route::get('/suggestions', [SuggestionController::class, 'index']);
-    Route::post('/suggestions', [SuggestionController::class, 'store']);
 });
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/notifications', [NotificationController::class, 'index']);
-    Route::post('/notifications', [NotificationController::class, 'store']);
+Route::get('/complaints', [ComplaintController::class, 'index']);
+Route::post('/complaints', [ComplaintController::class, 'store']);
 
-    Route::get('/debts', [DebtController::class, 'index']);
-    Route::post('/debts', [DebtController::class, 'store']);
-    Route::post('/debts/upload', [DebtController::class, 'upload']);
+Route::get('/suggestions', [SuggestionController::class, 'index']);
+Route::post('/suggestions', [SuggestionController::class, 'store']);
 
-    Route::get('/service-requests', [ServiceRequestController::class, 'index']);
-    Route::post('/service-requests', [ServiceRequestController::class, 'store']);
+Route::get('/notifications', [NotificationController::class, 'index']);
+Route::post('/notifications', [NotificationController::class, 'store']);
 
-    Route::get('/complaints', [ComplaintController::class, 'index']);
-    Route::post('/complaints', [ComplaintController::class, 'store']);
+Route::get('/debts', [DebtController::class, 'index']);
+Route::post('/debts', [DebtController::class, 'store']);
+Route::post('/debts/upload', [DebtController::class, 'upload']);
 
-    Route::get('/suggestions', [SuggestionController::class, 'index']);
-    Route::post('/suggestions', [SuggestionController::class, 'store']);
+Route::get('/service-requests', [ServiceRequestController::class, 'index']);
+Route::post('/service-requests', [ServiceRequestController::class, 'store']);
 
-    Route::get('/polls', [PollController::class, 'index']);
-    Route::post('/polls/{poll}/vote', [PollController::class, 'vote']);
+Route::get('/complaints', [ComplaintController::class, 'index']);
+Route::post('/complaints', [ComplaintController::class, 'store']);
 
-    Route::get('/announcements', [AnnouncementController::class, 'index']);
-});
+Route::get('/suggestions', [SuggestionController::class, 'index']);
+Route::post('/suggestions', [SuggestionController::class, 'store']);
+
+Route::get('/polls', [PollController::class, 'index']);
+Route::post('/polls/{poll}/vote', [PollController::class, 'vote']);
+
+Route::get('/announcements', [AnnouncementController::class, 'index']);
 
 Route::post('/upload-debt-data', [InputDebtDataController::class, 'upload']);

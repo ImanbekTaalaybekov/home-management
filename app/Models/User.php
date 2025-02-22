@@ -15,7 +15,7 @@ class User extends Authenticatable implements CanResetPassword
 
     protected $fillable = [
         'name',
-        'phone_number',
+        'personal_account',
         'password',
         'residential_complex_id',
         'block_number',
