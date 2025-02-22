@@ -2,29 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Language;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 use App\Http\Resources\UserResource;
-
 
 class AuthController extends Controller
 {
     public function auth(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'personal_account' => 'required',
             'password' => 'required',
             'device' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('personal_account', $request->personal_account)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
-                'message' => 'Invalid email or password'
+                'message' => 'Invalid personal account or password'
             ], 401);
         }
 
@@ -34,23 +31,27 @@ class AuthController extends Controller
             'auth_token' => $token,
             'user' => new UserResource($user),
         ]);
-
     }
 
     public function register(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:users,email',
+            'name' => 'required|string|max:255',
+            'personal_account' => 'required|string|unique:users,personal_account',
             'password' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9]{6,}$/'],
-            'device' => 'required',
-            'language' => 'nullable',
+            'device' => 'required|string',
+            'residential_complex_id' => 'nullable|integer|exists:residential_complexes,id',
+            'block_number' => 'nullable|string|max:255',
+            'apartment_number' => 'nullable|string|max:255',
         ]);
 
         $user = User::create([
-            'email' => $request->email,
-            'language' => $request->language,
-            'password' => $request->password,
-            'status' => 'standart'
+            'name' => $request->name,
+            'personal_account' => $request->personal_account,
+            'password' => Hash::make($request->password),
+            'residential_complex_id' => $request->residential_complex_id,
+            'block_number' => $request->block_number,
+            'apartment_number' => $request->apartment_number,
         ]);
 
         $token = $user->createToken($request->device)->plainTextToken;
@@ -63,10 +64,7 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        $user = $request->user();
-
         return response()->json([
-            'notification' => $user->notifications,
             'user' => new UserResource($request->user()),
         ]);
     }
@@ -74,19 +72,23 @@ class AuthController extends Controller
     public function update(Request $request)
     {
         $input = $request->validate([
-            'language' => ['nullable', Rule::enum(Language::class)],
+            'name' => 'nullable|string|max:255',
             'password' => ['nullable', 'string', 'min:6', 'regex:/^[a-zA-Z0-9]{6,}$/'],
-            'notifications' => ['nullable', 'array'],
-            'city_id' => ['nullable', 'integer', 'exists:cities,id'],
+            'residential_complex_id' => 'nullable|integer|exists:residential_complexes,id',
+            'block_number' => 'nullable|string|max:255',
+            'apartment_number' => 'nullable|string|max:255',
         ]);
 
         $user = $request->user();
-        $input = array_filter($input);
-        $user->update($input);
+
+        if (isset($input['password'])) {
+            $input['password'] = Hash::make($input['password']);
+        }
+
+        $user->update(array_filter($input));
 
         return response()->json([
-            'notification' => $user->notifications,
-            'user' => new UserResource($request->user()),
+            'user' => new UserResource($user),
         ]);
     }
 
