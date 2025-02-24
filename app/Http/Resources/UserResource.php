@@ -15,10 +15,12 @@ class UserResource extends JsonResource
     {
         return  [
             'id' => $this->id,
-            'status' => $this->status,
-            'level' => $this->level,
-            'email' => $this->hideEmail ? null : $this->email,
+            'name' => $this->name,
+            'personal_account' => $this->personal_account,
+            'phone_number' => $this->phone_number,
+            'residential_complex_id' => $this->residential_complex_id,
+            'block_number' => $this->block_number,
+            'apartment_number' => $this->apartment_number,
         ];
     }
 }
-

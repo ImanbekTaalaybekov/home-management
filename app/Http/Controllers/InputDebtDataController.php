@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\InputDebtData;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Settings;
 
 class InputDebtDataController extends Controller
 {
     public function upload(Request $request)
     {
-        $request->validate(['file' => 'required|mimes:xlsx']);
+        Settings::setLocale('ru_RU');
 
         $file = $request->file('file');
         $spreadsheet = IOFactory::load($file->getPathname());
@@ -19,7 +21,13 @@ class InputDebtDataController extends Controller
 
         $rows = $sheet->toArray(null, true, true, true);
 
+        $address = null;
+
         foreach ($rows as $rowIndex => $row) {
+            if ($rowIndex < 6) {
+                continue;
+            }
+
             $account = $row['A'] ?? null;
             $fio = $row['B'] ?? null;
             $apartment = $row['D'] ?? null;
@@ -39,41 +47,96 @@ class InputDebtDataController extends Controller
             $totalUtilities = $row['AH'] ?? null;
 
             $cellFill = $sheet->getStyle("A{$rowIndex}")->getFill()->getFillType();
-            if (empty($account) || $cellFill !== Fill::FILL_NONE) {
+
+            if ($cellFill !== Fill::FILL_NONE) {
+                $address = $account;
                 continue;
             }
 
-            $address = null;
-            for ($i = $rowIndex - 1; $i > 0; $i--) {
-                $cellFill = $sheet->getStyle("A{$i}")->getFill()->getFillType();
-                if ($cellFill !== Fill::FILL_NONE) {
-                    $address = $sheet->getCell("A{$i}")->getValue();
-                    break;
-                }
+            if (empty($account)) {
+                continue;
             }
 
-            InputDebtData::create([
-                'account_number' => $account,
-                'full_name' => $fio,
-                'address' => $address,
-                'apartment_number' => $apartment,
-                'payment_date' => $paymentDate,
-                'debt_month' => $debtMonth,
-                'housing_maintenance' => $housingCost,
-                'hot_water_sewage_meter' => $hotWaterSewageMeter,
-                'heating' => $heating,
-                'garbage_disposal' => $garbageDisposal,
-                'cold_water_meter' => $coldWaterMeter,
-                'electricity' => $electricity,
-                'hot_water_meter' => $hotWaterMeter,
-                'cold_water_sewage_meter' => $coldWaterSewageMeter,
-                'previous_debts' => $previousDebts,
-                'duty_lighting' => $dutyLighting,
-                'capital_repair' => $capitalRepair,
-                'total_utilities' => $totalUtilities,
-            ]);
+            try {
+                InputDebtData::create([
+                    'account_number' => $account,
+                    'full_name' => $fio,
+                    'address' => $address,
+                    'apartment_number' => $apartment,
+                    'payment_date' => $this->parseDate($paymentDate),
+                    'debt_month' => $debtMonth,
+                    'housing_maintenance' => $this->parseNumber($housingCost),
+                    'hot_water_sewage_meter' => $this->parseNumber($hotWaterSewageMeter),
+                    'heating' => $this->parseNumber($heating),
+                    'garbage_disposal' => $this->parseNumber($garbageDisposal),
+                    'cold_water_meter' => $this->parseNumber($coldWaterMeter),
+                    'electricity' => $this->parseNumber($electricity),
+                    'hot_water_meter' => $this->parseNumber($hotWaterMeter),
+                    'cold_water_sewage_meter' => $this->parseNumber($coldWaterSewageMeter),
+                    'previous_debts' => $this->parseNumber($previousDebts),
+                    'duty_lighting' => $this->parseNumber($dutyLighting),
+                    'capital_repair' => $this->parseNumber($capitalRepair),
+                    'total_utilities' => $this->parseNumber($totalUtilities),
+                ]);
+            } catch (\Exception $e) {
+                continue;
+            }
         }
 
+        InputDebtData::whereIn('account_number', [
+            'ТОО "Управляющая Компания ZD" Код 1781',
+            '0001',
+            'ТОО "Управляющая компания ZD" Код 1792',
+            'Лицевой счет'
+        ])->delete();
+
         return response()->json(['message' => 'Файл успешно обработан и данные загружены'], 200);
+    }
+
+    private function parseDate($value)
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        if (is_numeric($value)) {
+            try {
+                return Date::excelToDateTimeObject($value)->format('Y-m-d');
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+
+        try {
+            $date = \DateTime::createFromFormat('d.m.Y', $value);
+            if ($date) {
+                return $date->format('Y-m-d');
+            }
+
+            $date = \DateTime::createFromFormat('Y-m-d', $value);
+            if ($date) {
+                return $date->format('Y-m-d');
+            }
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        return null;
+    }
+
+    private function parseNumber($value)
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        $value = preg_replace('/\s+/', '', $value);
+        $value = str_replace(',', '.', $value);
+
+        if (is_numeric($value)) {
+            return (float) $value;
+        }
+
+        return null;
     }
 }

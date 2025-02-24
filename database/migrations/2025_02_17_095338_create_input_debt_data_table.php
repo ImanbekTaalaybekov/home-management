@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('input_debt_data', function (Blueprint $table) {
             $table->id();
-            $table->string('account_number');
-            $table->string('full_name');
+            $table->string('account_number')->nullable();
+            $table->string('full_name')->nullable();
             $table->string('address')->nullable();
             $table->string('apartment_number')->nullable();
             $table->date('payment_date')->nullable();

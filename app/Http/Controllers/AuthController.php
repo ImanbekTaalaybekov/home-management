@@ -13,11 +13,15 @@ class AuthController extends Controller
     {
         $request->validate([
             'personal_account' => 'required',
+            'phone_number' => 'required',
             'password' => 'required',
             'device' => 'required',
         ]);
 
-        $user = User::where('personal_account', $request->personal_account)->first();
+        $user = User::where('personal_account', $request->personal_account)
+            ->where('phone_number', $request->phone_number)
+            ->first();
+
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
@@ -38,6 +42,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'personal_account' => 'required|string|unique:users,personal_account',
+            'phone_number' => 'required|string|unique:users,phone_number',
             'password' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9]{6,}$/'],
             'device' => 'required|string',
             'residential_complex_id' => 'nullable|integer|exists:residential_complexes,id',
@@ -48,6 +53,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'personal_account' => $request->personal_account,
+            'phone_number' => $request->phone_number,
             'password' => Hash::make($request->password),
             'residential_complex_id' => $request->residential_complex_id,
             'block_number' => $request->block_number,
@@ -61,6 +67,7 @@ class AuthController extends Controller
             'user' => new UserResource($user),
         ]);
     }
+
 
     public function me(Request $request)
     {
