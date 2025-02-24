@@ -19,7 +19,8 @@ class User extends Authenticatable implements CanResetPassword
         'password',
         'residential_complex_id',
         'block_number',
-        'apartment_number'
+        'apartment_number',
+        'phone_number',
     ];
 
     protected $hidden = [

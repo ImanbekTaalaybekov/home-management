@@ -4,14 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Общие фиксы и правки 180225 v1">
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Общие фиксы и правки 210225 v1">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Controllers/AuthController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/AuthController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/DebtController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/DebtController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Models/Debt.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Debt.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/InputDebtDataController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/InputDebtDataController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Resources/UserResource.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Resources/UserResource.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Models/User.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/User.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/migrations/2014_10_12_000000_create_users_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2014_10_12_000000_create_users_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/api.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/migrations/2025_02_17_095338_create_input_debt_data_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2025_02_17_095338_create_input_debt_data_table.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/input_report_data/example1.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/input_report_data/example1.xlsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -184,7 +185,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Global-fixes-210225-v1",
+    "git-widget-placeholder": "Global-fixes-240225-v1",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -239,6 +240,14 @@
       <workItem from="1739966213189" duration="5000" />
       <workItem from="1740047083857" duration="575000" />
       <workItem from="1740123885897" duration="11295000" />
+      <workItem from="1740205297886" duration="125000" />
+      <workItem from="1740205442290" duration="3000" />
+      <workItem from="1740289860962" duration="4648000" />
+      <workItem from="1740297798938" duration="2884000" />
+      <workItem from="1740306975763" duration="73000" />
+      <workItem from="1740367391199" duration="609000" />
+      <workItem from="1740369613060" duration="3525000" />
+      <workItem from="1740376761554" duration="4768000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
@@ -272,7 +281,15 @@
       <option name="project" value="LOCAL" />
       <updated>1739447648661</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Общие фиксы и правки 210225 v1">
+      <option name="closed" value="true" />
+      <created>1740205337378</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1740205337378</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -293,6 +310,7 @@
     <MESSAGE value="First settings" />
     <MESSAGE value="Second settings" />
     <MESSAGE value="Работа по долгам" />
-    <option name="LAST_COMMIT_MESSAGE" value="Работа по долгам" />
+    <MESSAGE value="Общие фиксы и правки 210225 v1" />
+    <option name="LAST_COMMIT_MESSAGE" value="Общие фиксы и правки 210225 v1" />
   </component>
 </project>
