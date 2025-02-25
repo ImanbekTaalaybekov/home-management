@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\VerificationCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResource;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -22,13 +24,54 @@ class AuthController extends Controller
             ->where('phone_number', $request->phone_number)
             ->first();
 
-
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Invalid personal account or password'
             ], 401);
         }
 
+        $code = 1111; //Затычка, затем заменить на mt_rand(1000,9999)
+        $expiresAt = now()->addMinutes(5);
+
+        VerificationCode::updateOrCreate(
+            ['user_id' => $user->id],
+            ['code' => $code, 'expires_at' => $expiresAt]
+        );
+
+        $this->sendSms($user->phone_number, "Ваш код подтверждения: $code");
+
+        return response()->json([
+            'message' => 'SMS code sent',
+            'requires_verification' => true,
+            'user_id' => $user->id,
+        ]);
+    }
+
+    private function sendSms($phoneNumber, $message)
+    {
+    //Добавить отправку СМС исходя от выбранного оператора (KCELL)
+    }
+
+    public function verifySmsCode(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'code' => 'required',
+        ]);
+
+        $verificationCode = VerificationCode::where('user_id', $request->user_id)
+            ->where('code', $request->code)
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (!$verificationCode) {
+            return response()->json([
+                'message' => 'Invalid or expired code'
+            ], 401);
+        }
+
+        $verificationCode->delete();
+        $user = User::find($request->user_id);
         $token = $user->createToken($request->device)->plainTextToken;
 
         return response()->json([

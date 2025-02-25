@@ -4,13 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Выгрузка на серверург">
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Общие фиксы и правки 240225 v2">
+      <changelist_data name="ImanbekTaalaybekov" email="145759656+imanbektaalaybekov@users.noreply.github.com" automatic="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/InstalledVersions.php" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/composer/InstalledVersions.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/autoload_classmap.php" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/composer/autoload_classmap.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/autoload_static.php" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/composer/autoload_static.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/composer/installed.php" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/composer/installed.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/AuthController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/AuthController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/migrations/2014_10_12_000000_create_users_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2014_10_12_000000_create_users_table.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/seeders/DatabaseSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/seeders/DatabaseSeeder.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,12 +34,12 @@
     &quot;assignee&quot;: &quot;ImanbekTaalaybekov&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/ImanbekTaalaybekov/home-management.git&quot;,
-    &quot;accountId&quot;: &quot;09e110f8-bc0f-4677-875e-c142a1e4a914&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/ImanbekTaalaybekov/home-management.git",
+    "accountId": "10306e22-ba7f-4a58-b35c-4725494ef8f8"
   }
-}</component>
+}]]></component>
   <component name="PhpWorkspaceProjectConfiguration" interpreter_name="/bin/php">
     <include_path>
       <path value="$PROJECT_DIR$/vendor/swagger-api/swagger-ui" />
@@ -183,7 +182,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Setting-up-for-server",
+    "git-widget-placeholder": "main",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -248,6 +247,7 @@
       <workItem from="1740376761554" duration="4768000" />
       <workItem from="1740392001342" duration="177000" />
       <workItem from="1740392208781" duration="1559000" />
+      <workItem from="1740459086272" duration="7011000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
@@ -300,7 +300,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="Global-fixes-240225-v2" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -313,6 +325,8 @@
     <MESSAGE value="Merge pull request #10 from ImanbekTaalaybekov/Global-fixes-240225-v1&#10;&#10;Общие фиксы и правки 240225 v1" />
     <MESSAGE value="Общие фиксы и правки 210225 v1" />
     <MESSAGE value="Выгрузка на серверург" />
-    <option name="LAST_COMMIT_MESSAGE" value="Выгрузка на серверург" />
+    <MESSAGE value="Общие фиксы и правки 240225 v2" />
+    <MESSAGE value="Merge pull request #11 from ImanbekTaalaybekov/Setting-up-for-server&#10;&#10;Выгрузка на сервер" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge pull request #11 from ImanbekTaalaybekov/Setting-up-for-server&#10;&#10;Выгрузка на сервер" />
   </component>
 </project>
