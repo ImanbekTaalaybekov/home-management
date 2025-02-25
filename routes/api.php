@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::group(['prefix' => 'v1'], function () {
     Route::post('auth', [AuthController::class, 'auth']);
+    Route::post('/verify-sms', [AuthController::class, 'verifySmsCode']);
     Route::post('register', [AuthController::class, 'register']);
     Route::put('user', [AuthController::class, 'update'])->middleware('auth:sanctum');
     Route::get('me', [AuthController::class, 'me'])->middleware('auth:sanctum');
