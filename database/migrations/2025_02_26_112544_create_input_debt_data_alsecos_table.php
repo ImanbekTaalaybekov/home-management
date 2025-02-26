@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('input_debt_data', function (Blueprint $table) {
+        Schema::create('input_debt_data_alsecos', function (Blueprint $table) {
             $table->id();
             $table->string('account_number')->nullable();
             $table->string('full_name')->nullable();
@@ -40,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('input_debt_data');
+        Schema::dropIfExists('input_debt_data_alsecos');
     }
 };

@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Общие фиксы и правки 240225 v2">
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Верификация пользователя по СМС роуты">
       <changelist_data name="ImanbekTaalaybekov" email="145759656+imanbektaalaybekov@users.noreply.github.com" automatic="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
@@ -250,6 +250,8 @@
       <workItem from="1740392001342" duration="177000" />
       <workItem from="1740392208781" duration="1559000" />
       <workItem from="1740459086272" duration="7011000" />
+      <workItem from="1740540559420" duration="3005000" />
+      <workItem from="1740559283513" duration="323000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
@@ -291,7 +293,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740205337378</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Верификация пользователя по СМС роуты">
+      <option name="closed" value="true" />
+      <created>1740486233068</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1740486233068</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -329,6 +339,7 @@
     <MESSAGE value="Выгрузка на серверург" />
     <MESSAGE value="Общие фиксы и правки 240225 v2" />
     <MESSAGE value="Merge pull request #11 from ImanbekTaalaybekov/Setting-up-for-server&#10;&#10;Выгрузка на сервер" />
-    <option name="LAST_COMMIT_MESSAGE" value="Merge pull request #11 from ImanbekTaalaybekov/Setting-up-for-server&#10;&#10;Выгрузка на сервер" />
+    <MESSAGE value="Верификация пользователя по СМС роуты" />
+    <option name="LAST_COMMIT_MESSAGE" value="Верификация пользователя по СМС роуты" />
   </component>
 </project>
