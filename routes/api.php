@@ -52,4 +52,5 @@ Route::post('/polls/{poll}/vote', [PollController::class, 'vote']);
 
 Route::get('/announcements', [AnnouncementController::class, 'index']);
 
-Route::post('/upload-debt-data', [InputDebtDataController::class, 'upload']);
+Route::post('/upload-debt-data-alseco', [InputDebtDataController::class, 'uploadAlseco']);
+Route::post('/upload-debt-data-urta', [InputDebtDataController::class, 'uploadUrta']);
