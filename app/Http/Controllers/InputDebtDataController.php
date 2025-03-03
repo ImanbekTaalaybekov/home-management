@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\InputDebtDataAlseco;
 use App\Models\InputDebtDataIvc;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -68,50 +69,57 @@ class InputDebtDataController extends Controller
             return null;
         }
         try {
-            return \Carbon\Carbon::createFromFormat('d.m.Y', $value)->format('Y-m-d');
+            return Carbon::createFromFormat('d.m.Y', $value)->format('Y-m-d');
         } catch (\Exception $e) {
             return null;
         }
     }
 
-    public function uploadIvc($file)
+    public function uploadIvc(Request $request)
     {
-        $spreadsheet = IOFactory::load($file->getPathname());
-        $sheet = $spreadsheet->getActiveSheet();
-        $rows = $sheet->toArray(null, true, true, true);
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
 
-        $currentHouse = null;
+            $spreadsheet = IOFactory::load($file->getPathname());
+            $sheet = $spreadsheet->getActiveSheet();
 
-        foreach ($rows as $row) {
-            if (!empty($row['B'])) {
-                $house = $this->findHouse($sheet, $row['A']);
-                InputDebtDataIvc::create([
-                    'account_number' => $row['A'],
-                    'house' => $house,
-                    'apartment' => $row['B'],
-                    'full_name' => $row['C'] ?: 'ФИО не указаны',
-                    'phone' => $row['D'],
-                    'service_name' => $row['E'],
-                    'debt' => $row['F'],
-                    'penalty' => $row['G']
-                ]);
+            $rows = $sheet->toArray();
+
+            foreach ($rows as $index => $row) {
+                $excelRowIndex = $index + 1;
+
+                if (!empty($row[1]) && $sheet->getStyle('B' . $excelRowIndex)->getFill()->getStartColor()->getRGB() === 'FFFFFF') {
+                    $house = $this->getHouseValue($sheet, $excelRowIndex);
+
+                    InputDebtDataIvc::create([
+                        'account_number' => $row[0],
+                        'apartment'     => $row[1],
+                        'full_name'     => empty($row[2]) ? 'ФИО не указаны' : $row[2],
+                        'phone'         => $row[3],
+                        'service_name'  => $row[4],
+                        'debt'          => $row[5],
+                        'penalty'       => $row[6],
+                        'house'         => $house,
+                    ]);
+                }
             }
+
+            return response()->json(['message' => 'Файл успешно загружен и обработан']);
         }
+
+        return response()->json(['message' => 'Файл не был загружен'], 400);
     }
 
-    private function findHouse($sheet, $currentCell)
+    private function getHouseValue($sheet, $excelRowIndex)
     {
-        $rowIndex = array_search($currentCell, array_column($sheet->toArray(), 'A'));
+        $excelRowIndex = intval($excelRowIndex);
 
-        for ($i = $rowIndex - 1; $i >= 1; $i--) {
-            $cell = $sheet->getCell("A{$i}");
-            $fill = $cell->getStyle()->getFill()->getStartColor()->getRGB();
-
-            if ($fill !== 'FFFFFF') {
-                return $sheet->getCell("A" . ($i - 1))->getValue();
+        for ($i = $excelRowIndex; $i >= 1; $i--) {
+            $cell = 'A' . $i;
+            if ($sheet->getStyle($cell)->getFill()->getStartColor()->getRGB() !== 'FFFFFF') {
+                return $sheet->getCell('A' . ($i - 1))->getValue();
             }
         }
-
-        return null;
+        return 'Неизвестный дом';
     }
 }
