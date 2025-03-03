@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\InputDebtDataAlseco;
+use App\Models\InputDebtDataIvc;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -71,5 +72,46 @@ class InputDebtDataController extends Controller
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    public function uploadIvc($file)
+    {
+        $spreadsheet = IOFactory::load($file->getPathname());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray(null, true, true, true);
+
+        $currentHouse = null;
+
+        foreach ($rows as $row) {
+            if (!empty($row['B'])) {
+                $house = $this->findHouse($sheet, $row['A']);
+                InputDebtDataIvc::create([
+                    'account_number' => $row['A'],
+                    'house' => $house,
+                    'apartment' => $row['B'],
+                    'full_name' => $row['C'] ?: 'ФИО не указаны',
+                    'phone' => $row['D'],
+                    'service_name' => $row['E'],
+                    'debt' => $row['F'],
+                    'penalty' => $row['G']
+                ]);
+            }
+        }
+    }
+
+    private function findHouse($sheet, $currentCell)
+    {
+        $rowIndex = array_search($currentCell, array_column($sheet->toArray(), 'A'));
+
+        for ($i = $rowIndex - 1; $i >= 1; $i--) {
+            $cell = $sheet->getCell("A{$i}");
+            $fill = $cell->getStyle()->getFill()->getStartColor()->getRGB();
+
+            if ($fill !== 'FFFFFF') {
+                return $sheet->getCell("A" . ($i - 1))->getValue();
+            }
+        }
+
+        return null;
     }
 }
