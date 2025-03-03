@@ -13,24 +13,25 @@ return new class extends Migration
     {
         Schema::create('input_debt_data_alsecos', function (Blueprint $table) {
             $table->id();
-            $table->string('account_number')->nullable();
-            $table->string('full_name')->nullable();
-            $table->string('address')->nullable();
-            $table->string('apartment_number')->nullable();
-            $table->date('payment_date')->nullable();
-            $table->string('debt_month')->nullable();
-            $table->decimal('housing_maintenance', 10, 2)->nullable();
-            $table->decimal('hot_water_sewage_meter', 10, 2)->nullable();
-            $table->decimal('heating', 10, 2)->nullable();
-            $table->decimal('garbage_disposal', 10, 2)->nullable();
-            $table->decimal('cold_water_meter', 10, 2)->nullable();
-            $table->decimal('electricity', 10, 2)->nullable();
-            $table->decimal('hot_water_meter', 10, 2)->nullable();
-            $table->decimal('cold_water_sewage_meter', 10, 2)->nullable();
-            $table->decimal('previous_debts', 10, 2)->nullable();
-            $table->decimal('duty_lighting', 10, 2)->nullable();
-            $table->decimal('capital_repair', 10, 2)->nullable();
-            $table->decimal('total_utilities', 10, 2)->nullable();
+            $table->string('account_number');
+            $table->string('management_body_code');
+            $table->string('management_body_name');
+            $table->string('supplier_code');
+            $table->string('supplier_name');
+            $table->string('owner_full_name');
+            $table->string('region');
+            $table->string('locality');
+            $table->string('locality_part')->nullable();
+            $table->string('house');
+            $table->string('apartment')->nullable();
+            $table->string('service');
+            $table->integer('debt_months_count');
+            $table->date('last_payment_date')->nullable();
+            $table->decimal('debt_amount', 15, 2);
+            $table->decimal('current_charges', 15, 2)->nullable();
+            $table->string('document_type')->nullable();
+            $table->date('document_date')->nullable();
+            $table->text('comment')->nullable();
             $table->timestamps();
         });
     }
