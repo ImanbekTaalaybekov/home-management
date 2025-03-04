@@ -44,5 +44,7 @@ class DebtImportController extends Controller
                 ]);
             }
         }
+
+        return response()->json(['message' => 'Данные импортированы']);
     }
 }

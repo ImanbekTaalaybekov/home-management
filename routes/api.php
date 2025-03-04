@@ -56,4 +56,4 @@ Route::get('/announcements', [AnnouncementController::class, 'index']);
 Route::post('/upload-debt-data-alseco', [InputDebtDataController::class, 'uploadAlseco']);
 Route::post('/upload-debt-data-ivc', [InputDebtDataController::class, 'uploadIvc']);
 
-Route::post('/upload-debt-data-alseco', [DebtImportController::class, 'importDebt']);
+Route::post('/debt-import', [DebtImportController::class, 'importDebt']);
