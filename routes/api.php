@@ -4,6 +4,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DebtController;
+use App\Http\Controllers\DebtImportController;
 use App\Http\Controllers\InputDebtDataController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PollController;
@@ -54,3 +55,5 @@ Route::get('/announcements', [AnnouncementController::class, 'index']);
 
 Route::post('/upload-debt-data-alseco', [InputDebtDataController::class, 'uploadAlseco']);
 Route::post('/upload-debt-data-ivc', [InputDebtDataController::class, 'uploadIvc']);
+
+Route::post('/upload-debt-data-alseco', [DebtImportController::class, 'importDebt']);

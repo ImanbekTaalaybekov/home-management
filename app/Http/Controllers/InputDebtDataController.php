@@ -17,6 +17,8 @@ class InputDebtDataController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $rows = $sheet->toArray(null, true, true, true);
 
+        InputDebtDataAlseco::truncate();
+
         foreach (array_slice($rows, 5) as $row) {
 
             InputDebtDataAlseco::create([
@@ -78,8 +80,10 @@ class InputDebtDataController extends Controller
     public function uploadIvc(Request $request)
     {
         if ($request->hasFile('file')) {
-            $file = $request->file('file');
 
+            InputDebtDataIvc::truncate();
+
+            $file = $request->file('file');
             $spreadsheet = IOFactory::load($file->getPathname());
             $sheet = $spreadsheet->getActiveSheet();
 
