@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Notification;
-use App\Models\User;
 use App\Services\NotificationService;
 
 class NotificationController extends Controller

@@ -2,21 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\DebtResource;
 use Illuminate\Http\Request;
 use App\Models\Debt;
 use App\Services\PaymentService;
+use Illuminate\Support\Facades\Auth;
 
 class DebtController extends Controller
 {
-    public function index(Request $request)
-    {
-        $debts = Debt::where('user_id', $request->user()->id)
-            ->orderBy('due_date', 'asc')
-            ->get();
-
-        return response()->json($debts);
-    }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -43,5 +36,14 @@ class DebtController extends Controller
         $paymentService->processPayments(storage_path('app/' . $filePath));
 
         return response()->json(['message' => 'Данные успешно загружены']);
+    }
+
+    public function getUserDebts()
+    {
+        $user = Auth::user();
+
+        $debts = Debt::where('user_id', $user->id)->get();
+
+        return DebtResource::collection($debts);
     }
 }
