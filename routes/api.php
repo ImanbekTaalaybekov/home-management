@@ -32,10 +32,10 @@ Route::post('/complaints', [ComplaintController::class, 'store']);
 Route::get('/suggestions', [SuggestionController::class, 'index']);
 Route::post('/suggestions', [SuggestionController::class, 'store']);
 
-Route::get('/notifications', [NotificationController::class, 'index']);
+Route::get('/notifications', [NotificationController::class, 'index'])->middleware('auth:sanctum');;
 Route::post('/notifications', [NotificationController::class, 'store']);
 
-Route::get('/debts', [DebtController::class, 'index']);
+Route::get('/debts', [DebtController::class, 'getUserDebts']);
 Route::post('/debts', [DebtController::class, 'store']);
 Route::post('/debts/upload', [DebtController::class, 'upload']);
 

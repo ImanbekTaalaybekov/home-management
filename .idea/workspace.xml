@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Внесение зменений в загрузку данных v3">
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Расширение функционала по жалобам">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -24,7 +24,7 @@
     </option>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="Update-complaint-features" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -257,6 +257,7 @@
       <workItem from="1740939677712" duration="3000" />
       <workItem from="1740971722831" duration="5165000" />
       <workItem from="1741021884693" duration="5000" />
+      <workItem from="1741100570956" duration="1000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
@@ -350,6 +351,7 @@
     <MESSAGE value="Merge pull request #11 from ImanbekTaalaybekov/Setting-up-for-server&#10;&#10;Выгрузка на сервер" />
     <MESSAGE value="Верификация пользователя по СМС роуты" />
     <MESSAGE value="Обновление composer" />
-    <option name="LAST_COMMIT_MESSAGE" value="Обновление composer" />
+    <MESSAGE value="Заполнение долгов по коммунальным услугам" />
+    <option name="LAST_COMMIT_MESSAGE" value="Заполнение долгов по коммунальным услугам" />
   </component>
 </project>
