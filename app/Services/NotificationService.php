@@ -2,35 +2,80 @@
 namespace App\Services;
 
 use App\Models\Notification;
+use App\Notifications\PushNotification;
+use Illuminate\Support\Facades\Log;
+use NotificationChannels\Fcm\FcmMessage;
+use App\Models\User;
 
 class NotificationService
 {
-    public function sendGlobalNotification($title, $message)
+    public function sendGlobalNotification($title, $message, array $photos = [])
     {
-        Notification::create([
+        $notification = Notification::create([
             'title' => $title,
             'message' => $message,
             'type' => 'global',
         ]);
+
+        $this->attachPhotos($notification, $photos);
+
+        $this->sendPushNotification($title, $message, User::pluck('fcm_token')->toArray());
     }
 
-    public function sendComplexNotification($complexId, $title, $message)
+    public function sendComplexNotification($complexId, $title, $message, array $photos = [])
     {
-        Notification::create([
+        $notification = Notification::create([
             'title' => $title,
             'message' => $message,
             'type' => 'complex',
             'residential_complex_id' => $complexId,
         ]);
+
+        $this->attachPhotos($notification, $photos);
+
+        $tokens = User::where('residential_complex_id', $complexId)->pluck('fcm_token')->toArray();
+        $this->sendPushNotification($title, $message, $tokens);
     }
 
-    public function sendPersonalNotification($userId, $title, $message)
+    public function sendPersonalNotification($userId, $title, $message, array $photos = [])
     {
-        Notification::create([
+        $notification = Notification::create([
             'title' => $title,
             'message' => $message,
             'type' => 'personal',
             'user_id' => $userId,
         ]);
+
+        $this->attachPhotos($notification, $photos);
+
+        $token = User::find($userId)->fcm_token;
+        $this->sendPushNotification($title, $message, [$token]);
+    }
+
+    private function attachPhotos(Notification $notification, array $photos)
+    {
+        foreach ($photos as $path) {
+            $notification->photos()->create(['path' => $path]);
+        }
+    }
+
+    private function sendPushNotification($title, $message, array $tokens)
+    {
+        if (empty($tokens)) return;
+
+        $fcmMessage = FcmMessage::create()
+            ->setNotification([
+                'title' => $title,
+                'body' => $message,
+            ]);
+
+        foreach ($tokens as $token) {
+            try {
+                Notification::route('fcm', $token)->notify(new PushNotification($fcmMessage));
+            } catch (\Exception $e) {
+                Log::error("FCM push notification failed: " . $e->getMessage());
+            }
+        }
     }
 }
+

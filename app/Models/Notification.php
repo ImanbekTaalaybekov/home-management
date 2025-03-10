@@ -20,4 +20,9 @@ class Notification extends Model
     {
         return $this->belongsTo(ResidentialComplex::class);
     }
+
+    public function photos()
+    {
+        return $this->morphMany(Photo::class, 'photoable');
+    }
 }
