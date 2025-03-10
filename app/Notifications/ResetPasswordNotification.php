@@ -31,7 +31,7 @@ class ResetPasswordNotification extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail']; // Указываем, что уведомление будет отправлено по email
+        return ['mail'];
     }
 
     /**

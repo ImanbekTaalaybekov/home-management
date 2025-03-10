@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('block_number')->nullable();
             $table->string('apartment_number')->nullable();
             $table->string('residential_complex_id')->nullable();
+            $table->string('fcm_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

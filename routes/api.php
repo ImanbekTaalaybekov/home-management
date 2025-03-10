@@ -17,14 +17,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::group(['prefix' => 'v1'], function () {
-    Route::post('auth', [AuthController::class, 'auth']);
-    Route::post('/verify-sms', [AuthController::class, 'verifySmsCode']);
-    Route::post('register', [AuthController::class, 'register']);
-    Route::put('user', [AuthController::class, 'update'])->middleware('auth:sanctum');
-    Route::get('me', [AuthController::class, 'me'])->middleware('auth:sanctum');
-    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-});
+Route::post('/auth', [AuthController::class, 'auth']);
+Route::post('/verify-sms', [AuthController::class, 'verifySmsCode']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::put('/user', [AuthController::class, 'update'])->middleware('auth:sanctum');
+Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::post('/user-fcm-token', [AuthController::class, 'updateFcmToken'])->middleware('auth:sanctum');
 
 Route::get('/complaints', [ComplaintController::class, 'index']);
 Route::post('/complaints', [ComplaintController::class, 'store']);
@@ -32,7 +31,8 @@ Route::post('/complaints', [ComplaintController::class, 'store']);
 Route::get('/suggestions', [SuggestionController::class, 'index']);
 Route::post('/suggestions', [SuggestionController::class, 'store']);
 
-Route::get('/notifications', [NotificationController::class, 'index'])->middleware('auth:sanctum');;
+Route::get('/notifications', [NotificationController::class, 'index'])->middleware('auth:sanctum');
+Route::get('/notifications/{id}', [NotificationController::class, 'show']);
 Route::post('/notifications', [NotificationController::class, 'store']);
 
 Route::get('/debts', [DebtController::class, 'getUserDebts']);

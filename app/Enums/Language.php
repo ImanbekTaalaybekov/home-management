@@ -9,13 +9,13 @@ enum Language: string
 
 
     case RUS = 'ru';
-    case KGZ = 'kg';
+    case KZ = 'kz';
 
     public function title(string $lang = null): string
     {
         $value = match ($this) {
             self::RUS => 'Русский',
-            self::KGZ => 'Кыргызский',
+            self::KZ => 'Казахский',
         };
 
         return __($value, locale: $lang);
@@ -25,7 +25,7 @@ enum Language: string
     {
         return match ($this) {
             self::RUS => '🇷🇺',
-            self::KGZ => '🇰🇬',
+            self::KZ => '🇰🇿',
         };
     }
 
