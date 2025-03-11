@@ -7,7 +7,6 @@ use App\Models\VerificationCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResource;
-use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
