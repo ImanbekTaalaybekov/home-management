@@ -16,4 +16,11 @@ class DebtController extends Controller
 
         return DebtResource::collection($debts);
     }
+
+    public function getSingleDebt($id)
+    {
+        $notification = Debt::where('id', $id)->get();
+
+        return response()->json($notification);
+    }
 }
