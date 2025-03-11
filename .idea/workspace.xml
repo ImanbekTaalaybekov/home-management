@@ -6,11 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Расширение функционала уведомлениям">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Enums/FavoriteEnum.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Enums/PushNotificationStatus.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Enums/UserNotification.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/ComplaintController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/ComplaintController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Controllers/DebtController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/DebtController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Resources/DebtResource.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Resources/DebtResource.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/Complaint.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Complaint.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/api.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -217,7 +215,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Debt-filter-110325-v1",
+    "git-widget-placeholder": "Complaint-index-shows-110325-v1",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",

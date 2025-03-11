@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Complaint;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ComplaintController extends Controller
 {
@@ -28,5 +29,28 @@ class ComplaintController extends Controller
         }
 
         return response()->json($complaint, 201);
+    }
+
+    public function index()
+    {
+        $user = Auth::user();
+
+        $complaints = Complaint::with('photos')
+            ->where('user_id', $user->id)
+            ->get();
+
+        return response()->json($complaints);
+    }
+
+    public function show($id)
+    {
+        $complaint = Complaint::with('photos')
+            ->where('id', $id);
+
+        if (!$complaint) {
+            return response()->json(['message' => 'Жалоба не найдена'], 404);
+        }
+
+        return response()->json($complaint);
     }
 }
