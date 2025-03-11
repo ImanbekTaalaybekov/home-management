@@ -36,8 +36,6 @@ Route::get('/notifications/{id}', [NotificationController::class, 'show']);
 Route::post('/notifications', [NotificationController::class, 'store']);
 
 Route::get('/debts', [DebtController::class, 'getUserDebts']);
-Route::post('/debts', [DebtController::class, 'store']);
-Route::post('/debts/upload', [DebtController::class, 'upload']);
 
 Route::get('/service-requests', [ServiceRequestController::class, 'index']);
 Route::post('/service-requests', [ServiceRequestController::class, 'store']);

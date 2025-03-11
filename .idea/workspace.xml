@@ -4,22 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Расширение функционала по жалобам">
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Расширение функционала уведомлениям">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Enums/Language.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Enums/Language.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/AuthController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/AuthController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/NotificationController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/NotificationController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Models/Notification.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Notification.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Models/Photo.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Photo.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Models/User.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/User.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Notifications/ResetPasswordNotification.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Notifications/ResetPasswordNotification.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Services/NotificationService.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Services/NotificationService.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.lock" beforeDir="false" afterPath="$PROJECT_DIR$/composer.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/services.php" beforeDir="false" afterPath="$PROJECT_DIR$/config/services.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2014_10_12_000000_create_users_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2014_10_12_000000_create_users_table.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Enums/FavoriteEnum.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Enums/PushNotificationStatus.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Enums/UserNotification.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/DebtController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/DebtController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Resources/DebtResource.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Resources/DebtResource.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/api.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -226,7 +217,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Notification-changes-100325-v1",
+    "git-widget-placeholder": "Debt-filter-110325-v1",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -303,6 +294,7 @@
       <workItem from="1741577992727" duration="625000" />
       <workItem from="1741580599647" duration="452000" />
       <workItem from="1741594978266" duration="14627000" />
+      <workItem from="1741625560132" duration="7276000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
@@ -397,6 +389,7 @@
     <MESSAGE value="Верификация пользователя по СМС роуты" />
     <MESSAGE value="Обновление composer" />
     <MESSAGE value="Заполнение долгов по коммунальным услугам" />
-    <option name="LAST_COMMIT_MESSAGE" value="Заполнение долгов по коммунальным услугам" />
+    <MESSAGE value="Расширение функционала уведомлениям" />
+    <option name="LAST_COMMIT_MESSAGE" value="Расширение функционала уведомлениям" />
   </component>
 </project>

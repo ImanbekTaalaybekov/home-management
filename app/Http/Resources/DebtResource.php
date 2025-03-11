@@ -28,14 +28,19 @@ class DebtResource extends JsonResource
     protected function calculateOverdue()
     {
         if ($this->type === 'Alseco') {
+            if (is_null($this->due_date)) {
+                return false;
+            }
             $dueDate = Carbon::parse($this->due_date);
-            return $dueDate->diffInMonths(now()) > 2;
+            return $dueDate->diffInDays(now()) > 60;
         }
 
         if ($this->type === 'IVC') {
+            if (is_null($this->amount)) {
+                return false;
+            }
             return $this->amount > 20000;
         }
-
         return false;
     }
 }
