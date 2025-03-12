@@ -12,6 +12,8 @@ class ServiceRequestController extends Controller
         $request->validate([
             'type' => 'required|string',
             'description' => 'required|string',
+            'photos' => 'nullable|array',
+            'photos.*' => 'image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $serviceRequest = ServiceRequest::create([
@@ -19,6 +21,16 @@ class ServiceRequestController extends Controller
             'type' => $request->type,
             'description' => $request->description,
         ]);
+
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $photo) {
+                $path = $photo->store('service_requests', 'public');
+
+                $serviceRequest->photos()->create([
+                    'path' => $path,
+                ]);
+            }
+        }
 
         return response()->json($serviceRequest, 201);
     }
