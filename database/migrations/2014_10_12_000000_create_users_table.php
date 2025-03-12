@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('phone_number')->nullable();
             $table->string('name')->unique();
             $table->string('password');
-            $table->string('address');
             $table->string('block_number')->nullable();
             $table->string('apartment_number')->nullable();
             $table->string('residential_complex_id')->nullable();

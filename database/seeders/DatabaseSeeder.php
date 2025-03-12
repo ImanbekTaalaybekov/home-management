@@ -20,8 +20,11 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('pass'),
             'residential_complex_id' => 1,
             'block_number' => 'B1',
-            'apartment_number' => '101',
-            'address' => 'Akhunbaev st.'
+            'apartment_number' => '101'
+        ]);
+
+        $this->call([
+            UserSeeder::class
         ]);
     }
 }
