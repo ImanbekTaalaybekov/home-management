@@ -6,6 +6,7 @@ use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\DebtImportController;
 use App\Http\Controllers\InputDebtDataController;
+use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\ServiceRequestController;
@@ -56,3 +57,9 @@ Route::post('/upload-debt-data-alseco', [InputDebtDataController::class, 'upload
 Route::post('/upload-debt-data-ivc', [InputDebtDataController::class, 'uploadIvc']);
 
 Route::post('/debt-import', [DebtImportController::class, 'importDebt']);
+
+Route::post('/knowledge-base/categories', [KnowledgeBaseController::class, 'storeCategory']);
+Route::get('/knowledge-base/categories', [KnowledgeBaseController::class, 'indexCategories']);
+Route::post('/knowledge-base/articles', [KnowledgeBaseController::class, 'storeArticle']);
+Route::get('/knowledge-base/articles', [KnowledgeBaseController::class, 'indexArticles']);
+Route::get('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'showArticle']);
