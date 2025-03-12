@@ -21,15 +21,22 @@ class PollController extends Controller
 
     public function store(Request $request)
     {
+        $user = $request->user();
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'residential_complex_id' => 'required|exists:residential_complexes,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date'
         ]);
 
-        $poll = Poll::create($request->all());
+        $poll = Poll::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'residential_complex_id' => $user->residential_complex_id,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+        ]);
 
         return response()->json($poll, 201);
     }
