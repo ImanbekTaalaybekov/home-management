@@ -6,6 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Добавление сидера юзеров">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/AnnouncementController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/AnnouncementController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/Announcement.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Announcement.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/migrations/2025_02_17_114949_create_announcements_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2025_02_17_114949_create_announcements_table.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/api.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -212,7 +215,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "KnowledgeBase-120325-v1",
+    "git-widget-placeholder": "Announcement-fixes",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",

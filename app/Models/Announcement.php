@@ -12,8 +12,6 @@ class Announcement extends Model
     protected $fillable = [
         'title',
         'content',
-        'type',
         'residential_complex_id',
-        'building_number'
     ];
 }
