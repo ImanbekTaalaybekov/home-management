@@ -17,7 +17,6 @@ return new class extends Migration
             $table->text('description');
             $table->enum('type', ['complex', 'building']);
             $table->foreignId('residential_complex_id')->nullable()->constrained();
-            $table->string('building_number')->nullable();
             $table->date('start_date');
             $table->date('end_date');
             $table->timestamps();
