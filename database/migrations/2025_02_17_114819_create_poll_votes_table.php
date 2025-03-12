@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('poll_id')->constrained();
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('poll_option_id')->constrained();
+            $table->string('vote');
             $table->timestamps();
         });
     }
