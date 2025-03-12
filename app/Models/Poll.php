@@ -12,17 +12,10 @@ class Poll extends Model
     protected $fillable = [
         'title',
         'description',
-        'type',
         'residential_complex_id',
-        'building_number',
         'start_date',
         'end_date'
     ];
-
-    public function options()
-    {
-        return $this->hasMany(PollOption::class);
-    }
 
     public function votes()
     {
