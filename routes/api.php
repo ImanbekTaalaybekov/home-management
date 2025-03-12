@@ -48,8 +48,10 @@ Route::post('/complaints', [ComplaintController::class, 'store']);
 
 Route::post('/suggestions', [SuggestionController::class, 'store']);
 
-Route::get('/polls', [PollController::class, 'index']);
-Route::post('/polls/{poll}/vote', [PollController::class, 'vote']);
+Route::get('/polls', [PollController::class, 'index'])->middleware('auth:sanctum');
+Route::post('/polls', [PollController::class, 'store']);
+Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])->middleware('auth:sanctum');
+Route::get('/polls/{poll}', [PollController::class, 'show'])->middleware('auth:sanctum');
 
 Route::get('/announcements', [AnnouncementController::class, 'index']);
 Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);

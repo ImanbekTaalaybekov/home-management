@@ -6,9 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Добавление сидера юзеров">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/AnnouncementController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/AnnouncementController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Models/Announcement.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Announcement.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2025_02_17_114949_create_announcements_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2025_02_17_114949_create_announcements_table.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/PollController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/PollController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/Poll.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Poll.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/PollOption.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/PollVote.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/PollVote.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/migrations/2025_02_17_114701_create_poll_options_table.php" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/api.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -215,7 +217,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Announcement-fixes",
+    "git-widget-placeholder": "Polls",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -353,7 +355,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740851340269</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Объявления">
+      <option name="closed" value="true" />
+      <created>1741766877033</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1741766877033</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -392,6 +402,7 @@
     <MESSAGE value="Заполнение долгов по коммунальным услугам" />
     <MESSAGE value="Расширение функционала уведомлениям" />
     <MESSAGE value="Добавление фотографий при вызове матера" />
-    <option name="LAST_COMMIT_MESSAGE" value="Добавление фотографий при вызове матера" />
+    <MESSAGE value="Объявления" />
+    <option name="LAST_COMMIT_MESSAGE" value="Объявления" />
   </component>
 </project>
