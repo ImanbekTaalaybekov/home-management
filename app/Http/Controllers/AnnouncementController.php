@@ -11,17 +11,34 @@ class AnnouncementController extends Controller
     {
         $user = $request->user();
 
-        $announcements = Announcement::where(function ($query) use ($user) {
-            $query->where('residential_complex_id', $user->residential_complex_id)
-                ->where('type', 'complex');
-        })
-            ->orWhere(function ($query) use ($user) {
-                $query->where('building_number', $user->building_number)
-                    ->where('type', 'building');
-            })
+        $announcements = Announcement::where('residential_complex_id', $user->residential_complex_id)
             ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json($announcements);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'residential_complex_id' => 'required|exists:residential_complexes,id'
+        ]);
+
+        $announcement = Announcement::create($request->all());
+
+        return response()->json($announcement, 201);
+    }
+
+    public function show($id, Request $request)
+    {
+        $user = $request->user();
+
+        $announcement = Announcement::where('id', $id)
+            ->where('residential_complex_id', $user->residential_complex_id)
+            ->firstOrFail();
+
+        return response()->json($announcement);
     }
 }

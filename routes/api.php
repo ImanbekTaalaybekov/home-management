@@ -52,6 +52,8 @@ Route::get('/polls', [PollController::class, 'index']);
 Route::post('/polls/{poll}/vote', [PollController::class, 'vote']);
 
 Route::get('/announcements', [AnnouncementController::class, 'index']);
+Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);
+Route::post('/announcements', [AnnouncementController::class, 'index']);
 
 Route::post('/upload-debt-data-alseco', [InputDebtDataController::class, 'uploadAlseco']);
 Route::post('/upload-debt-data-ivc', [InputDebtDataController::class, 'uploadIvc']);
