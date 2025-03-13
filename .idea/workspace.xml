@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Внесение зменений в загрузку данных v3">
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Фиксы по сидерам">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -37,13 +37,13 @@
     &quot;assignee&quot;: &quot;ImanbekTaalaybekov&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/ImanbekTaalaybekov/home-management.git&quot;,
-    &quot;accountId&quot;: &quot;1e0e5102-2c6c-4606-b1f0-f14934b8db9d&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/ImanbekTaalaybekov/home-management.git",
+    "accountId": "1e0e5102-2c6c-4606-b1f0-f14934b8db9d"
   }
-}</component>
-  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="/bin/php">
+}]]></component>
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="php">
     <include_path>
       <path value="$PROJECT_DIR$/vendor/swagger-api/swagger-ui" />
       <path value="$PROJECT_DIR$/vendor/tijsverkoyen/css-to-inline-styles" />
@@ -289,6 +289,8 @@
       <workItem from="1741580599647" duration="452000" />
       <workItem from="1741594978266" duration="14627000" />
       <workItem from="1741625560132" duration="7276000" />
+      <workItem from="1741780605023" duration="17207000" />
+      <workItem from="1741851058930" duration="18000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
@@ -346,7 +348,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740851340269</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Фиксы по сидерам">
+      <option name="closed" value="true" />
+      <created>1741779872214</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1741779872214</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -384,6 +394,7 @@
     <MESSAGE value="Обновление composer" />
     <MESSAGE value="Заполнение долгов по коммунальным услугам" />
     <MESSAGE value="Расширение функционала уведомлениям" />
-    <option name="LAST_COMMIT_MESSAGE" value="Расширение функционала уведомлениям" />
+    <MESSAGE value="Фиксы по сидерам" />
+    <option name="LAST_COMMIT_MESSAGE" value="Фиксы по сидерам" />
   </component>
 </project>
