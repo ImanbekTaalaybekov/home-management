@@ -4,14 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Announcement;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AnnouncementController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $user = $request->user();
+        $user = Auth::guard('sanctum')->user();
 
-        $announcements = Announcement::where('residential_complex_id', $user->residential_complex_id)
+        $announcements = Announcement::with('photos')
+            ->where('residential_complex_id', $user->residential_complex_id)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -20,22 +22,40 @@ class AnnouncementController extends Controller
 
     public function store(Request $request)
     {
+        $user = Auth::guard('sanctum')->user();
+
         $request->validate([
             'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'residential_complex_id' => 'required|exists:residential_complexes,id'
+            'message' => 'required|string',
+            'photos' => 'nullable|array',
+            'photos.*' => 'image|mimes:jpeg,png,jpg',
         ]);
 
-        $announcement = Announcement::create($request->all());
+        $announcement = Announcement::create([
+            'title' => $request->title,
+            'content' => $request->message,
+            'residential_complex_id' => $user->residential_complex_id
+        ]);
 
-        return response()->json($announcement, 201);
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $photo) {
+                $path = $photo->store('photos', 'public');
+
+                $announcement->photos()->create([
+                    'path' => $path,
+                ]);
+            }
+        }
+
+        return response()->json($announcement->load('photos'), 201);
     }
 
-    public function show($id, Request $request)
+    public function show($id)
     {
-        $user = $request->user();
+        $user = Auth::guard('sanctum')->user();
 
-        $announcement = Announcement::where('id', $id)
+        $announcement = Announcement::with('photos')
+            ->where('id', $id)
             ->where('residential_complex_id', $user->residential_complex_id)
             ->firstOrFail();
 

@@ -41,7 +41,7 @@ class NotificationController extends Controller
             'user_id' => 'nullable|exists:users,id',
             'residential_complex_id' => 'nullable|exists:residential_complexes,id',
             'photos' => 'nullable|array',
-            'photos.*' => 'string',
+            'photos.*' => 'nullable',
         ]);
 
         $photos = $request->photos ?? [];

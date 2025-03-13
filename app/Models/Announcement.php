@@ -14,4 +14,9 @@ class Announcement extends Model
         'content',
         'residential_complex_id',
     ];
+
+    public function photos()
+    {
+        return $this->morphMany(Photo::class, 'photoable');
+    }
 }

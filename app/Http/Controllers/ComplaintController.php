@@ -10,14 +10,10 @@ class ComplaintController extends Controller
 {
     public function store(Request $request)
     {
-        $request->validate([
-            'message' => 'required|string',
-            'photos' => 'nullable|array',
-            'photos.*' => 'image|mimes:jpeg,png,jpg|max:2048',
-        ]);
+        $user = Auth::guard('sanctum')->user();
 
         $complaint = Complaint::create([
-            'user_id' => auth()->id(),
+            'user_id' => $user->id,
             'message' => $request->message,
         ]);
 
@@ -44,8 +40,7 @@ class ComplaintController extends Controller
 
     public function show($id)
     {
-        $complaint = Complaint::with('photos')
-            ->where('id', $id);
+        $complaint = Complaint::with('photos')->find($id);
 
         if (!$complaint) {
             return response()->json(['message' => 'Жалоба не найдена'], 404);

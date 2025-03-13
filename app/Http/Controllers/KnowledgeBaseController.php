@@ -31,12 +31,12 @@ class KnowledgeBaseController extends Controller
             'content' => 'required|string',
             'category_id' => 'required|exists:knowledge_base_categories,id',
             'photos' => 'nullable|array',
-            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif'
         ]);
 
         $article = KnowledgeBase::create($request->only(['title', 'content', 'category_id']));
 
-        if ($request->has('photos')) {
+        if ($request->hasfile('photos')) {
             foreach ($request->file('photos') as $photo) {
                 $path = $photo->store('knowledge_base_photos', 'public');
                 $article->photos()->create(['path' => $path]);
@@ -46,9 +46,19 @@ class KnowledgeBaseController extends Controller
         return response()->json($article->load('category'), 201);
     }
 
-    public function indexArticles()
+    public function indexArticles(Request $request)
     {
-        return response()->json(KnowledgeBase::with(['category', 'photos'])->get());
+        $request->validate([
+            'category_id' => 'required|exists:knowledge_base_categories,id',
+        ]);
+
+        $categoryId = $request->category_id;
+
+        $articles = KnowledgeBase::with(['category', 'photos'])
+            ->where('category_id', $categoryId)
+            ->get();
+
+        return response()->json($articles);
     }
 
     public function showArticle($id)
