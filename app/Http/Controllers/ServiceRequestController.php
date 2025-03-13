@@ -4,20 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\ServiceRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ServiceRequestController extends Controller
 {
     public function store(Request $request)
     {
+        $user = Auth::guard('sanctum')->user();
+
         $request->validate([
             'type' => 'required|string',
             'description' => 'required|string',
             'photos' => 'nullable|array',
-            'photos.*' => 'image|mimes:jpg,jpeg,png|max:2048',
+            'photos.*' => 'image|mimes:jpg,jpeg,png',
         ]);
 
         $serviceRequest = ServiceRequest::create([
-            'user_id' => auth()->id(),
+            'user_id' => $user->id,
             'type' => $request->type,
             'description' => $request->description,
         ]);
@@ -25,7 +28,6 @@ class ServiceRequestController extends Controller
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
                 $path = $photo->store('service_requests', 'public');
-
                 $serviceRequest->photos()->create([
                     'path' => $path,
                 ]);

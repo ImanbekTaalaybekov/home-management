@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Poll;
 use App\Models\PollVote;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PollController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $user = $request->user();
+        $user = Auth::guard('sanctum')->user();
 
         $polls = Poll::where('residential_complex_id', $user->residential_complex_id)
             ->orderBy('start_date', 'desc')
@@ -21,13 +22,11 @@ class PollController extends Controller
 
     public function store(Request $request)
     {
-        $user = $request->user();
+        $user = Auth::guard('sanctum')->user();
 
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date'
         ]);
 
         $poll = Poll::create([
@@ -47,9 +46,9 @@ class PollController extends Controller
             'vote' => 'required|in:yes,no',
         ]);
 
-        $user = $request->user();
+        $user = Auth::guard('sanctum')->user();
 
-        if ($poll->residential_complex_id !== $user->residential_complex_id) {
+        if ((int)$poll->residential_complex_id !== (int)$user->residential_complex_id) {
             return response()->json(['message' => 'Вы не можете голосовать в этом опросе'], 403);
         }
 
@@ -70,11 +69,11 @@ class PollController extends Controller
         return response()->json(['message' => 'Ваш голос учтен']);
     }
 
-    public function show(Poll $poll, Request $request)
+    public function show(Poll $poll)
     {
-        $user = $request->user();
+        $user = Auth::guard('sanctum')->user();
 
-        if ($poll->residential_complex_id !== $user->residential_complex_id) {
+        if ((int)$poll->residential_complex_id !== (int)$user->residential_complex_id) {
             return response()->json(['message' => 'Опрос недоступен'], 403);
         }
 

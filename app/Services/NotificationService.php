@@ -19,7 +19,7 @@ class NotificationService
 
         $this->attachPhotos($notification, $photos);
 
-        $this->sendPushNotification($title, $message, User::pluck('fcm_token')->toArray());
+        /*$this->sendPushNotification($title, $message, User::pluck('fcm_token')->toArray());*/
     }
 
     public function sendComplexNotification($complexId, $title, $message, array $photos = [])
@@ -34,7 +34,7 @@ class NotificationService
         $this->attachPhotos($notification, $photos);
 
         $tokens = User::where('residential_complex_id', $complexId)->pluck('fcm_token')->toArray();
-        $this->sendPushNotification($title, $message, $tokens);
+        /*$this->sendPushNotification($title, $message, $tokens);*/
     }
 
     public function sendPersonalNotification($userId, $title, $message, array $photos = [])
@@ -49,7 +49,7 @@ class NotificationService
         $this->attachPhotos($notification, $photos);
 
         $token = User::find($userId)->fcm_token;
-        $this->sendPushNotification($title, $message, [$token]);
+        /*$this->sendPushNotification($title, $message, [$token]);*/
     }
 
     private function attachPhotos(Notification $notification, array $photos)

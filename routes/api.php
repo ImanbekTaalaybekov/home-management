@@ -27,7 +27,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 Route::post('/user-fcm-token', [AuthController::class, 'updateFcmToken'])->middleware('auth:sanctum');
 
 Route::get('/complaints', [ComplaintController::class, 'index'])->middleware('auth:sanctum');
-Route::post('/complaints', [ComplaintController::class, 'store']);
+Route::post('/complaints', [ComplaintController::class, 'store'])->middleware('auth:sanctum');
 Route::get('/complaints/{id}', [ComplaintController::class, 'show']);
 
 Route::get('/suggestions', [SuggestionController::class, 'index']);
@@ -49,13 +49,13 @@ Route::post('/complaints', [ComplaintController::class, 'store']);
 Route::post('/suggestions', [SuggestionController::class, 'store']);
 
 Route::get('/polls', [PollController::class, 'index'])->middleware('auth:sanctum');
-Route::post('/polls', [PollController::class, 'store']);
+Route::post('/polls', [PollController::class, 'store'])->middleware('auth:sanctum');
 Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])->middleware('auth:sanctum');
 Route::get('/polls/{poll}', [PollController::class, 'show'])->middleware('auth:sanctum');
 
-Route::get('/announcements', [AnnouncementController::class, 'index']);
-Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);
-Route::post('/announcements', [AnnouncementController::class, 'index']);
+Route::get('/announcements', [AnnouncementController::class, 'index'])->middleware('auth:sanctum');
+Route::get('/announcements/{id}', [AnnouncementController::class, 'show'])->middleware('auth:sanctum');
+Route::post('/announcements', [AnnouncementController::class, 'store'])->middleware('auth:sanctum');
 
 Route::post('/upload-debt-data-alseco', [InputDebtDataController::class, 'uploadAlseco']);
 Route::post('/upload-debt-data-ivc', [InputDebtDataController::class, 'uploadIvc']);
