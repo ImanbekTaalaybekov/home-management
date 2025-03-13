@@ -17,3 +17,9 @@ yarn-error.log
 .idea
 .vscode
 /vendor/
+/bootstrap/cache
+bootstrap/cache/
+.idea/
+workspace.xml
+
+
