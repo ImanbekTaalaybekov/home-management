@@ -17,11 +17,15 @@ if (!isset($_SESSION['admin'])) {
     <aside class="sidebar">
         <h2>Меню</h2>
         <ul>
-            <li><a href="debt_upload.php">Загрузка задолженностей</a></li>
-            <li><a href="notifications.php">Уведомления</a></li>
-            <li><a href="knowledge_base.php">База знаний</a></li>
-            <li><a href="polls.php">Голосования</a></li>
-            <li><a href="complaints.php">Жалобы</a></li>
+            <li><a href="debt.php">Загрузка данных коммунальных услуг</a></li>>
+            <li><a href="debt_view.php">Просмотр данных коммунальных услуг</a></li>
+            <li><a href="notification.php">Управление уведомлениями</a></li>
+            <li><a href="knowledge_base.php">Управление базами знаний</a></li>
+            <li><a href="complaint.php">Жалобы</a></li>
+            <li><a href="suggestion.php">Предложения</a></li>
+            <li><a href="service.php">Вызов мастера</a></li>
+            <li><a href="announcement.php">Объявления</a></li>
+            <li><a href="poll.php">Голосования</a></li>
             <li><a href="logout.php">Выход</a></li>
         </ul>
     </aside>
