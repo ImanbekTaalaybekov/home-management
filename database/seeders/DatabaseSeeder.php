@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Admin;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -21,6 +22,12 @@ class DatabaseSeeder extends Seeder
             'residential_complex_id' => 1,
             'block_number' => 'B1',
             'apartment_number' => '101'
+        ]);
+
+        Admin::create([
+            'username' => 'Admin',
+            'password' => '1234',
+            'role' => 'admin',
         ]);
 
         $this->call([

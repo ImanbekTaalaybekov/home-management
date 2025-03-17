@@ -4,81 +4,111 @@ if (!isset($_SESSION['admin'])) {
     header('Location: login.php');
     exit();
 }
+
+require_once 'database.php';
+
+$categories = $pdo->query("SELECT * FROM knowledge_base_categories")->fetchAll(PDO::FETCH_ASSOC);
+
+$recordsStmt = $pdo->query("SELECT knowledge_bases.*, knowledge_base_categories.name AS category_name FROM knowledge_bases LEFT JOIN knowledge_base_categories ON knowledge_bases.category_id = knowledge_base_categories.id ORDER BY knowledge_bases.created_at DESC");
+$records = $recordsStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Knowledge Base Admin Panel</title>
+    <title>Управление базами знаний</title>
+    <link rel="stylesheet" href="include/style.css">
 </head>
 <body>
-<h1>Управление базой знаний</h1>
+<div class="container">
+    <h1>Управление базами знаний</h1>
 
-<section>
-    <h2>Создать категорию</h2>
-    <form action="knowledge_base_request.php" method="post">
-        <label for="category_name">Название категории:</label>
-        <input type="text" name="category_name" id="category_name" placeholder="Общие правила" required>
-        <button type="submit" name="submit_create_category">Создать категорию</button>
-    </form>
-</section>
+    <section>
+        <h2>Создать запись</h2>
+        <form id="knowledgeForm">
+            <div>
+                <label>Заголовок:</label>
+                <input type="text" name="title" required>
+            </div>
+            <div>
+                <label>Категория:</label>
+                <select name="category_id" required>
+                    <?php foreach ($categories as $cat): ?>
+                        <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div>
+                <label>Содержание:</label>
+                <textarea name="content" rows="4" required></textarea>
+            </div>
+            <button type="submit">Добавить запись</button>
+        </form>
+        <div id="knowledgeResult"></div>
+    </section>
 
-<hr>
+    <section>
+        <h2>Записи базы знаний</h2>
+        <table class="knowledge-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Заголовок</th>
+                <th>Категория</th>
+                <th>Содержание</th>
+                <th>Создано</th>
+                <th>Действия</th>
+            </tr>
+            </thead>
+            <tbody id="knowledgeList">
+            <?php foreach ($records as $record): ?>
+                <tr id="record-<?= $record['id'] ?>">
+                    <td><?= $record['id'] ?></td>
+                    <td><?= htmlspecialchars($record['title']) ?></td>
+                    <td><?= htmlspecialchars($record['category_name']) ?></td>
+                    <td><?= nl2br(htmlspecialchars($record['content'])) ?></td>
+                    <td><?= date('d.m.Y H:i', strtotime($record['created_at'])) ?></td>
+                    <td><button onclick="deleteRecord(<?= $record['id'] ?>)">Удалить</button></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </section>
 
-<section>
-    <h2>Создать статью</h2>
-    <form action="knowledge_base_request.php" method="post" enctype="multipart/form-data">
-        <div>
-            <label for="title">Заголовок статьи:</label>
-            <input type="text" name="title" id="title" value="Как пользоваться лифтом" required>
-        </div>
-        <div>
-            <label for="content">Содержание статьи:</label>
-            <textarea name="content" id="content" rows="3" required>Надо правильно пользоваться</textarea>
-        </div>
-        <div>
-            <label for="category_id">ID категории:</label>
-            <input type="text" name="category_id" id="category_id" value="1" required>
-        </div>
-        <div>
-            <label for="photos">Фотографии (необязательно):</label>
-            <input type="file" name="photos[]" id="photos" multiple>
-        </div>
-        <button type="submit" name="submit_create_article">Создать статью</button>
-    </form>
-</section>
+    <a href="main.php">← Вернуться в меню</a>
+</div>
 
-<hr>
+<script>
+    document.getElementById('knowledgeForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        let formData = new FormData(this);
 
-<section>
-    <h2>Показать категории</h2>
-    <form action="knowledge_base_request.php" method="post">
-        <button type="submit" name="submit_show_categories">Показать все категории</button>
-    </form>
-</section>
+        fetch('knowledge_base_request.php', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('knowledgeResult').innerHTML = data;
+                setTimeout(() => location.reload(), 1000);
+            })
+            .catch(err => {
+                document.getElementById('knowledgeResult').innerHTML = '<p style="color:red;">Ошибка: ' + err + '</p>';
+            });
+    });
 
-<hr>
-
-<section>
-    <h2>Показать статьи</h2>
-    <form action="knowledge_base_request.php" method="post">
-        <label for="filter_category_id">ID категории (опционально):</label>
-        <input type="text" name="filter_category_id" id="filter_category_id" placeholder="Например: 1">
-        <button type="submit" name="submit_show_articles">Показать статьи</button>
-    </form>
-</section>
-
-<hr>
-
-<section>
-    <h2>Показать конкретную статью</h2>
-    <form action="knowledge_base_request.php" method="post">
-        <label for="article_id">ID статьи:</label>
-        <input type="text" name="article_id" id="article_id" placeholder="1">
-        <button type="submit" name="submit_show_one_article">Показать статью</button>
-    </form>
-</section>
-
+    function deleteRecord(id){
+        if(confirm('Удалить запись ID ' + id + '?')){
+            fetch('knowledge_base_request.php?delete=' + id)
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    document.getElementById('record-' + id).remove();
+                })
+                .catch(err => alert('Ошибка: ' + err));
+        }
+    }
+</script>
 </body>
 </html>

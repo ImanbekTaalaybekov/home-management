@@ -17,7 +17,7 @@ if (!isset($_SESSION['admin'])) {
     <aside class="sidebar">
         <h2>Меню</h2>
         <ul>
-            <li><a href="debt.php">Загрузка данных коммунальных услуг</a></li>>
+            <li><a href="debt.php">Загрузка данных коммунальных услуг</a></li>
             <li><a href="debt_view.php">Просмотр данных коммунальных услуг</a></li>
             <li><a href="notification.php">Управление уведомлениями</a></li>
             <li><a href="knowledge_base.php">Управление базами знаний</a></li>

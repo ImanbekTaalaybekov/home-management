@@ -16,6 +16,5 @@
         <button type="submit">Войти</button>
     </form>
 </div>
-<script src="include/scripts.js"></script>
 </body>
 </html>
