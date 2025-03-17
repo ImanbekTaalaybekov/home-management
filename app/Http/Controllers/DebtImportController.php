@@ -23,7 +23,7 @@ class DebtImportController extends Controller
                     'user_id' => $user->id,
                     'type' => 'Alseco',
                     'name' => $alsecoDebt->service,
-                    'amount' => $alsecoDebt->debt_amount,
+                    'amount' => abs($alsecoDebt->debt_amount),
                     'due_date' => $alsecoDebt->last_payment_date,
                 ]);
             }
@@ -39,7 +39,7 @@ class DebtImportController extends Controller
                     'user_id' => $user->id,
                     'type' => 'IVC',
                     'name' => $ivcDebt->service_name,
-                    'amount' => $ivcDebt->debt + $ivcDebt->penalty,
+                    'amount' => abs($ivcDebt->debt + $ivcDebt->penalty),
                     'due_date' => now()->format('Y-m-d')
                 ]);
             }

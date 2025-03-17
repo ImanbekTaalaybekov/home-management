@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($_GET['type'] === 'import') {
-        echo sendApiRequest('http://212.112.105.242:8800/api/import-debt-data', []);
+        echo sendApiRequest('http://212.112.105.242:8800/api/debt-import', []);
     }
 }
 ?>

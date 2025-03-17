@@ -1,5 +1,5 @@
 <?php
-require_once 'database.php';
+require_once 'include/database.php';
 
 if (isset($_GET['id'])) {
     $id = (int)$_GET['id'];

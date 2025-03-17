@@ -1,5 +1,5 @@
 <?php
-require_once 'database.php';
+require_once 'include/database.php';
 
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];

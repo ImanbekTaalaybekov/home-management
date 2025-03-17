@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
-require_once 'database.php';
+require_once 'include/database.php';
 
 $limit = 50;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;

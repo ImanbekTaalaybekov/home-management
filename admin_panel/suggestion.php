@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
-require_once 'database.php';
+require_once 'include/database.php';
 
 $stmt = $pdo->query("SELECT suggestions.*, users.name AS user_name FROM suggestions LEFT JOIN users ON suggestions.user_id = users.id ORDER BY suggestions.created_at DESC");
 $suggestions = $stmt->fetchAll(PDO::FETCH_ASSOC);
