@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
-require_once 'database.php';
+require_once 'include/database.php';
 
 $stmt = $pdo->query("SELECT notifications.*, residential_complexes.name AS complex_name, users.name AS user_name FROM notifications
     LEFT JOIN residential_complexes ON notifications.residential_complex_id = residential_complexes.id

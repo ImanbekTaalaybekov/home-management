@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
-require_once 'database.php';
+require_once 'include/database.php';
 
 $categories = $pdo->query("SELECT * FROM knowledge_base_categories")->fetchAll(PDO::FETCH_ASSOC);
 

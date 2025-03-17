@@ -49,65 +49,47 @@ if (!isset($_SESSION['admin'])) {
     function sendFile(formId, url, resultId) {
         const form = document.getElementById(formId);
         const resultBox = document.getElementById(resultId);
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(form);
 
-            fetch(url, {
-                method: 'POST',
-                body: formData
+        const formData = new FormData(form);
+        resultBox.innerHTML = 'Загрузка...';
+
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.text())
+            .then(data => {
+                resultBox.innerHTML = data;
             })
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById(resultId).innerHTML = data;
-                })
-                .catch(err => {
-                    document.getElementById(resultId).innerHTML = '<p style="color:red;">Ошибка: ' + err + '</p>';
-                });
-        }
+            .catch(err => {
+                resultBox.innerHTML = '<p style="color:red;">Ошибка: ' + err + '</p>';
+            });
+    }
 
-        document.getElementById('importBtn').addEventListener('click', function() {
-            fetch('debt_request.php', {
-                method: 'POST',
-                body: new URLSearchParams({'import': true})
+    document.getElementById('alsecoForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        sendFile('alsecoForm', 'debt_request.php?type=alseco', 'alsecoResult');
+    });
+
+    document.getElementById('ivcForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        sendFile('ivcForm', 'debt_request.php?type=ivc', 'ivcResult');
+    });
+
+    document.getElementById('importBtn').addEventListener('click', function(){
+        const importResult = document.getElementById('importResult');
+        importResult.innerHTML = 'Загрузка...';
+
+        fetch('debt_request.php?type=import', { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+                importResult.innerHTML = data;
             })
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('importResult').innerHTML = data;
-                })
-                .catch(err => {
-                    document.getElementById('importResult').innerHTML = '<p style="color:red;">Ошибка: ' + err + '</p>';
-                });
-        }
-
-        document.getElementById('importBtn').addEventListener('click', function(){
-            document.getElementById('importResult').innerHTML = 'Загрузка...';
-        });
-
-        document.getElementById('alsecoResult').innerHTML = '';
-        document.getElementById('ivcResult').innerHTML = '';
-        document.getElementById('importResult').innerHTML = '';
-
-        document.getElementById('ivcForm').addEventListener('submit', function(e){
-            e.preventDefault();
-            sendFile('ivcForm', 'debt_request.php?type=ivc', 'ivcResult');
-        });
-
-        document.getElementById('alsecoForm').addEventListener('submit', function(e){
-            e.preventDefault();
-            sendFile('alsecoForm', 'debt_request.php?type=alseco', 'alsecoResult');
-        });
-
-        document.getElementById('importBtn').addEventListener('click', function(){
-            fetch('debt_request.php?type=import', {method: 'POST'})
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('importResult').innerHTML = data;
-                })
-                .catch(err => {
-                    document.getElementById('importResult').innerHTML = '<p style="color:red;">Ошибка: ' + err + '</p>';
-                });
-        });
+            .catch(err => {
+                importResult.innerHTML = '<p style="color:red;">Ошибка: ' + err + '</p>';
+            });
+    });
 </script>
+
 </body>
 </html>

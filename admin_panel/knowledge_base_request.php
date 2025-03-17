@@ -1,5 +1,5 @@
 <?php
-require_once 'database.php';
+require_once 'include/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'])) {
     $stmt = $pdo->prepare("INSERT INTO notifications (type, title, message, residential_complex_id, user_id) VALUES (?, ?, ?, ?, ?)");
