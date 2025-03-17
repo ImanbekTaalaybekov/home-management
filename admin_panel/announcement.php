@@ -4,32 +4,66 @@ if (!isset($_SESSION['admin'])) {
     header('Location: login.php');
     exit();
 }
+
+require_once 'database.php';
+
+$stmt = $pdo->query("SELECT announcements.*, residential_complexes.name AS complex_name FROM announcements LEFT JOIN residential_complexes ON announcements.residential_complex_id = residential_complexes.id ORDER BY announcements.created_at DESC");
+$announcements = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Announcements</title>
+    <title>Управление объявлениями</title>
+    <link rel="stylesheet" href="include/style.css">
 </head>
 <body>
-<h1>Управление объявлениями</h1>
-<section>
-    <h2>Список объявлений</h2>
-    <form action="announcement_request.php" method="post">
-        <button type="submit" name="submit_show_announcements">Показать все объявления</button>
-    </form>
-</section>
+<div class="container">
+    <h1>Объявления</h1>
 
-<hr>
+    <table class="announcements-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Заголовок</th>
+            <th>Содержание</th>
+            <th>Жилой комплекс</th>
+            <th>Дата создания</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody id="announcementsList">
+        <?php foreach ($announcements as $announcement): ?>
+            <tr id="announcement-<?= $announcement['id'] ?>">
+                <td><?= $announcement['id'] ?></td>
+                <td><?= htmlspecialchars($announcement['title']) ?></td>
+                <td><?= nl2br(htmlspecialchars($announcement['content'])) ?></td>
+                <td><?= htmlspecialchars($announcement['complex_name'] ?: '-') ?></td>
+                <td><?= date('d.m.Y H:i', strtotime($announcement['created_at'])) ?></td>
+                <td>
+                    <button onclick="deleteAnnouncement(<?= $announcement['id'] ?>)">Удалить</button>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
 
-<section>
-    <h2>Показать конкретное объявление</h2>
-    <form action="announcement_request.php" method="post">
-        <label for="announcement_id">ID объявления:</label>
-        <input type="text" name="announcement_id" id="announcement_id" placeholder="5" required>
-        <button type="submit" name="submit_show_one_announcement">Показать объявление</button>
-    </form>
-</section>
+    <a href="main.php">← Вернуться в меню</a>
+</div>
+
+<script>
+    function deleteAnnouncement(id){
+        if(confirm('Удалить объявление ID ' + id + '?')){
+            fetch('announcement_request.php?delete=' + id)
+                .then(res => res.text())
+                .then(response => {
+                    alert(response);
+                    document.getElementById('announcement-' + id).remove();
+                })
+                .catch(err => alert('Ошибка: ' + err));
+        }
+    }
+</script>
 </body>
 </html>

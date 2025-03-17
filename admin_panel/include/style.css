@@ -1,0 +1,211 @@
+.notification-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.notification-table th, .notification-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.notification-table th {
+    background-color: #007BFF;
+    color: white;
+    text-align: left;
+}
+
+.notification-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.notification-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.notification-table button {
+    color: white;
+    background-color: #dc3545;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.notification-table button:hover {
+    background-color: #c82333;
+}
+
+.knowledge-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.knowledge-table th, .knowledge-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.knowledge-table th {
+    background-color: #28a745;
+    color: white;
+    text-align: left;
+}
+
+.knowledge-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.knowledge-table button {
+    color: white;
+    background-color: #dc3545;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.knowledge-table button:hover {
+    background-color: #c82333;
+}
+
+.complaints-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.complaints-table th, .complaints-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.complaints-table th {
+    background-color: #ff9800;
+    color: white;
+    text-align: left;
+}
+
+.complaints-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.complaints-table button {
+    color: white;
+    background-color: #4CAF50;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+.complaints-table button:hover {
+    opacity: 0.9;
+}
+
+.complaints-table button:last-child {
+    background-color: #dc3545;
+}
+
+.suggestions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.suggestions-table th, .suggestions-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.suggestions-table th {
+    background-color: #17a2b8;
+    color: white;
+    text-align: left;
+}
+
+.suggestions-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.suggestions-table tr:hover {
+    background-color: #e2e6ea;
+}
+
+.announcements-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.announcements-table th, .announcements-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.announcements-table th {
+    background-color: #007bff;
+    color: white;
+    text-align: left;
+}
+
+.announcements-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.announcements-table tr:hover {
+    background-color: #e9ecef;
+}
+
+.announcements-table button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.announcements-table button:hover {
+    opacity: 0.8;
+}
+
+.polls-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.polls-table th, .polls-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.polls-table th {
+    background-color: #20c997;
+    color: white;
+    text-align: left;
+}
+
+.polls-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.polls-table tr:hover {
+    background-color: #e9ecef;
+}
+
+.polls-table button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.polls-table button:hover {
+    opacity: 0.8;
+}
