@@ -5,7 +5,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Админка глобальные фиксы 170325 v1">
+      <change afterPath="$PROJECT_DIR$/admin_panel/include/style.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/announcement.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/announcement.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/announcement_request.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/announcement_request.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/complaint.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/complaint.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/complaint_request.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/complaint_request.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/debt.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/debt.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/debt_request.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/debt_request.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/debt_view.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/debt_view.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/debt_view_request.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/include/auth.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/include/auth.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/include/database.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/include/database.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/index.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/index.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/knowledge_base.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/knowledge_base.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/knowledge_base_request.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/knowledge_base_request.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/main.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/main.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/notification.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/notification.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/notification_request.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/notification_request.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/poll.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/poll.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/poll_request.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/poll_request.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/service.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/service.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/service_request.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/service_request.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/suggestion.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/suggestion.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/suggestion_request.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/seeders/DatabaseSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/seeders/DatabaseSeeder.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,7 +57,7 @@
     </option>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="Admin-panel-global-fixes-170325-v1" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -214,25 +238,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "Admin-panel-global-fixes-170325-v1",
+    "list.type.of.created.stylesheet": "CSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/admin_panel/include" />
@@ -310,8 +334,6 @@
       <workItem from="1742128302823" duration="2903000" />
       <workItem from="1742147918791" duration="21000" />
       <workItem from="1742180930669" duration="23398000" />
-      <workItem from="1742215000563" duration="258000" />
-      <workItem from="1742235795322" duration="3000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
@@ -377,15 +399,7 @@
       <option name="project" value="LOCAL" />
       <updated>1741779872214</updated>
     </task>
-    <task id="LOCAL-00009" summary="Админка глобальные фиксы 170325 v1">
-      <option name="closed" value="true" />
-      <created>1742215172867</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1742215172867</updated>
-    </task>
-    <option name="localTasksCounter" value="10" />
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -424,7 +438,6 @@
     <MESSAGE value="Заполнение долгов по коммунальным услугам" />
     <MESSAGE value="Расширение функционала уведомлениям" />
     <MESSAGE value="Фиксы по сидерам" />
-    <MESSAGE value="Админка глобальные фиксы 170325 v1" />
-    <option name="LAST_COMMIT_MESSAGE" value="Админка глобальные фиксы 170325 v1" />
+    <option name="LAST_COMMIT_MESSAGE" value="Фиксы по сидерам" />
   </component>
 </project>
