@@ -19,7 +19,7 @@ class ComplaintController extends Controller
 
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('photos/complaint');
+                $path = $photo->store('photos/complaint', 'public');
                 $complaint->photos()->create(['path' => $path]);
             }
         }

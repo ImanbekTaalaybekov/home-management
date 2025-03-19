@@ -68,7 +68,7 @@ function safeDate($date) {
                 <td><?= safeDate($suggestion['created_at']) ?></td>
                 <td>
                     <?php if ($suggestion['photo_path']): ?>
-                        <img src="<?= htmlspecialchars($suggestion['photo_path']) ?>" class="preview-img" alt="Фото">
+                        <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $suggestion['photo_path']) ?>" class="preview-img" alt="Фото">
                     <?php else: ?>
                         Нет
                     <?php endif; ?>
