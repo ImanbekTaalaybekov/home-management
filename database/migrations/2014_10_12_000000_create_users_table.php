@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('block_number')->nullable();
             $table->string('apartment_number')->nullable();
-            $table->string('residential_complex_id')->nullable();
+            $table->foreignId('residential_complex_id')->nullable()->constrained('residential_complexes');
             $table->string('fcm_token')->nullable();
             $table->rememberToken();
             $table->timestamps();

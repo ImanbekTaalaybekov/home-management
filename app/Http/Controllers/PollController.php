@@ -43,7 +43,7 @@ class PollController extends Controller
     public function vote(Request $request, Poll $poll)
     {
         $request->validate([
-            'vote' => 'required|in:yes,no',
+            'vote' => 'required|in:yes,no,abstain',
         ]);
 
         $user = Auth::guard('sanctum')->user();
@@ -79,12 +79,14 @@ class PollController extends Controller
 
         $yesVotes = PollVote::where('poll_id', $poll->id)->where('vote', 'yes')->count();
         $noVotes = PollVote::where('poll_id', $poll->id)->where('vote', 'no')->count();
+        $abstainVotes = PollVote::where('poll_id', $poll->id)->where('vote', 'abstain')->count();
 
         return response()->json([
             'poll' => $poll,
             'votes' => [
                 'yes' => $yesVotes,
                 'no' => $noVotes,
+                'abstain' => $abstainVotes,
             ]
         ]);
     }

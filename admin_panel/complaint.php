@@ -7,8 +7,22 @@ if (!isset($_SESSION['admin'])) {
 
 require_once 'include/database.php';
 
-$stmt = $pdo->query("SELECT complaints.*, users.name AS user_name FROM complaints LEFT JOIN users ON complaints.user_id = users.id ORDER BY complaints.created_at DESC");
+$stmt = $pdo->query("
+    SELECT complaints.*, users.name AS user_name, 
+           (SELECT path FROM photos WHERE photoable_type = 'App\\Models\\Complaint' AND photoable_id = complaints.id LIMIT 1) AS photo_path
+    FROM complaints
+    LEFT JOIN users ON complaints.user_id = users.id
+    ORDER BY complaints.created_at DESC
+");
 $complaints = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+function safeField($value){
+    return $value ? htmlspecialchars($value) : '—';
+}
+
+function safeDate($date){
+    return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
+}
 ?>
 
 <!DOCTYPE html>
@@ -17,6 +31,14 @@ $complaints = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Управление жалобами</title>
     <link rel="stylesheet" href="include/style.css">
+    <style>
+        .preview-img {
+            max-width: 50px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -30,6 +52,7 @@ $complaints = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th>Сообщение</th>
             <th>Статус</th>
             <th>Дата подачи</th>
+            <th>Фото</th>
             <th>Действия</th>
         </tr>
         </thead>
@@ -37,12 +60,19 @@ $complaints = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php foreach ($complaints as $complaint): ?>
             <tr id="complaint-<?= $complaint['id'] ?>">
                 <td><?= $complaint['id'] ?></td>
-                <td><?= htmlspecialchars($complaint['user_name']) ?></td>
-                <td><?= nl2br(htmlspecialchars($complaint['message'])) ?></td>
+                <td><?= safeField($complaint['user_name']) ?></td>
+                <td><?= nl2br(safeField($complaint['message'])) ?></td>
                 <td id="status-<?= $complaint['id'] ?>">
-                    <?= htmlspecialchars($complaint['status']) ?>
+                    <?= safeField($complaint['status']) ?>
                 </td>
-                <td><?= date('d.m.Y H:i', strtotime($complaint['created_at'])) ?></td>
+                <td><?= safeDate($complaint['created_at']) ?></td>
+                <td>
+                    <?php if ($complaint['photo_path']): ?>
+                        <img src="<?= htmlspecialchars($complaint['photo_path']) ?>" class="preview-img" alt="Фото">
+                    <?php else: ?>
+                        —
+                    <?php endif; ?>
+                </td>
                 <td>
                     <?php if ($complaint['status'] !== 'done'): ?>
                         <button onclick="markDone(<?= $complaint['id'] ?>)">Готово</button>

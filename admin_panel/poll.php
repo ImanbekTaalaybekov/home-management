@@ -7,8 +7,23 @@ if (!isset($_SESSION['admin'])) {
 
 require_once 'include/database.php';
 
-$stmt = $pdo->query("SELECT polls.*, residential_complexes.name AS complex_name FROM polls LEFT JOIN residential_complexes ON polls.residential_complex_id = residential_complexes.id ORDER BY polls.created_at DESC");
+$stmt = $pdo->query("
+    SELECT polls.*, residential_complexes.name AS complex_name,
+           (SELECT COUNT(*) FROM poll_votes WHERE poll_id = polls.id AND vote = 'yes') AS votes_yes,
+           (SELECT COUNT(*) FROM poll_votes WHERE poll_id = polls.id AND vote = 'no') AS votes_no,
+           (SELECT COUNT(*) FROM poll_votes WHERE poll_id = polls.id AND vote = 'abstain') AS votes_abstain
+    FROM polls 
+    LEFT JOIN residential_complexes ON polls.residential_complex_id = residential_complexes.id 
+    ORDER BY polls.created_at DESC");
 $polls = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+function safeField($value) {
+    return $value ? htmlspecialchars($value) : '—';
+}
+
+function safeDate($date) {
+    return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
+}
 ?>
 
 <!DOCTYPE html>
@@ -32,6 +47,9 @@ $polls = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th>Дата начала</th>
             <th>Дата окончания</th>
             <th>Создано</th>
+            <th>Голоса "Да"</th>
+            <th>Голоса "Нет"</th>
+            <th>Воздержались</th>
             <th>Действия</th>
         </tr>
         </thead>
@@ -39,12 +57,15 @@ $polls = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php foreach ($polls as $poll): ?>
             <tr id="poll-<?= $poll['id'] ?>">
                 <td><?= $poll['id'] ?></td>
-                <td><?= htmlspecialchars($poll['title']) ?></td>
-                <td><?= nl2br(htmlspecialchars($poll['description'])) ?></td>
-                <td><?= htmlspecialchars($poll['complex_name'] ?: '-') ?></td>
-                <td><?= date('d.m.Y', strtotime($poll['start_date'])) ?></td>
-                <td><?= date('d.m.Y', strtotime($poll['end_date'])) ?></td>
-                <td><?= date('d.m.Y H:i', strtotime($poll['created_at'])) ?></td>
+                <td><?= safeField($poll['title']) ?></td>
+                <td><?= nl2br(safeField($poll['description'])) ?></td>
+                <td><?= safeField($poll['complex_name']) ?></td>
+                <td><?= safeDate($poll['start_date']) ?></td>
+                <td><?= safeDate($poll['end_date']) ?></td>
+                <td><?= safeDate($poll['created_at']) ?></td>
+                <td><?= (int)$poll['votes_yes'] ?></td>
+                <td><?= (int)$poll['votes_no'] ?></td>
+                <td><?= (int)$poll['votes_abstain'] ?></td>
                 <td>
                     <button onclick="deletePoll(<?= $poll['id'] ?>)">Удалить</button>
                 </td>
@@ -60,9 +81,9 @@ $polls = $stmt->fetchAll(PDO::FETCH_ASSOC);
     function deletePoll(id){
         if(confirm('Удалить голосование ID ' + id + '?')){
             fetch('poll_request.php?delete=' + id)
-                .then(res => res.text())
-                .then(response => {
-                    alert(response);
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
                     document.getElementById('poll-' + id).remove();
                 })
                 .catch(err => alert('Ошибка: ' + err));
