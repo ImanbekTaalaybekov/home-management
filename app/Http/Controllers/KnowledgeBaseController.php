@@ -36,9 +36,9 @@ class KnowledgeBaseController extends Controller
 
         $article = KnowledgeBase::create($request->only(['title', 'content', 'category_id']));
 
-        if ($request->hasfile('photos')) {
+        if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('knowledge_base_photos', 'public');
+                $path = $photo->store('photos/knowledge-base', 'public');
                 $article->photos()->create(['path' => $path]);
             }
         }

@@ -44,7 +44,13 @@ class NotificationController extends Controller
             'photos.*' => 'nullable',
         ]);
 
-        $photos = $request->photos ?? [];
+        $photos = [];
+
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $photo) {
+                $photos[] = $photo->store('photos', 'public'); // Сохраняем фото в "photos"
+            }
+        }
 
         switch ($request->type) {
             case 'global':

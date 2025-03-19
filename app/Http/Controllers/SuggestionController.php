@@ -25,7 +25,7 @@ class SuggestionController extends Controller
 
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('photos');
+                $path = $photo->store('photos/suggestion');
                 $suggestion->photos()->create(['path' => $path]);
             }
         }
