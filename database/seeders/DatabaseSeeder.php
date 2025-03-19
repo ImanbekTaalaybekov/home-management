@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Admin::create([
-            'username' => 'Admin',
+            'username' => 'admin',
             'password' => '1234',
             'role' => 'admin',
         ]);
