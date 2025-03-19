@@ -61,7 +61,7 @@ function daysDifference($date) {
         <?php foreach ($debts as $debt): ?>
             <?php
             $highlight = '';
-            if (($debt['type'] == 'alseco' && daysDifference($debt['due_date']) > 60) || ($debt['type'] == 'ivc' && $debt['amount'] > 20000)) {
+            if (($debt['type'] == 'Alseco' && daysDifference($debt['due_date']) > 60) || ($debt['type'] == 'Ivc' && $debt['amount'] > 20000)) {
                 $highlight = ' style="background-color:#f8d7da;"';
             }
             ?>
@@ -70,7 +70,7 @@ function daysDifference($date) {
                 <td><?= htmlspecialchars($debt['user_name']) ?></td>
                 <td><?= htmlspecialchars($debt['type']) ?></td>
                 <td><?= htmlspecialchars($debt['name']) ?></td>
-                <td><?= number_format($debt['amount'], 2) ?>₽</td>
+                <td><?= number_format($debt['amount'], 2) ?></td>
                 <td><?= $debt['due_date'] ? date('d.m.Y', strtotime($debt['due_date'])) : '-' ?></td>
                 <td><?= htmlspecialchars($debt['block_number']) ?></td>
                 <td><?= htmlspecialchars($debt['apartment_number']) ?></td>

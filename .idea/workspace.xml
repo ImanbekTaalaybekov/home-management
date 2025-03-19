@@ -31,6 +31,7 @@
       <change beforePath="$PROJECT_DIR$/admin_panel/suggestion_request.php" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/database/seeders/DatabaseSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/seeders/DatabaseSeeder.php" afterDir="false" />
     </list>
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Админка глобальные фиксы 180325 v3" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -58,6 +59,7 @@
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
         <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="Service-request-index-120325-v1" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -243,6 +245,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "Admin-panel-global-fixes-170325-v1",
+    "git-widget-placeholder": "main",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -334,6 +337,11 @@
       <workItem from="1742128302823" duration="2903000" />
       <workItem from="1742147918791" duration="21000" />
       <workItem from="1742180930669" duration="23398000" />
+
+      <workItem from="1742215000563" duration="258000" />
+      <workItem from="1742235795322" duration="3000" />
+      <workItem from="1742267824329" duration="3321000" />
+      <workItem from="1742273898409" duration="17896000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
