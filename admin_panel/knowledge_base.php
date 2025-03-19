@@ -135,7 +135,7 @@ function safeDate($date){
                     <td><?= safeDate($record['created_at']) ?></td>
                     <td>
                         <?php if ($record['photo_path']): ?>
-                            <img src="<?= htmlspecialchars($record['photo_path']) ?>" class="preview-img" alt="Фото">
+                            <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $record['photo_path']) ?>" class="preview-img" alt="Фото">
                         <?php else: ?>
                             Нет
                         <?php endif; ?>

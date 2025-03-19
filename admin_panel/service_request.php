@@ -30,7 +30,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
         $stmtDeletePhoto = $pdo->prepare("DELETE FROM photos WHERE photoable_type = 'App\\Models\\ServiceRequest' AND photoable_id = ?");
         $stmtDeletePhoto->execute([$id]);
 
-        // Удаляем саму заявку
         $stmt = $pdo->prepare("DELETE FROM service_requests WHERE id = ?");
         $stmt->execute([$id]);
 
