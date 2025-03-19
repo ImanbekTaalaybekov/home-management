@@ -7,11 +7,25 @@ if (!isset($_SESSION['admin'])) {
 
 require_once 'include/database.php';
 
-$stmt = $pdo->query("SELECT notifications.*, residential_complexes.name AS complex_name, users.name AS user_name FROM notifications
+$stmt = $pdo->query("
+    SELECT notifications.*, 
+           residential_complexes.name AS complex_name, 
+           users.name AS user_name, 
+           (SELECT path FROM photos WHERE photoable_type = 'App\\Models\\Notification' AND photoable_id = notifications.id LIMIT 1) AS photo_path
+    FROM notifications
     LEFT JOIN residential_complexes ON notifications.residential_complex_id = residential_complexes.id
     LEFT JOIN users ON notifications.user_id = users.id
-    ORDER BY notifications.created_at DESC");
+    ORDER BY notifications.created_at DESC
+");
 $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+function safeField($value){
+    return $value ? htmlspecialchars($value) : '—';
+}
+
+function safeDate($date){
+    return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
+}
 ?>
 
 <!DOCTYPE html>
@@ -20,39 +34,53 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Notifications Admin Panel</title>
     <link rel="stylesheet" href="include/style.css">
+    <style>
+        .preview-img {
+            max-width: 50px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
     <h1>Управление уведомлениями</h1>
 
     <section>
-        <h2>Создать уведомление</h2>
+        <h2><span id="formTitle">Создать уведомление</span></h2>
         <form id="notificationForm" enctype="multipart/form-data">
+            <input type="hidden" name="id" id="notificationId">
             <div>
                 <label>Тип уведомления:</label>
-                <input type="text" name="type" value="complex" required>
+                <select name="type" id="notificationType" required>
+                    <option value="complex">Для комплекса</option>
+                    <option value="global">Общее</option>
+                    <option value="personal">Личное</option>
+                </select>
             </div>
             <div>
                 <label>Заголовок:</label>
-                <input type="text" name="title" placeholder="Например: Ремонт дорог" required>
+                <input type="text" name="title" id="notificationTitle" required>
             </div>
             <div>
                 <label>Сообщение:</label>
-                <textarea name="message" rows="3" placeholder="Будет перекрыт главный вход" required></textarea>
+                <textarea name="message" id="notificationMessage" rows="3" required></textarea>
             </div>
             <div>
                 <label>ID ЖК (если нужно):</label>
-                <input type="text" name="residential_complex_id">
+                <input type="text" name="residential_complex_id" id="notificationComplexId">
             </div>
             <div>
                 <label>ID пользователя (если нужно адресно):</label>
-                <input type="text" name="user_id">
+                <input type="text" name="user_id" id="notificationUserId">
             </div>
             <div>
                 <label>Фотографии (необязательно, можно несколько):</label>
                 <input type="file" name="photos[]" multiple>
             </div>
-            <button type="submit">Создать уведомление</button>
+            <button type="submit">Сохранить</button>
+            <button type="button" id="cancelEdit" style="display:none;">Отмена</button>
         </form>
         <div id="notificationResult"></div>
     </section>
@@ -69,6 +97,7 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>ЖК</th>
                 <th>Пользователь</th>
                 <th>Дата создания</th>
+                <th>Фото</th>
                 <th>Действия</th>
             </tr>
             </thead>
@@ -76,13 +105,23 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach ($notifications as $notification): ?>
                 <tr id="notification-<?= $notification['id'] ?>">
                     <td><?= $notification['id'] ?></td>
-                    <td><?= htmlspecialchars($notification['type']) ?></td>
-                    <td><?= htmlspecialchars($notification['title']) ?></td>
-                    <td><?= htmlspecialchars($notification['message']) ?></td>
-                    <td><?= htmlspecialchars($notification['complex_name']) ?></td>
-                    <td><?= htmlspecialchars($notification['user_name']) ?></td>
-                    <td><?= date('d.m.Y H:i', strtotime($notification['created_at'])) ?></td>
-                    <td><button onclick="deleteNotification(<?= $notification['id'] ?>)">Удалить</button></td>
+                    <td><?= safeField($notification['type']) ?></td>
+                    <td><?= safeField($notification['title']) ?></td>
+                    <td><?= safeField($notification['message']) ?></td>
+                    <td><?= safeField($notification['complex_name']) ?></td>
+                    <td><?= safeField($notification['user_name']) ?></td>
+                    <td><?= safeDate($notification['created_at']) ?></td>
+                    <td>
+                        <?php if ($notification['photo_path']): ?>
+                            <img src="<?= htmlspecialchars($notification['photo_path']) ?>" class="preview-img" alt="Фото">
+                        <?php else: ?>
+                            Нет
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <button onclick="editNotification(<?= $notification['id'] ?>, '<?= $notification['type'] ?>', '<?= htmlspecialchars($notification['title']) ?>', '<?= htmlspecialchars($notification['message']) ?>', '<?= $notification['residential_complex_id'] ?: '' ?>', '<?= $notification['user_id'] ?: '' ?>')">Изменить</button>
+                        <button onclick="deleteNotification(<?= $notification['id'] ?>)">Удалить</button>
+                    </td>
                 </tr>
             <?php endforeach; ?>
             </tbody>
@@ -96,8 +135,10 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
     document.getElementById('notificationForm').addEventListener('submit', function(e){
         e.preventDefault();
         let formData = new FormData(this);
+        let notificationId = document.getElementById('notificationId').value;
+        let url = notificationId ? 'notification_request.php?update=' + notificationId : 'notification_request.php';
 
-        fetch('notification_request.php', {
+        fetch(url, {
             method: 'POST',
             body: formData
         })
@@ -122,6 +163,23 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 .catch(error => alert('Ошибка: ' + error));
         }
     }
+
+    function editNotification(id, type, title, message, complexId, userId) {
+        document.getElementById('notificationId').value = id;
+        document.getElementById('notificationType').value = type;
+        document.getElementById('notificationTitle').value = title;
+        document.getElementById('notificationMessage').value = message;
+        document.getElementById('notificationComplexId').value = complexId;
+        document.getElementById('notificationUserId').value = userId;
+
+        document.getElementById('cancelEdit').style.display = 'inline-block';
+    }
+
+    document.getElementById('cancelEdit').addEventListener('click', function(){
+        document.getElementById('notificationForm').reset();
+        document.getElementById('notificationId').value = '';
+        this.style.display = 'none';
+    });
 </script>
 </body>
 </html>

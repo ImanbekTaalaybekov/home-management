@@ -209,3 +209,62 @@
 .polls-table button:hover {
     opacity: 0.8;
 }
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.users-table th, .users-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.users-table th {
+    background-color: #7952b3;
+    color: white;
+    text-align: left;
+}
+
+.users-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.users-table tr:hover {
+    background-color: #e9ecef;
+}
+
+.complex-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.complex-table th, .complex-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.complex-table th {
+    background-color: #343a40;
+    color: white;
+    text-align: left;
+}
+
+.complex-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.complex-table button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.complex-table button:hover {
+    opacity: 0.8;
+}

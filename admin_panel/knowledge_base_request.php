@@ -1,20 +1,112 @@
 <?php
 require_once 'include/database.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'])) {
-    $stmt = $pdo->prepare("INSERT INTO notifications (type, title, message, residential_complex_id, user_id) VALUES (?, ?, ?, ?, ?)");
-    $stmt->execute([
-        $_POST['type'],
-        $_POST['title'],
-        $_POST['message'],
-        $_POST['residential_complex_id'] ?: null,
-        $_POST['user_id'] ?: null
-    ]);
-    echo "<p style='color:green;'>Уведомление успешно создано!</p>";
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title']) && !isset($_GET['update'])) {
+    try {
+        $postFields = [
+            'title' => $_POST['title'],
+            'content' => $_POST['content'],
+            'category_id' => $_POST['category_id']
+        ];
+
+        if (!empty($_FILES['photos']['name'][0])) {
+            foreach ($_FILES['photos']['tmp_name'] as $index => $tmpPath) {
+                if ($_FILES['photos']['error'][$index] === UPLOAD_ERR_OK) {
+                    $originalName = $_FILES['photos']['name'][$index];
+                    $mimeType = mime_content_type($tmpPath) ?: 'application/octet-stream';
+                    $postFields['photos[' . $index . ']'] = curl_file_create($tmpPath, $mimeType, $originalName);
+                }
+            }
+        }
+
+        $ch = curl_init('http://212.112.105.242:8800/api/knowledge-base/articles');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($ch);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            echo "<p style='color:red;'>Ошибка при создании записи: {$error}</p>";
+        } else {
+            echo "<p style='color:green;'>Запись успешно создана!</p>";
+        }
+    } catch (Exception $e) {
+        echo "<p style='color:red;'>Ошибка: " . $e->getMessage() . "</p>";
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['update'])) {
+    try {
+        $id = (int)$_GET['update'];
+        $stmt = $pdo->prepare("UPDATE knowledge_bases SET title = ?, content = ?, category_id = ? WHERE id = ?");
+        $stmt->execute([
+            $_POST['title'],
+            $_POST['content'],
+            $_POST['category_id'],
+            $id
+        ]);
+        echo "<p style='color:blue;'>Запись успешно обновлена!</p>";
+    } catch (Exception $e) {
+        echo "<p style='color:red;'>Ошибка: " . $e->getMessage() . "</p>";
+    }
 }
 
 if (isset($_GET['delete'])) {
-    $stmt = $pdo->prepare("DELETE FROM notifications WHERE id = ?");
-    $stmt->execute([$_GET['delete']]);
-    echo "Уведомление успешно удалено!";
+    try {
+        $stmt = $pdo->prepare("DELETE FROM knowledge_bases WHERE id = ?");
+        $stmt->execute([$_GET['delete']]);
+        echo "Запись успешно удалена!";
+    } catch (Exception $e) {
+        echo "Ошибка при удалении: " . $e->getMessage();
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['category_name']) && !isset($_GET['update_category'])) {
+    try {
+        $postData = ['name' => $_POST['category_name']];
+
+        $ch = curl_init('http://212.112.105.242:8800/api/knowledge-base/categories');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($ch);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            echo "<p style='color:red;'>Ошибка при создании категории: {$error}</p>";
+        } else {
+            echo "<p style='color:green;'>Категория успешно добавлена!</p>";
+        }
+    } catch (Exception $e) {
+        echo "<p style='color:red;'>Ошибка: " . $e->getMessage() . "</p>";
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['update_category'])) {
+    try {
+        $id = (int)$_GET['update_category'];
+        $stmt = $pdo->prepare("UPDATE knowledge_base_categories SET name = ? WHERE id = ?");
+        $stmt->execute([
+            $_POST['category_name'],
+            $id
+        ]);
+        echo "<p style='color:blue;'>Категория успешно обновлена!</p>";
+    } catch (Exception $e) {
+        echo "<p style='color:red;'>Ошибка: " . $e->getMessage() . "</p>";
+    }
+}
+
+if (isset($_GET['delete_category'])) {
+    try {
+        $stmt = $pdo->prepare("DELETE FROM knowledge_base_categories WHERE id = ?");
+        $stmt->execute([$_GET['delete_category']]);
+        echo "Категория успешно удалена!";
+    } catch (Exception $e) {
+        echo "Ошибка при удалении категории: " . $e->getMessage();
+    }
 }
