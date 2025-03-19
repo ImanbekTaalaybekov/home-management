@@ -39,7 +39,7 @@ class AnnouncementController extends Controller
 
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('photos', 'public');
+                $path = $photo->store('photos/announcement', 'public');
 
                 $announcement->photos()->create([
                     'path' => $path,

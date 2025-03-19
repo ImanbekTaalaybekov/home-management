@@ -27,7 +27,7 @@ class ServiceRequestController extends Controller
 
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('service_requests', 'public');
+                $path = $photo->store('photos/service', 'public');
                 $serviceRequest->photos()->create([
                     'path' => $path,
                 ]);
