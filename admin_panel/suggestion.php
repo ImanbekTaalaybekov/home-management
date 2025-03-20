@@ -16,13 +16,16 @@ $stmt = $pdo->query("
     ORDER BY suggestions.created_at DESC");
 $suggestions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-function safeField($value) {
+function safeField($value)
+{
     return $value ? htmlspecialchars($value) : '—';
 }
 
-function safeDate($date) {
+function safeDate($date)
+{
     return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -31,19 +34,21 @@ function safeDate($date) {
     <meta charset="UTF-8">
     <title>Предложения жителей</title>
     <link rel="stylesheet" href="include/style.css">
-    <style>
-        .preview-img {
-            max-width: 50px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-    </style>
 </head>
 <body>
-<div class="container">
-    <h1>Предложения жителей</h1>
-
+<div id="imageModal" class="modal-overlay">
+    <span class="close-modal">&times;</span>
+    <div class="modal-content">
+        <img id="modalImage" src="" alt="Увеличенное изображение">
+    </div>
+</div>
+<div class="suggestion-container">
+    <div class="suggestion-block">
+    <h1 class="suggestion-h1">Предложения жителей</h1>
+    <br>
+    <a href="main.php">
+        <button>← Вернуться в меню</button>
+    </a>
     <table class="suggestions-table">
         <thead>
         <tr>
@@ -68,7 +73,10 @@ function safeDate($date) {
                 <td><?= safeDate($suggestion['created_at']) ?></td>
                 <td>
                     <?php if ($suggestion['photo_path']): ?>
-                        <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $suggestion['photo_path']) ?>" class="preview-img" alt="Фото">
+                        <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $suggestion['photo_path']) ?>"
+                             class="preview-img"
+                             alt="Фото"
+                             onclick="openModal(this)">
                     <?php else: ?>
                         Нет
                     <?php endif; ?>
@@ -83,8 +91,7 @@ function safeDate($date) {
         <?php endforeach; ?>
         </tbody>
     </table>
-
-    <a href="main.php">← Вернуться в меню</a>
+</div>
 </div>
 
 <script>
@@ -109,6 +116,25 @@ function safeDate($date) {
                 .catch(err => alert('Ошибка: ' + err));
         }
     }
+</script>
+<script>
+    function openModal(imgElement) {
+        const modal = document.getElementById("imageModal");
+        const modalImg = document.getElementById("modalImage");
+
+        modal.style.display = "flex";
+        modalImg.src = imgElement.src;
+    }
+
+    document.querySelector(".close-modal").addEventListener("click", function() {
+        document.getElementById("imageModal").style.display = "none";
+    });
+
+    document.getElementById("imageModal").addEventListener("click", function(event) {
+        if (event.target === this) {
+            this.style.display = "none";
+        }
+    });
 </script>
 </body>
 </html>

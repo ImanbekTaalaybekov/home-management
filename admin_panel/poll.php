@@ -34,9 +34,11 @@ function safeDate($date) {
     <link rel="stylesheet" href="include/style.css">
 </head>
 <body>
-<div class="container">
+<div class="poll-container">
     <h1>Голосования</h1>
-
+    <a href="main.php">
+        <button>← Вернуться в меню</button>
+    </a>
     <table class="polls-table">
         <thead>
         <tr>
@@ -73,8 +75,6 @@ function safeDate($date) {
         <?php endforeach; ?>
         </tbody>
     </table>
-
-    <a href="main.php">← Вернуться в меню</a>
 </div>
 
 <script>

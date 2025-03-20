@@ -30,22 +30,22 @@ function safeDate($date){
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Управление базами знаний</title>
+    <title>Wires Home</title>
     <link rel="stylesheet" href="include/style.css">
-    <style>
-        .preview-img {
-            max-width: 50px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-    </style>
 </head>
 <body>
-<div class="container">
-    <h1>Управление базами знаний</h1>
-
-    <section>
+<div id="imageModal" class="modal-overlay">
+    <span class="close-modal">&times;</span>
+    <div class="modal-content">
+        <img id="modalImage" src="" alt="Увеличенное изображение">
+    </div>
+</div>
+<div class="knowledge-base-container">
+    <section class="knowledge-base-section">
+        <h1 class="knowledge-base-h1">Управление базами знаний</h1>
+        <a href="main.php">
+            <button>← Вернуться в меню</button>
+        </a>
         <h2><span id="formTitle">Создать запись</span></h2>
         <form id="knowledgeForm" enctype="multipart/form-data">
             <input type="hidden" name="id" id="recordId">
@@ -75,7 +75,7 @@ function safeDate($date){
         <div id="knowledgeResult"></div>
     </section>
 
-    <section>
+    <section class="knowledge-base-section">
         <h2>Категории</h2>
         <form id="categoryForm">
             <input type="hidden" name="category_id" id="categoryId">
@@ -111,7 +111,7 @@ function safeDate($date){
         </table>
     </section>
 
-    <section>
+    <section class="knowledge-base-section">
         <h2>Записи базы знаний</h2>
         <table class="knowledge-table">
             <thead>
@@ -135,7 +135,10 @@ function safeDate($date){
                     <td><?= safeDate($record['created_at']) ?></td>
                     <td>
                         <?php if ($record['photo_path']): ?>
-                            <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $record['photo_path']) ?>" class="preview-img" alt="Фото">
+                            <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $record['photo_path']) ?>"
+                                 class="preview-img"
+                                 alt="Фото"
+                                 onclick="openModal(this)">
                         <?php else: ?>
                             Нет
                         <?php endif; ?>
@@ -149,8 +152,6 @@ function safeDate($date){
             </tbody>
         </table>
     </section>
-
-    <a href="main.php">← Вернуться в меню</a>
 </div>
 
 <script>
@@ -209,6 +210,25 @@ function safeDate($date){
                 .then(() => document.getElementById('category-' + id).remove());
         }
     }
+</script>
+<script>
+    function openModal(imgElement) {
+        const modal = document.getElementById("imageModal");
+        const modalImg = document.getElementById("modalImage");
+
+        modal.style.display = "flex";
+        modalImg.src = imgElement.src;
+    }
+
+    document.querySelector(".close-modal").addEventListener("click", function() {
+        document.getElementById("imageModal").style.display = "none";
+    });
+
+    document.getElementById("imageModal").addEventListener("click", function(event) {
+        if (event.target === this) {
+            this.style.display = "none";
+        }
+    });
 </script>
 </body>
 </html>

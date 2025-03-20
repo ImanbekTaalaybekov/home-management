@@ -31,19 +31,19 @@ function safeDate($date) {
     <meta charset="UTF-8">
     <title>Управление объявлениями</title>
     <link rel="stylesheet" href="include/style.css">
-    <style>
-        .preview-img {
-            max-width: 50px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-    </style>
 </head>
 <body>
-<div class="container">
+<div id="imageModal" class="modal-overlay">
+    <span class="close-modal">&times;</span>
+    <div class="modal-content">
+        <img id="modalImage" src="" alt="Увеличенное изображение">
+    </div>
+</div>
+<div class="announcement-container">
     <h1>Объявления</h1>
-
+    <a href="main.php">
+        <button>← Вернуться в меню</button>
+    </a>
     <table class="announcements-table">
         <thead>
         <tr>
@@ -66,7 +66,10 @@ function safeDate($date) {
                 <td><?= safeDate($announcement['created_at']) ?></td>
                 <td>
                     <?php if ($announcement['photo_path']): ?>
-                        <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $announcement['photo_path']) ?>" class="preview-img" alt="Фото">
+                        <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $announcement['photo_path']) ?>"
+                             class="preview-img"
+                             alt="Фото"
+                             onclick="openModal(this)">
                     <?php else: ?>
                         Нет
                     <?php endif; ?>
@@ -78,8 +81,6 @@ function safeDate($date) {
         <?php endforeach; ?>
         </tbody>
     </table>
-
-    <a href="main.php">← Вернуться в меню</a>
 </div>
 
 <script>
@@ -94,6 +95,25 @@ function safeDate($date) {
                 .catch(err => alert('Ошибка: ' + err));
         }
     }
+</script>
+<script>
+    function openModal(imgElement) {
+        const modal = document.getElementById("imageModal");
+        const modalImg = document.getElementById("modalImage");
+
+        modal.style.display = "flex";
+        modalImg.src = imgElement.src;
+    }
+
+    document.querySelector(".close-modal").addEventListener("click", function() {
+        document.getElementById("imageModal").style.display = "none";
+    });
+
+    document.getElementById("imageModal").addEventListener("click", function(event) {
+        if (event.target === this) {
+            this.style.display = "none";
+        }
+    });
 </script>
 </body>
 </html>

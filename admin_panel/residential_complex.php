@@ -24,17 +24,16 @@ function safeDate($date){
 </head>
 <body>
 <div class="container">
-    <h1>Жилые Комплексы</h1>
-
-    <section>
+    <section class="complex-form-section">
+        <h1 class="complex-h1">Жилые Комплексы</h1>
         <h2><span id="formTitle">Добавить ЖК</span></h2>
         <form id="complexForm">
             <input type="hidden" name="id" id="complexId">
-            <div>
+            <div class="form-group">
                 <label>Название ЖК:</label>
                 <input type="text" name="name" id="complexName" required>
             </div>
-            <div>
+            <div class="form-group">
                 <label>Адрес ЖК:</label>
                 <input type="text" name="address" id="complexAddress" required>
             </div>
@@ -44,7 +43,8 @@ function safeDate($date){
         <div id="complexResult"></div>
     </section>
 
-    <section>
+    <section class="complex-list-section">
+        <a href="main.php"><button>← Вернуться в меню</button></a>
         <h2>Существующие ЖК</h2>
         <table class="complex-table">
             <thead>
@@ -65,15 +65,13 @@ function safeDate($date){
                     <td><?= safeDate($complex['created_at']) ?></td>
                     <td>
                         <button onclick="editComplex(<?= $complex['id'] ?>, '<?= htmlspecialchars($complex['name']) ?>', '<?= htmlspecialchars($complex['address']) ?>')">Изменить</button>
-                        <button onclick="deleteComplex(<?= $complex['id'] ?>)">Удалить</button>
+                        <button class="delete-btn" onclick="deleteComplex(<?= $complex['id'] ?>)">Удалить</button>
                     </td>
                 </tr>
             <?php endforeach; ?>
             </tbody>
         </table>
     </section>
-
-    <a href="main.php">← Вернуться в меню</a>
 </div>
 
 <script>

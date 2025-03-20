@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error    = curl_error($ch);
         curl_close($ch);
 
-        return $error ? "<p style='color:red;'>Ошибка: $error</p>" : "<p style='color:green;'>Ответ сервера: $response</p>";
+        return $error ? "<p style='color:red;'>Ошибка: $error</p>" : "<p style='color:green;'> Данные загружены</p>";
     }
 
     if ($_GET['type'] === 'alseco' && isset($_FILES['file'])) {
