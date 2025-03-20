@@ -19,34 +19,33 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Управление пользователями</title>
+    <title>Wires Home</title>
     <link rel="stylesheet" href="include/style.css">
 </head>
 <body>
 <div class="container">
-    <h1>Пользователи</h1>
-
-    <section>
+    <section class="user-form-section">
+        <h1 class="user-h1">Управление пользователями</h1>
         <h2>Создать нового пользователя</h2>
         <form id="userForm">
             <input type="hidden" name="id" id="userId">
-            <div>
+            <div class="form-group">
                 <label>Имя:</label>
                 <input type="text" name="name" id="userName" required>
             </div>
-            <div>
+            <div class="form-group">
                 <label>Лицевой счет:</label>
                 <input type="text" name="personal_account" id="userAccount">
             </div>
-            <div>
+            <div class="form-group">
                 <label>Телефон:</label>
                 <input type="text" name="phone_number" id="userPhone">
             </div>
-            <div>
+            <div class="form-group">
                 <label>Пароль:</label>
-                <input type="text" name="password" id="userPassword" required>
+                <input type="password" name="password" id="userPassword" required>
             </div>
-            <div>
+            <div class="form-group">
                 <label>Жилой комплекс:</label>
                 <select name="residential_complex_id" id="userComplex">
                     <option value="">- Выберите ЖК -</option>
@@ -61,7 +60,8 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div id="userResult"></div>
     </section>
 
-    <section>
+    <section class="user-list-section">
+        <a href="main.php"><button>← Вернуться в меню</button></a>
         <h2>Список пользователей</h2>
         <table class="users-table">
             <thead>
@@ -86,15 +86,13 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td><?= date('d.m.Y H:i', strtotime($user['created_at'])) ?></td>
                     <td>
                         <button onclick="editUser(<?= $user['id'] ?>, '<?= $user['name'] ?>', '<?= $user['personal_account'] ?>', '<?= $user['phone_number'] ?>', '<?= $user['residential_complex_id'] ?>')">Изменить</button>
-                        <button onclick="deleteUser(<?= $user['id'] ?>)">Удалить</button>
+                        <button class="delete-btn" onclick="deleteUser(<?= $user['id'] ?>)">Удалить</button>
                     </td>
                 </tr>
             <?php endforeach; ?>
             </tbody>
         </table>
     </section>
-
-    <a href="main.php">← Вернуться в меню</a>
 </div>
 
 <script>

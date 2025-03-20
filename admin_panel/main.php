@@ -9,7 +9,7 @@ if (!isset($_SESSION['admin'])) {
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Админка</title>
+    <title>Wires Home</title>
     <link rel="stylesheet" href="include/style.css">
 </head>
 <body>
@@ -31,10 +31,6 @@ if (!isset($_SESSION['admin'])) {
             <li><a href="logout.php">Выход</a></li>
         </ul>
     </aside>
-    <main class="content">
-        <h1>Добро пожаловать в админку</h1>
-        <p>Выберите действие в меню слева.</p>
-    </main>
 </div>
 </body>
 </html>

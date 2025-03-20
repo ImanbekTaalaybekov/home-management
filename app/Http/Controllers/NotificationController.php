@@ -48,7 +48,7 @@ class NotificationController extends Controller
 
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
-                $photos[] = $photo->store('photos', 'public'); // Сохраняем фото в "photos"
+                $photos[] = $photo->store('photos/notification', 'public');
             }
         }
 
