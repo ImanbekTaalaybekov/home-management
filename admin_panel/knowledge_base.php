@@ -44,78 +44,82 @@ function safeDate($date)
     </div>
 </div>
 <div class="knowledge-base-container">
-    <section class="knowledge-base-section">
-        <h1 class="knowledge-base-h1">Управление базами знаний</h1>
-        <a href="main.php">
-            <button>← Вернуться в меню</button>
-        </a>
-        <h2><span id="formTitle">Создать запись</span></h2>
-        <form id="knowledgeForm" enctype="multipart/form-data">
-            <input type="hidden" name="id" id="recordId">
-            <div>
-                <label>Заголовок:</label>
-                <input type="text" name="title" id="recordTitle" required>
-            </div>
-            <div>
-                <label>Категория:</label>
-                <select name="category_id" id="recordCategory" required>
-                    <?php foreach ($categories as $cat): ?>
-                        <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div>
-                <label>Содержание:</label>
-                <textarea name="content" id="recordContent" rows="4" required></textarea>
-            </div>
-            <div>
-                <label>Фотографии (необязательно, можно несколько):</label>
-                <input type="file" name="photos[]" multiple>
-            </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" id="cancelEdit" style="display:none;">Отмена</button>
-        </form>
-        <div id="knowledgeResult"></div>
-    </section>
+    <div class="knowledge-base-block-top">
+        <div class="footer-margin"></div>
+        <section class="knowledge-base-section-top">
+            <h1 class="knowledge-base-h1">Управление базами знаний</h1>
+            <a href="main.php">
+                <button>← Вернуться в меню</button>
+            </a>
+            <h2><span id="formTitle">Создать запись</span></h2>
+            <form id="knowledgeForm" enctype="multipart/form-data">
+                <input type="hidden" name="id" id="recordId">
+                <div>
+                    <label>Заголовок:</label>
+                    <input type="text" name="title" id="recordTitle" required>
+                </div>
+                <div>
+                    <label>Категория:</label>
+                    <select name="category_id" id="recordCategory" required>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label>Содержание:</label>
+                    <textarea name="content" id="recordContent" rows="4" required></textarea>
+                </div>
+                <div>
+                    <label>Фотографии (необязательно, можно несколько):</label>
+                    <input type="file" name="photos[]" multiple>
+                </div>
+                <br>
+                <button type="submit">Сохранить</button>
+                <button type="button" id="cancelEdit" style="display:none;">Отмена</button>
+            </form>
+            <div id="knowledgeResult"></div>
+        </section>
 
-    <section class="knowledge-base-section">
-        <h2>Категории</h2>
-        <form id="categoryForm">
-            <input type="hidden" name="category_id" id="categoryId">
-            <div>
-                <label>Название категории:</label>
-                <input type="text" name="category_name" id="categoryName" required>
-            </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" id="cancelCategoryEdit" style="display:none;">Отмена</button>
-        </form>
-        <div id="categoryResult"></div>
+        <section class="knowledge-base-top-section">
+            <h2>Категории</h2>
+            <form id="categoryForm">
+                <input type="hidden" name="category_id" id="categoryId">
+                <div>
+                    <label>Название категории:</label>
+                    <input type="text" name="category_name" id="categoryName" required>
+                </div>
+                <br>
+                <button type="submit">Сохранить</button>
+                <button type="button" id="cancelCategoryEdit" style="display:none;">Отмена</button>
+            </form>
+            <div id="categoryResult"></div>
 
-        <table class="category-table">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Название</th>
-                <th>Действия</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($categories as $category): ?>
-                <tr id="category-<?= $category['id'] ?>">
-                    <td><?= $category['id'] ?></td>
-                    <td><?= htmlspecialchars($category['name']) ?></td>
-                    <td>
-                        <button onclick="editCategory(<?= $category['id'] ?>, '<?= htmlspecialchars($category['name']) ?>')">
-                            Изменить
-                        </button>
-                        <button onclick="deleteCategory(<?= $category['id'] ?>)">Удалить</button>
-                    </td>
+            <table class="category-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Действия</th>
                 </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-    </section>
-
+                </thead>
+                <tbody>
+                <?php foreach ($categories as $category): ?>
+                    <tr id="category-<?= $category['id'] ?>">
+                        <td><?= $category['id'] ?></td>
+                        <td><?= htmlspecialchars($category['name']) ?></td>
+                        <td>
+                            <button onclick="editCategory(<?= $category['id'] ?>, '<?= htmlspecialchars($category['name']) ?>')">
+                                Изменить
+                            </button>
+                            <button onclick="deleteCategory(<?= $category['id'] ?>)">Удалить</button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </section>
+    </div>
     <section class="knowledge-base-section">
         <h2>Записи базы знаний</h2>
         <table class="knowledge-table">
@@ -159,6 +163,7 @@ function safeDate($date)
             </tbody>
         </table>
     </section>
+    <div class="footer-margin"></div>
 </div>
 
 <script>

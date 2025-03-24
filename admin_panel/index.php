@@ -8,12 +8,15 @@
 </head>
 <body>
 <div class="login-container">
-    <h2>Вход в админку</h2>
+    <div class="login-container-logo">
+        <img src="include/logo.png" alt="Логотип" class="login-logo">
+    </div>
+    <h2 class="login-title">Вход в админку</h2>
     <?php if (isset($error)) echo "<p style='color: red;'>$error</p>"; ?>
     <form method="POST">
         <input type="text" name="username" placeholder="Логин" required>
-        <input type="password" name="password" placeholder="Пароль" required>
-        <button type="submit">Войти</button>
+        <input type="password" name="password" placeholder="Пароль" required class="login-input">
+        <button type="submit" class="login-button">Войти</button>
     </form>
 </div>
 </body>

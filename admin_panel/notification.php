@@ -7,7 +7,14 @@ if (!isset($_SESSION['admin'])) {
 
 require_once 'include/database.php';
 
-$stmt = $pdo->query("
+$totalNotifications = $pdo->query("SELECT COUNT(*) FROM notifications")->fetchColumn();
+
+$perPage = 20;
+$totalPages = ceil($totalNotifications / $perPage);
+$currentPage = isset($_GET['page']) ? max(1, min($totalPages, (int)$_GET['page'])) : 1;
+$offset = ($currentPage - 1) * $perPage;
+
+$stmt = $pdo->prepare("
     SELECT notifications.*, 
            residential_complexes.name AS complex_name, 
            users.name AS user_name, 
@@ -16,7 +23,11 @@ $stmt = $pdo->query("
     LEFT JOIN residential_complexes ON notifications.residential_complex_id = residential_complexes.id
     LEFT JOIN users ON notifications.user_id = users.id
     ORDER BY notifications.created_at DESC
+    LIMIT :limit OFFSET :offset
 ");
+$stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 function safeField($value){
@@ -130,6 +141,23 @@ function safeDate($date){
             <?php endforeach; ?>
             </tbody>
         </table>
+
+        <?php if ($totalPages > 1): ?>
+            <div class="pagination">
+                <?php if ($currentPage > 1): ?>
+                    <a href="?page=<?= $currentPage - 1 ?>">&laquo;</a>
+                <?php endif; ?>
+
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a href="?page=<?= $i ?>" <?= $i == $currentPage ? 'class="active"' : '' ?>><?= $i ?></a>
+                <?php endfor; ?>
+
+                <?php if ($currentPage < $totalPages): ?>
+                    <a href="?page=<?= $currentPage + 1 ?>">&raquo;</a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+        <div class="footer-margin"></div>
     </section>
 </div>
 
@@ -138,7 +166,8 @@ function safeDate($date){
         e.preventDefault();
         let formData = new FormData(this);
         let notificationId = document.getElementById('notificationId').value;
-        let url = notificationId ? 'notification_request.php?update=' + notificationId : 'notification_request.php';
+        let currentPage = new URLSearchParams(window.location.search).get('page') || 1;
+        let url = notificationId ? `notification_request.php?update=${notificationId}&page=${currentPage}` : `notification_request.php?page=${currentPage}`;
 
         fetch(url, {
             method: 'POST',
@@ -156,11 +185,12 @@ function safeDate($date){
 
     function deleteNotification(id){
         if(confirm('Удалить уведомление ID ' + id + '?')){
-            fetch('notification_request.php?delete=' + id)
+            let currentPage = new URLSearchParams(window.location.search).get('page') || 1;
+            fetch(`notification_request.php?delete=${id}&page=${currentPage}`)
                 .then(response => response.text())
                 .then(data => {
                     alert(data);
-                    document.getElementById('notification-' + id).remove();
+                    location.reload();
                 })
                 .catch(error => alert('Ошибка: ' + error));
         }
@@ -182,8 +212,7 @@ function safeDate($date){
         document.getElementById('notificationId').value = '';
         this.style.display = 'none';
     });
-</script>
-<script>
+
     function openModal(imgElement) {
         const modal = document.getElementById("imageModal");
         const modalImg = document.getElementById("modalImage");
