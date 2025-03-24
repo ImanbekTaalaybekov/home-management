@@ -56,6 +56,7 @@ Route::get('/polls/{poll}', [PollController::class, 'show'])->middleware('auth:s
 Route::get('/announcements', [AnnouncementController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/announcements/{id}', [AnnouncementController::class, 'show'])->middleware('auth:sanctum');
 Route::post('/announcements', [AnnouncementController::class, 'store'])->middleware('auth:sanctum');
+Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->middleware('auth:sanctum');
 
 Route::post('/upload-debt-data-alseco', [InputDebtDataController::class, 'uploadAlseco']);
 Route::post('/upload-debt-data-ivc', [InputDebtDataController::class, 'uploadIvc']);

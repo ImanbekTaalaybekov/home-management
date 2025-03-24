@@ -73,7 +73,7 @@ function safeDate($date)
                 <td><?= safeDate($suggestion['created_at']) ?></td>
                 <td>
                     <?php if ($suggestion['photo_path']): ?>
-                        <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $suggestion['photo_path']) ?>"
+                        <img src="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $suggestion['photo_path']) ?>"
                              class="preview-img"
                              alt="Фото"
                              onclick="openModal(this)">

@@ -17,13 +17,16 @@ $recordsStmt = $pdo->query("
     ORDER BY knowledge_bases.created_at DESC");
 $records = $recordsStmt->fetchAll(PDO::FETCH_ASSOC);
 
-function safeField($value){
+function safeField($value)
+{
     return $value ? htmlspecialchars($value) : '—';
 }
 
-function safeDate($date){
+function safeDate($date)
+{
     return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -102,7 +105,9 @@ function safeDate($date){
                     <td><?= $category['id'] ?></td>
                     <td><?= htmlspecialchars($category['name']) ?></td>
                     <td>
-                        <button onclick="editCategory(<?= $category['id'] ?>, '<?= htmlspecialchars($category['name']) ?>')">Изменить</button>
+                        <button onclick="editCategory(<?= $category['id'] ?>, '<?= htmlspecialchars($category['name']) ?>')">
+                            Изменить
+                        </button>
                         <button onclick="deleteCategory(<?= $category['id'] ?>)">Удалить</button>
                     </td>
                 </tr>
@@ -135,7 +140,7 @@ function safeDate($date){
                     <td><?= safeDate($record['created_at']) ?></td>
                     <td>
                         <?php if ($record['photo_path']): ?>
-                            <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $record['photo_path']) ?>"
+                            <img src="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $record['photo_path']) ?>"
                                  class="preview-img"
                                  alt="Фото"
                                  onclick="openModal(this)">
@@ -144,7 +149,9 @@ function safeDate($date){
                         <?php endif; ?>
                     </td>
                     <td>
-                        <button onclick="editRecord(<?= $record['id'] ?>, '<?= htmlspecialchars($record['title']) ?>', '<?= htmlspecialchars($record['content']) ?>', <?= $record['category_id'] ?>)">Изменить</button>
+                        <button onclick="editRecord(<?= $record['id'] ?>, '<?= htmlspecialchars($record['title']) ?>', '<?= htmlspecialchars($record['content']) ?>', <?= $record['category_id'] ?>)">
+                            Изменить
+                        </button>
                         <button onclick="deleteRecord(<?= $record['id'] ?>)">Удалить</button>
                     </td>
                 </tr>
@@ -155,7 +162,7 @@ function safeDate($date){
 </div>
 
 <script>
-    document.getElementById('knowledgeForm').addEventListener('submit', function(e){
+    document.getElementById('knowledgeForm').addEventListener('submit', function (e) {
         e.preventDefault();
         let formData = new FormData(this);
         let recordId = document.getElementById('recordId').value;
@@ -172,7 +179,7 @@ function safeDate($date){
             });
     });
 
-    document.getElementById('categoryForm').addEventListener('submit', function(e){
+    document.getElementById('categoryForm').addEventListener('submit', function (e) {
         e.preventDefault();
         let formData = new FormData(this);
         let categoryId = document.getElementById('categoryId').value;
@@ -189,8 +196,8 @@ function safeDate($date){
             });
     });
 
-    function deleteRecord(id){
-        if(confirm('Удалить запись ID ' + id + '?')){
+    function deleteRecord(id) {
+        if (confirm('Удалить запись ID ' + id + '?')) {
             fetch('knowledge_base_request.php?delete=' + id)
                 .then(response => response.text())
                 .then(() => document.getElementById('record-' + id).remove());
@@ -203,8 +210,8 @@ function safeDate($date){
         document.getElementById('cancelCategoryEdit').style.display = 'inline-block';
     }
 
-    function deleteCategory(id){
-        if(confirm('Удалить категорию ID ' + id + '?')){
+    function deleteCategory(id) {
+        if (confirm('Удалить категорию ID ' + id + '?')) {
             fetch('knowledge_base_request.php?delete_category=' + id)
                 .then(response => response.text())
                 .then(() => document.getElementById('category-' + id).remove());
@@ -220,11 +227,11 @@ function safeDate($date){
         modalImg.src = imgElement.src;
     }
 
-    document.querySelector(".close-modal").addEventListener("click", function() {
+    document.querySelector(".close-modal").addEventListener("click", function () {
         document.getElementById("imageModal").style.display = "none";
     });
 
-    document.getElementById("imageModal").addEventListener("click", function(event) {
+    document.getElementById("imageModal").addEventListener("click", function (event) {
         if (event.target === this) {
             this.style.display = "none";
         }

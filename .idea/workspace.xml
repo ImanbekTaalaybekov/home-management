@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Фиксы по контроллерам 190325 v4">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin_panel/debt_request.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/debt_request.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin_panel/knowledge_base_request.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/knowledge_base_request.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin_panel/notification_request.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/notification_request.php" afterDir="false" />
-    </list>
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Добавление HTTPS" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -36,7 +31,7 @@
     </option>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="Add-https-protocol" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -221,7 +216,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Add-https-protocol",
+    "git-widget-placeholder": "main",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",

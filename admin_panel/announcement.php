@@ -16,13 +16,16 @@ $stmt = $pdo->query("
     ORDER BY announcements.created_at DESC");
 $announcements = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-function safeField($value) {
+function safeField($value)
+{
     return $value ? htmlspecialchars($value) : '—';
 }
 
-function safeDate($date) {
+function safeDate($date)
+{
     return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -66,7 +69,7 @@ function safeDate($date) {
                 <td><?= safeDate($announcement['created_at']) ?></td>
                 <td>
                     <?php if ($announcement['photo_path']): ?>
-                        <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $announcement['photo_path']) ?>"
+                        <img src="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $announcement['photo_path']) ?>"
                              class="preview-img"
                              alt="Фото"
                              onclick="openModal(this)">
@@ -84,8 +87,8 @@ function safeDate($date) {
 </div>
 
 <script>
-    function deleteAnnouncement(id){
-        if(confirm('Удалить объявление ID ' + id + '?')){
+    function deleteAnnouncement(id) {
+        if (confirm('Удалить объявление ID ' + id + '?')) {
             fetch('announcement_request.php?delete=' + id)
                 .then(response => response.text())
                 .then(data => {
@@ -105,11 +108,11 @@ function safeDate($date) {
         modalImg.src = imgElement.src;
     }
 
-    document.querySelector(".close-modal").addEventListener("click", function() {
+    document.querySelector(".close-modal").addEventListener("click", function () {
         document.getElementById("imageModal").style.display = "none";
     });
 
-    document.getElementById("imageModal").addEventListener("click", function(event) {
+    document.getElementById("imageModal").addEventListener("click", function (event) {
         if (event.target === this) {
             this.style.display = "none";
         }
