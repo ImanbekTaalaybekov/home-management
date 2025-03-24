@@ -15,6 +15,9 @@ if (!isset($_SESSION['admin'])) {
 <body>
 <div class="container">
     <aside class="sidebar">
+        <div class="login-container-logo">
+            <img src="include/logo.png" alt="Логотип" class="login-logo">
+        </div>
         <h2>Меню</h2>
         <ul>
             <li><a href="user.php">Пользователи</a></li>

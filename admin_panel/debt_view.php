@@ -96,13 +96,13 @@ function daysDifference($date)
             <?php endforeach; ?>
             </tbody>
         </table>
+        <div class="debt-pagination">
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <a href="?page=<?= $i ?>" class="<?= $i === $page ? 'active' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+        </div>
+        <div class="footer-margin"></div>
     </section>
-
-    <div class="debt-pagination">
-        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="?page=<?= $i ?>" class="<?= $i === $page ? 'active' : '' ?>"><?= $i ?></a>
-        <?php endfor; ?>
-    </div>
 </div>
 </body>
 </html>

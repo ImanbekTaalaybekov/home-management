@@ -7,11 +7,22 @@ if (!isset($_SESSION['admin'])) {
 
 require_once 'include/database.php';
 
+$totalUsers = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+
+$perPage = 20;
+$totalPages = ceil($totalUsers / $perPage);
+$currentPage = isset($_GET['page']) ? max(1, min($totalPages, (int)$_GET['page'])) : 1;
+$offset = ($currentPage - 1) * $perPage;
+
 $complexes = $pdo->query("SELECT * FROM residential_complexes")->fetchAll(PDO::FETCH_ASSOC);
 
-$stmt = $pdo->query("SELECT users.*, residential_complexes.name AS complex_name FROM users 
+$stmt = $pdo->prepare("SELECT users.*, residential_complexes.name AS complex_name FROM users 
 LEFT JOIN residential_complexes ON users.residential_complex_id::bigint = residential_complexes.id 
-ORDER BY users.created_at DESC");
+ORDER BY users.created_at DESC
+LIMIT :limit OFFSET :offset");
+$stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -92,6 +103,23 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
             </tbody>
         </table>
+
+        <?php if ($totalPages > 1): ?>
+            <div class="pagination">
+                <?php if ($currentPage > 1): ?>
+                    <a href="?page=<?= $currentPage - 1 ?>">&laquo;</a>
+                <?php endif; ?>
+
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a href="?page=<?= $i ?>" <?= $i == $currentPage ? 'class="active"' : '' ?>><?= $i ?></a>
+                <?php endfor; ?>
+
+                <?php if ($currentPage < $totalPages): ?>
+                    <a href="?page=<?= $currentPage + 1 ?>">&raquo;</a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+        <div class="footer-margin"></div>
     </section>
 </div>
 
@@ -100,7 +128,8 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         e.preventDefault();
         let formData = new FormData(this);
         let userId = document.getElementById('userId').value;
-        let url = userId ? 'user_request.php?update=' + userId : 'user_request.php';
+        let currentPage = new URLSearchParams(window.location.search).get('page') || 1;
+        let url = userId ? `user_request.php?update=${userId}&page=${currentPage}` : `user_request.php?page=${currentPage}`;
 
         fetch(url, {
             method: 'POST',
@@ -118,11 +147,12 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     function deleteUser(id){
         if(confirm('Удалить пользователя ID ' + id + '?')){
-            fetch('user_request.php?delete=' + id)
+            let currentPage = new URLSearchParams(window.location.search).get('page') || 1;
+            fetch(`user_request.php?delete=${id}&page=${currentPage}`)
                 .then(res => res.text())
                 .then(response => {
                     alert(response);
-                    document.getElementById('user-' + id).remove();
+                    location.reload();
                 })
                 .catch(err => alert('Ошибка: ' + err));
         }

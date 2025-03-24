@@ -14,7 +14,7 @@ body {
 
 .sidebar {
     width: 250px;
-    background-color: #2c3e50;
+    background-color: #b5b5b5;
     color: white;
     padding: 20px;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
@@ -116,7 +116,7 @@ label {
 }
 
 input, select, textarea {
-    width: 100%;
+    width: 90%;
     padding: 8px;
     border: 1px solid #bdc3c7;
     border-radius: 5px;
@@ -312,7 +312,7 @@ a:hover {
 
 .knowledge-base-section {
     width: 80%;
-    margin:  auto;
+    margin: auto;
 }
 
 .complaints-table th, .complaints-table td {
@@ -444,11 +444,11 @@ a:hover {
 }
 
 .complaint-container {
-    width:100%;
+    width: 100%;
 }
 
 .suggestion-container {
-    width:100%;
+    width: 100%;
 }
 
 .suggestion-block {
@@ -472,7 +472,7 @@ a:hover {
 }
 
 .suggestion-h1 {
-font-size: 35px;
+    font-size: 35px;
 }
 
 .modal-overlay {
@@ -505,4 +505,78 @@ font-size: 35px;
 
 .knowledge-base-h1 {
     font-size: 35px;
+}
+
+.login-container {
+    margin: auto auto;
+}
+
+.login-title {
+    text-align: center;
+}
+
+.login-input {
+    margin-top: 5px;
+}
+
+.login-button {
+    margin: 5px auto 0 auto;
+    display: block;
+    width: fit-content;
+}
+
+.login-container-logo {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.login-logo {
+    max-width: 200px;
+    height: auto;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 15px;
+}
+
+.pagination a {
+    padding: 5px 10px;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    color: #333;
+    border-radius: 3px;
+}
+
+.pagination a.active {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+
+.pagination a:hover:not(.active) {
+    background-color: #f1f1f1;
+}
+
+.footer-margin {
+    height: 50px;
+}
+
+.knowledge-base-block-top {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.knowledge-base-section-top,
+.knowledge-base-top-section {
+    margin-left:5%;
+    flex: 1;
+    box-sizing: border-box;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
