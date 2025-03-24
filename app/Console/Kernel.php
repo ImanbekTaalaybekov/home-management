@@ -17,8 +17,8 @@ class Kernel extends ConsoleKernel
     ];
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('push:send')->everyMinute();
         $schedule->command('cleanup:password-reset-tokens')->hourly();
+        $schedule->command('announcements:delete-old')->daily();
     }
 
     /**

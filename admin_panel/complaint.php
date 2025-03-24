@@ -74,7 +74,7 @@ function safeDate($date)
                     <td><?= safeDate($complaint['created_at']) ?></td>
                     <td>
                         <?php if ($complaint['photo_path']): ?>
-                            <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $complaint['photo_path']) ?>"
+                            <img src="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $complaint['photo_path']) ?>"
                                  class="preview-img"
                                  alt="Фото"
                                  onclick="openModal(this)">

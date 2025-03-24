@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Announcement;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,6 +15,7 @@ class AnnouncementController extends Controller
 
         $announcements = Announcement::with('photos')
             ->where('residential_complex_id', $user->residential_complex_id)
+            ->where('created_at', '>=', Carbon::now()->subDays(30))
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -60,5 +62,19 @@ class AnnouncementController extends Controller
             ->firstOrFail();
 
         return response()->json($announcement);
+    }
+
+    public function destroy($id)
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        $announcement = Announcement::where('id', $id)
+            ->where('residential_complex_id', $user->residential_complex_id)
+            ->firstOrFail();
+
+        $announcement->photos()->delete();
+        $announcement->delete();
+
+        return response()->json(['message' => 'Объявление успешно удалено.']);
     }
 }

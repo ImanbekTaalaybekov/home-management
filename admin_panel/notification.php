@@ -113,7 +113,7 @@ function safeDate($date){
                     <td><?= safeDate($notification['created_at']) ?></td>
                     <td>
                         <?php if ($notification['photo_path']): ?>
-                            <img src="<?= htmlspecialchars('http://212.112.105.242:8800/storage/' . $notification['photo_path']) ?>"
+                            <img src="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $notification['photo_path']) ?>"
                                  class="preview-img"
                                  alt="Фото"
                                  onclick="openModal(this)">

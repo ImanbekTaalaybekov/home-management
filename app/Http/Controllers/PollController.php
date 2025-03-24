@@ -6,6 +6,7 @@ use App\Models\Poll;
 use App\Models\PollVote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class PollController extends Controller
 {
@@ -14,6 +15,7 @@ class PollController extends Controller
         $user = Auth::guard('sanctum')->user();
 
         $polls = Poll::where('residential_complex_id', $user->residential_complex_id)
+            ->where('created_at', '>=', Carbon::now()->subDays(30))
             ->orderBy('start_date', 'desc')
             ->get();
 

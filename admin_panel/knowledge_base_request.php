@@ -19,10 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title']) && !isset($_
             }
         }
 
-        $ch = curl_init('http://212.112.105.242:8800/api/knowledge-base/articles');
+        $ch = curl_init('https://212.112.105.242:443/api/knowledge-base/articles');
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
         $response = curl_exec($ch);
         $error = curl_error($ch);
@@ -66,24 +68,9 @@ if (isset($_GET['delete'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['category_name']) && !isset($_GET['update_category'])) {
     try {
-        $postData = ['name' => $_POST['category_name']];
-
-        $ch = curl_init('https://212.112.105.242:443/api/knowledge-base/articles');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-
-        $response = curl_exec($ch);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($error) {
-            echo "<p style='color:red;'>Ошибка при создании категории: {$error}</p>";
-        } else {
-            echo "<p style='color:green;'>Категория успешно добавлена!</p>";
-        }
+        $stmt = $pdo->prepare("INSERT INTO knowledge_base_categories (name) VALUES (?)");
+        $stmt->execute([$_POST['category_name']]);
+        echo "<p style='color:green;'>Категория успешно добавлена!</p>";
     } catch (Exception $e) {
         echo "<p style='color:red;'>Ошибка: " . $e->getMessage() . "</p>";
     }
