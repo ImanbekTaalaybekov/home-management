@@ -68,10 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['category_name']) && !
     try {
         $postData = ['name' => $_POST['category_name']];
 
-        $ch = curl_init('http://212.112.105.242:8800/api/knowledge-base/categories');
+        $ch = curl_init('https://212.112.105.242:443/api/knowledge-base/articles');
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
         $response = curl_exec($ch);
         $error = curl_error($ch);
