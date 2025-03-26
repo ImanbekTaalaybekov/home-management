@@ -70,6 +70,7 @@ function safeDate($date) {
                 <td><?= (int)$poll['votes_abstain'] ?></td>
                 <td>
                     <button onclick="deletePoll(<?= $poll['id'] ?>)">Удалить</button>
+                    <button onclick="downloadProtocol(<?= $poll['id'] ?>)">Получить протокол</button>
                 </td>
             </tr>
         <?php endforeach; ?>
@@ -88,6 +89,29 @@ function safeDate($date) {
                 })
                 .catch(err => alert('Ошибка: ' + err));
         }
+    }
+</script>
+<script>
+    function deletePoll(id){
+        if(confirm('Удалить голосование ID ' + id + '?')){
+            fetch('poll_request.php?delete=' + id)
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    document.getElementById('poll-' + id).remove();
+                })
+                .catch(err => alert('Ошибка: ' + err));
+        }
+    }
+
+    function downloadProtocol(id) {
+        const url = `https://212.112.105.242:443/api/polls/protocol/${id}`;
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `poll_protocol_${id}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 </script>
 </body>
