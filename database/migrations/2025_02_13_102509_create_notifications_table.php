@@ -18,6 +18,7 @@ return new class extends Migration
             $table->enum('type', ['global', 'complex', 'personal']);
             $table->foreignId('user_id')->nullable()->constrained();
             $table->foreignId('residential_complex_id')->nullable()->constrained();
+            $table->string('document')->nullable();
             $table->timestamps();
         });
     }

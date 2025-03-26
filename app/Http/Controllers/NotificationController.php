@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\NotificationResource;
 use Illuminate\Http\Request;
 use App\Models\Notification;
 use App\Services\NotificationService;
@@ -29,7 +30,7 @@ class NotificationController extends Controller
             return response()->json(['message' => 'Уведомление не найдено'], 404);
         }
 
-        return response()->json($notification);
+        return new NotificationResource($notification);
     }
 
     public function store(Request $request, NotificationService $notificationService)
@@ -42,6 +43,7 @@ class NotificationController extends Controller
             'residential_complex_id' => 'nullable|exists:residential_complexes,id',
             'photos' => 'nullable|array',
             'photos.*' => 'nullable',
+            'document' => 'nullable|file|mimes:pdf',
         ]);
 
         $photos = [];
@@ -52,15 +54,20 @@ class NotificationController extends Controller
             }
         }
 
+        $documentPath = null;
+        if ($request->hasFile('document')) {
+            $documentPath = $request->file('document')->store('documents/notification', 'public');
+        }
+
         switch ($request->type) {
             case 'global':
-                $notificationService->sendGlobalNotification($request->title, $request->message, $photos);
+                $notificationService->sendGlobalNotification($request->title, $request->message, $photos, $documentPath);
                 break;
             case 'complex':
-                $notificationService->sendComplexNotification($request->residential_complex_id, $request->title, $request->message, $photos);
+                $notificationService->sendComplexNotification($request->residential_complex_id, $request->title, $request->message, $photos, $documentPath);
                 break;
             case 'personal':
-                $notificationService->sendPersonalNotification($request->user_id, $request->title, $request->message, $photos);
+                $notificationService->sendPersonalNotification($request->user_id, $request->title, $request->message, $photos, $documentPath);
                 break;
         }
 

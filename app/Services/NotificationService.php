@@ -9,12 +9,13 @@ use App\Models\User;
 
 class NotificationService
 {
-    public function sendGlobalNotification($title, $message, array $photos = [])
+    public function sendGlobalNotification($title, $message, array $photos = [], $document = null)
     {
         $notification = Notification::create([
             'title' => $title,
             'message' => $message,
             'type' => 'global',
+            'document' => $document,
         ]);
 
         $this->attachPhotos($notification, $photos);
@@ -22,13 +23,14 @@ class NotificationService
         /*$this->sendPushNotification($title, $message, User::pluck('fcm_token')->toArray());*/
     }
 
-    public function sendComplexNotification($complexId, $title, $message, array $photos = [])
+    public function sendComplexNotification($complexId, $title, $message, array $photos = [], $document = null)
     {
         $notification = Notification::create([
             'title' => $title,
             'message' => $message,
             'type' => 'complex',
             'residential_complex_id' => $complexId,
+            'document' => $document,
         ]);
 
         $this->attachPhotos($notification, $photos);
@@ -37,13 +39,14 @@ class NotificationService
         /*$this->sendPushNotification($title, $message, $tokens);*/
     }
 
-    public function sendPersonalNotification($userId, $title, $message, array $photos = [])
+    public function sendPersonalNotification($userId, $title, $message, array $photos = [], $document = null)
     {
         $notification = Notification::create([
             'title' => $title,
             'message' => $message,
             'type' => 'personal',
             'user_id' => $userId,
+            'document' => $document,
         ]);
 
         $this->attachPhotos($notification, $photos);
