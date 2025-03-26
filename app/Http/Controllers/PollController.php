@@ -7,6 +7,7 @@ use App\Models\PollVote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PollController extends Controller
 {
@@ -91,5 +92,29 @@ class PollController extends Controller
                 'abstain' => $abstainVotes,
             ]
         ]);
+    }
+
+    public function generateProtocol(Poll $poll)
+    {
+        $votes = $poll->votes()->with('user')->get();
+
+        $yesVotes = $votes->where('vote', 'yes');
+        $noVotes = $votes->where('vote', 'no');
+        $abstainVotes = $votes->where('vote', 'abstain');
+
+        $data = [
+            'poll' => $poll,
+            'totalVotes' => $votes->count(),
+            'yesCount'    => $yesVotes->count(),
+            'noCount'     => $noVotes->count(),
+            'abstainCount'=> $abstainVotes->count(),
+            'yesVoters'   => $yesVotes->map(fn($vote) => $vote->user->name ?? '—'),
+            'noVoters'    => $noVotes->map(fn($vote) => $vote->user->name ?? '—'),
+            'abstainVoters' => $abstainVotes->map(fn($vote) => $vote->user->name ?? '—'),
+        ];
+
+        $pdf = PDF::loadView('pdf.poll_protocol', $data);
+
+        return $pdf->download("poll_protocol_{$poll->id}.pdf");
     }
 }

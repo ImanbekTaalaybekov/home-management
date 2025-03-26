@@ -21,6 +21,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title']) && !isset($_
             }
         }
 
+        if (!empty($_FILES['document']['tmp_name']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
+            $docTmpPath = $_FILES['document']['tmp_name'];
+            $docOriginalName = $_FILES['document']['name'];
+            $docMimeType = mime_content_type($docTmpPath) ?: 'application/pdf';
+            $postFields['document'] = curl_file_create($docTmpPath, $docMimeType, $docOriginalName);
+        }
+
         $ch = curl_init('https://212.112.105.242:443/api/notifications');
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
