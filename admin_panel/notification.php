@@ -90,6 +90,10 @@ function safeDate($date){
                 <label>Фотографии (необязательно, можно несколько):</label>
                 <input type="file" name="photos[]" multiple>
             </div>
+            <div>
+                <label>PDF-документ (необязательно):</label>
+                <input type="file" name="document" accept="application/pdf">
+            </div>
             <button type="submit">Сохранить</button>
             <button type="button" id="cancelEdit" style="display:none;">Отмена</button>
         </form>
@@ -109,6 +113,7 @@ function safeDate($date){
                 <th>Пользователь</th>
                 <th>Дата создания</th>
                 <th>Фото</th>
+                <th>Документ</th>
                 <th>Действия</th>
             </tr>
             </thead>
@@ -124,12 +129,16 @@ function safeDate($date){
                     <td><?= safeDate($notification['created_at']) ?></td>
                     <td>
                         <?php if ($notification['photo_path']): ?>
-                            <img src="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $notification['photo_path']) ?>"
-                                 class="preview-img"
-                                 alt="Фото"
-                                 onclick="openModal(this)">
+                            <img src="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $notification['photo_path']) ?>" class="preview-img" alt="Фото" onclick="openModal(this)">
                         <?php else: ?>
                             Нет
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if (!empty($notification['document'])): ?>
+                            <a href="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $notification['document']) ?>" target="_blank">Скачать</a>
+                        <?php else: ?>
+                            —
                         <?php endif; ?>
                     </td>
 

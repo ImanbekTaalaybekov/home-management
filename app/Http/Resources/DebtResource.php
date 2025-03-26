@@ -22,6 +22,7 @@ class DebtResource extends JsonResource
             'amount' => $this->amount,
             'due_date' => $this->due_date,
             'overdue' => $this->calculateOverdue(),
+            'deeplink'  => "Kasppi/services/{$this->type}/mount={$this->amount}"
         ];
     }
 

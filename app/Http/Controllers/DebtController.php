@@ -19,8 +19,7 @@ class DebtController extends Controller
 
     public function getSingleDebt($id)
     {
-        $notification = Debt::where('id', $id)->get();
-
-        return response()->json($notification);
+        $debt = Debt::findOrFail($id);
+        return new DebtResource($debt);
     }
 }

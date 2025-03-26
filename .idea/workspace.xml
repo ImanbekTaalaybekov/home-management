@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Улучшение визуала 240325 v1">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Pdf files to notifications" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -440,6 +438,7 @@
     <MESSAGE value="Фиксы по сидерам" />
     <MESSAGE value="Фиксы по контроллерам 190325 v4" />
     <MESSAGE value="Общие фиксы 240325 v1" />
-    <option name="LAST_COMMIT_MESSAGE" value="Общие фиксы 240325 v1" />
+    <MESSAGE value="Pdf files to notifications" />
+    <option name="LAST_COMMIT_MESSAGE" value="Pdf files to notifications" />
   </component>
 </project>
