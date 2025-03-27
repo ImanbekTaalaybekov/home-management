@@ -8,7 +8,7 @@
     <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Poll admin panel get protocol">
       <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-
+    </list>
     <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Улучшение визуала 240325 v1">
       <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
@@ -17,7 +17,6 @@
       <change beforePath="$PROJECT_DIR$/node_modules/@rollup/rollup-linux-x64-gnu/rollup.linux-x64-gnu.node" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@rollup/rollup-linux-x64-gnu/rollup.linux-x64-gnu.node" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/node_modules/@rollup/rollup-linux-x64-musl/rollup.linux-x64-musl.node" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/@rollup/rollup-linux-x64-musl/rollup.linux-x64-musl.node" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/favicon.ico" beforeDir="false" afterPath="$PROJECT_DIR$/public/favicon.ico" afterDir="false" />
-
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
