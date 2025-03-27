@@ -23,3 +23,6 @@ bootstrap/cache/
 workspace.xml
 
 
+/input_report_data/
+/public/
+/node_modules/
