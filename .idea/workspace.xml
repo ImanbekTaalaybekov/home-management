@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Pdf files to notifications" />
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Poll admin panel get protocol">
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -31,7 +34,7 @@
     </option>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="Visual-fixes-240325-v1" />
+        <entry key="$PROJECT_DIR$" value="Poll-admin-pdf-generate" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -201,6 +204,12 @@
       <path value="$PROJECT_DIR$/vendor/beste/json" />
       <path value="$PROJECT_DIR$/vendor/beste/in-memory-cache" />
       <path value="$PROJECT_DIR$/vendor/beste/clock" />
+      <path value="$PROJECT_DIR$/vendor/dompdf/php-svg-lib" />
+      <path value="$PROJECT_DIR$/vendor/dompdf/php-font-lib" />
+      <path value="$PROJECT_DIR$/vendor/dompdf/dompdf" />
+      <path value="$PROJECT_DIR$/vendor/masterminds/html5" />
+      <path value="$PROJECT_DIR$/vendor/sabberworm/php-css-parser" />
+      <path value="$PROJECT_DIR$/vendor/barryvdh/laravel-dompdf" />
     </include_path>
   </component>
   <component name="ProjectColorInfo">{
@@ -316,6 +325,9 @@
       <workItem from="1742816135617" duration="1020000" />
       <workItem from="1742878719778" duration="363000" />
       <workItem from="1742967899084" duration="728000" />
+      <workItem from="1742978575832" duration="11204000" />
+      <workItem from="1742991976300" duration="2000" />
+      <workItem from="1742992436103" duration="1000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
@@ -397,7 +409,23 @@
       <option name="project" value="LOCAL" />
       <updated>1742814887841</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Pdf files to notifications v2">
+      <option name="closed" value="true" />
+      <created>1742988015058</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1742988015058</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Poll admin panel get protocol">
+      <option name="closed" value="true" />
+      <created>1742991884456</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1742991884456</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -439,6 +467,7 @@
     <MESSAGE value="Фиксы по контроллерам 190325 v4" />
     <MESSAGE value="Общие фиксы 240325 v1" />
     <MESSAGE value="Pdf files to notifications" />
-    <option name="LAST_COMMIT_MESSAGE" value="Pdf files to notifications" />
+    <MESSAGE value="Poll admin panel get protocol" />
+    <option name="LAST_COMMIT_MESSAGE" value="Poll admin panel get protocol" />
   </component>
 </project>
