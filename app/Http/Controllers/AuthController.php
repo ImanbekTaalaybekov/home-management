@@ -19,9 +19,7 @@ class AuthController extends Controller
             'device' => 'required',
         ]);
 
-        $user = User::where('personal_account', $request->personal_account)
-            ->where('phone_number', $request->phone_number)
-            ->first();
+        $user = User::where('personal_account', $request->personal_account)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
@@ -29,7 +27,12 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $code = 1111; //Затычка, затем заменить на mt_rand(1000,9999)
+        if ($user->phone_number !== $request->phone_number) {
+            $user->phone_number = $request->phone_number;
+            $user->save();
+        }
+
+        $code = 1111; // Заглушка, затем заменить на mt_rand(1000,9999)
         $expiresAt = now()->addMinutes(5);
 
         VerificationCode::updateOrCreate(
