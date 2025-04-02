@@ -21,4 +21,9 @@ class Poll extends Model
     {
         return $this->hasMany(PollVote::class);
     }
+
+    public function residentialComplex()
+    {
+        return $this->belongsTo(ResidentialComplex::class);
+    }
 }

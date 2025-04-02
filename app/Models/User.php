@@ -47,4 +47,9 @@ class User extends Authenticatable implements CanResetPassword
     {
         return $this->hasMany(Notification::class);
     }
+
+    public function votes()
+    {
+        return $this->hasMany(PollVote::class);
+    }
 }
