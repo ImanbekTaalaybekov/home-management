@@ -2,84 +2,137 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Протокол голосования</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: "DejaVu Sans", sans-serif;
+            font-size: 12px;
             margin: 20px;
+        }
+        h1, h2, h3, p {
+            margin-bottom: 5px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid #000;
+            margin-top: 10px;
+            margin-bottom: 30px;
         }
         th, td {
-            padding: 8px;
+            border: 1px solid #000;
+            padding: 6px;
             text-align: left;
         }
-        h1, h2 {
-            text-align: center;
-        }
-        .table-header {
-            background-color: #f2f2f2;
+        .signature-table td {
+            border: none;
+            padding: 12px 0;
         }
     </style>
 </head>
 <body>
-<h1>Протокол голосования</h1>
-<h2>Собрание собственников квартир и нежилых помещений</h2>
-<p><strong>Дата начала голосования:</strong> {{ \Carbon\Carbon::parse($poll->start_date)->format('d.m.Y') }}</p>
-<p><strong>Дата окончания голосования:</strong> {{ \Carbon\Carbon::parse($poll->end_date)->format('d.m.Y') }}</p>
-<p><strong>Жилой комплекс:</strong> {{ $residentialComplex->name }}</p>
-<p><strong>Адрес:</strong> {{ $residentialComplex->address }}</p>
 
-<h3>Общее количество голосов: {{ $totalVotes }}</h3>
-<h3>Голоса "За": {{ $yesCount }} ({{ $yesVoters->count() }} голосов)</h3>
-<h3>Голоса "Против": {{ $noCount }} ({{ $noVoters->count() }} голосов)</h3>
-<h3>Голоса "Воздержался": {{ $abstainCount }} ({{ $abstainVoters->count() }} голосов)</h3>
+<h2>Лист регистрации собственников квартир, нежилого помещения<br>
+    многоквартирного жилого дома, участвующих на собрании</h2>
 
-<h3>Список проголосовавших:</h3>
+<p>«________» _________________________ 20___ года</p>
+<p><strong>Местонахождение многоквартирного жилого дома:</strong> {{ $residentialComplex->address }}</p>
 
 <table>
     <thead>
-    <tr class="table-header">
-        <th>Фамилия, имя, отчество</th>
-        <th>Голос</th>
+    <tr>
+        <th>№</th>
+        <th>Фамилия Имя Отчество</th>
+        <th>№ квартиры</th>
+        <th>Нежилое помещение</th>
+        <th>Подпись</th>
     </tr>
     </thead>
     <tbody>
-    <tr><td colspan="2"><strong>Голоса "За":</strong></td></tr>
-    @foreach ($yesVoters as $voter)
+    @foreach ($votes as $index => $vote)
         <tr>
-            <td>{{ $voter }}</td>
-            <td>За</td>
-        </tr>
-    @endforeach
-
-    <tr><td colspan="2"><strong>Голоса "Против":</strong></td></tr>
-    @foreach ($noVoters as $voter)
-        <tr>
-            <td>{{ $voter }}</td>
-            <td>Против</td>
-        </tr>
-    @endforeach
-
-    <tr><td colspan="2"><strong>Голоса "Воздержался":</strong></td></tr>
-    @foreach ($abstainVoters as $voter)
-        <tr>
-            <td>{{ $voter }}</td>
-            <td>Воздержался</td>
+            <td>{{ $index + 1 }}</td>
+            <td>{{ $vote->user->name ?? '—' }}</td>
+            <td>{{ $vote->user->apartment_number ?? '—' }}</td>
+            <td>{{ $vote->user->block_number ?? '—' }}</td>
+            <td></td>
         </tr>
     @endforeach
     </tbody>
 </table>
 
-<p><strong>Председатель собрания:</strong> ___________________________</p>
-<p><strong>Секретарь собрания:</strong> ______________________________</p>
-<p><strong>Члены совета дома:</strong> ______________________________</p>
+<table class="signature-table">
+    <tr>
+        <td>Председатель собрания: ___________________________ (Ф.И.О.) ___________________</td>
+    </tr>
+    <tr>
+        <td>Секретарь собрания: _____________________________ (Ф.И.О.) ___________________</td>
+    </tr>
+    <tr>
+        <td>Член совета дома: _______________________________ (Ф.И.О.) ___________________</td>
+    </tr>
+    <tr>
+        <td>Член совета дома: _______________________________ (Ф.И.О.) ___________________</td>
+    </tr>
+    <tr>
+        <td>Член совета дома: _______________________________ (Ф.И.О.) ___________________</td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>Лист голосования собственников квартир, нежилых помещений<br>
+    проголосовавших на собрании (проводимый путем явочного порядка)</h2>
+
+<p>«________» ____________________ 20___ года, время ____________</p>
+<p><strong>Местонахождение многоквартирного жилого дома:</strong> {{ $residentialComplex->address }}</p>
+
+<h4>Вопросы, внесенные для обсуждения:</h4>
+<p>{{ $poll->description }}</p>
+
+<table>
+    <thead>
+    <tr>
+        <th>№</th>
+        <th>Фамилия Имя Отчество</th>
+        <th>№ квартиры</th>
+        <th>Нежилое помещение</th>
+        <th>«За» (подпись)</th>
+        <th>«Против» (подпись)</th>
+        <th>Воздержусь (подпись)</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach ($votes as $index => $vote)
+        <tr>
+            <td>{{ $index + 1 }}</td>
+            <td>{{ $vote->user->name ?? '—' }}</td>
+            <td>{{ $vote->user->apartment_number ?? '—' }}</td>
+            <td>{{ $vote->user->block_number ?? '—' }}</td>
+            <td>{{ $vote->vote === 'yes' ? '✔' : '' }}</td>
+            <td>{{ $vote->vote === 'no' ? '✔' : '' }}</td>
+            <td>{{ $vote->vote === 'abstain' ? '✔' : '' }}</td>
+        </tr>
+    @endforeach
+    </tbody>
+</table>
+
+<table class="signature-table">
+    <tr>
+        <td>Председатель собрания: ___________________________ (Ф.И.О.) ___________________</td>
+    </tr>
+    <tr>
+        <td>Секретарь собрания: _____________________________ (Ф.И.О.) ___________________</td>
+    </tr>
+    <tr>
+        <td>Член совета дома: _______________________________ (Ф.И.О.) ___________________</td>
+    </tr>
+    <tr>
+        <td>Член совета дома: _______________________________ (Ф.И.О.) ___________________</td>
+    </tr>
+    <tr>
+        <td>Член совета дома: _______________________________ (Ф.И.О.) ___________________</td>
+    </tr>
+</table>
+
 </body>
 </html>

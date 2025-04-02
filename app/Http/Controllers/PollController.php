@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use setasign\Fpdi\Fpdi;
 
 class PollController extends Controller
 {
@@ -105,17 +106,40 @@ class PollController extends Controller
         $data = [
             'poll' => $poll,
             'totalVotes' => $votes->count(),
-            'yesCount'    => $yesVotes->count(),
-            'noCount'     => $noVotes->count(),
-            'abstainCount'=> $abstainVotes->count(),
-            'yesVoters'   => $yesVotes->map(fn($vote) => $vote->user->name ?? '—'),
-            'noVoters'    => $noVotes->map(fn($vote) => $vote->user->name ?? '—'),
+            'yesCount' => $yesVotes->count(),
+            'noCount' => $noVotes->count(),
+            'abstainCount' => $abstainVotes->count(),
+            'yesVoters' => $yesVotes->map(fn($vote) => $vote->user->name ?? '—'),
+            'noVoters' => $noVotes->map(fn($vote) => $vote->user->name ?? '—'),
             'abstainVoters' => $abstainVotes->map(fn($vote) => $vote->user->name ?? '—'),
             'residentialComplex' => $poll->residentialComplex,
+            'votes' => $votes,
         ];
 
-        $pdf = PDF::loadView('pdf.poll_protocol', $data);
+        $pdfContent = Pdf::loadView('pdf.poll_protocol', $data)->output();
+        $generatedPdfPath = storage_path("app/temp_generated_protocol_{$poll->id}.pdf");
+        file_put_contents($generatedPdfPath, $pdfContent);
 
-        return $pdf->download("poll_protocol_{$poll->id}.pdf");
+        $headerPdfPath = base_path('admin_panel/protocol/protocl-head.pdf');
+
+        $mergedPdf = new Fpdi();
+
+        foreach ([$headerPdfPath, $generatedPdfPath] as $file) {
+            $pageCount = $mergedPdf->setSourceFile($file);
+            for ($i = 1; $i <= $pageCount; $i++) {
+                $templateId = $mergedPdf->importPage($i);
+                $size = $mergedPdf->getTemplateSize($templateId);
+
+                $mergedPdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
+                $mergedPdf->useTemplate($templateId);
+            }
+        }
+
+        $finalPath = storage_path("app/final_protocol_{$poll->id}.pdf");
+        $mergedPdf->Output($finalPath, 'F');
+
+        @unlink($generatedPdfPath);
+
+        return response()->download($finalPath)->deleteFileAfterSend(true);
     }
 }
