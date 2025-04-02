@@ -44,7 +44,6 @@
         <th>Фамилия Имя Отчество</th>
         <th>№ квартиры</th>
         <th>Нежилое помещение</th>
-        <th>Подпись</th>
     </tr>
     </thead>
     <tbody>
@@ -54,7 +53,6 @@
             <td>{{ $vote->user->name ?? '—' }}</td>
             <td>{{ $vote->user->apartment_number ?? '—' }}</td>
             <td>{{ $vote->user->non_residential_premises ?? '—' }}</td>
-            <td></td>
         </tr>
     @endforeach
     </tbody>
