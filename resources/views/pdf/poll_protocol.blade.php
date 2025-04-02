@@ -53,7 +53,7 @@
             <td>{{ $index + 1 }}</td>
             <td>{{ $vote->user->name ?? '—' }}</td>
             <td>{{ $vote->user->apartment_number ?? '—' }}</td>
-            <td>{{ $vote->user->block_number ?? '—' }}</td>
+            <td>{{ $vote->user->non_residential_premises ?? '—' }}</td>
             <td></td>
         </tr>
     @endforeach
@@ -107,7 +107,7 @@
             <td>{{ $index + 1 }}</td>
             <td>{{ $vote->user->name ?? '—' }}</td>
             <td>{{ $vote->user->apartment_number ?? '—' }}</td>
-            <td>{{ $vote->user->block_number ?? '—' }}</td>
+            <td>{{ $vote->user->non_residential_premises ?? '—' }}</td>
             <td>{{ $vote->vote === 'yes' ? '✔' : '' }}</td>
             <td>{{ $vote->vote === 'no' ? '✔' : '' }}</td>
             <td>{{ $vote->vote === 'abstain' ? '✔' : '' }}</td>

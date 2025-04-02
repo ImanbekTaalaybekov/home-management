@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Auth changes: removing phone number">
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Общие фиксы 020425 v4">
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/PollController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/PollController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/User.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/User.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -215,6 +216,8 @@
       <path value="$PROJECT_DIR$/vendor/masterminds/html5" />
       <path value="$PROJECT_DIR$/vendor/barryvdh/laravel-dompdf" />
       <path value="$PROJECT_DIR$/vendor/sabberworm/php-css-parser" />
+      <path value="$PROJECT_DIR$/vendor/setasign/fpdi" />
+      <path value="$PROJECT_DIR$/vendor/setasign/fpdf" />
     </include_path>
   </component>
   <component name="ProjectColorInfo">{
@@ -230,7 +233,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Global-fixes-010425-v1",
+    "git-widget-placeholder": "Global-fixes-020425-v5",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -247,6 +250,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/admin_panel/protocol" />
       <recent name="$PROJECT_DIR$/admin_panel/include" />
     </key>
   </component>
@@ -346,6 +350,9 @@
       <workItem from="1743487370809" duration="48000" />
       <workItem from="1743506017695" duration="6000" />
       <workItem from="1743506044807" duration="5539000" />
+      <workItem from="1743583512030" duration="459000" />
+      <workItem from="1743584321228" duration="17000" />
+      <workItem from="1743584351418" duration="4947000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
@@ -443,7 +450,23 @@
       <option name="project" value="LOCAL" />
       <updated>1742991884456</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Общие фиксы 020425 v3">
+      <option name="closed" value="true" />
+      <created>1743583032037</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1743583032037</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Общие фиксы 020425 v4">
+      <option name="closed" value="true" />
+      <created>1743583472868</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1743583472868</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -487,6 +510,9 @@
     <MESSAGE value="Pdf files to notifications" />
     <MESSAGE value="Poll admin panel get protocol" />
     <MESSAGE value="Gitignore fixes" />
-    <option name="LAST_COMMIT_MESSAGE" value="Gitignore fixes" />
+    <MESSAGE value="Общие фиксы 020425 v1" />
+    <MESSAGE value="Общие фиксы 020425 v3" />
+    <MESSAGE value="Общие фиксы 020425 v4" />
+    <option name="LAST_COMMIT_MESSAGE" value="Общие фиксы 020425 v4" />
   </component>
 </project>
