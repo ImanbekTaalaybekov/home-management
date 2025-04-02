@@ -13,4 +13,9 @@ class ResidentialComplex extends Model
         'name',
         'address',
     ];
+
+    public function polls()
+    {
+        return $this->hasMany(Poll::class);
+    }
 }

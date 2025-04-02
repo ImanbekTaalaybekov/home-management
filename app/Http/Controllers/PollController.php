@@ -23,7 +23,7 @@ class PollController extends Controller
         return response()->json($polls);
     }
 
-    public function store(Request $request)
+    /*public function store(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
 
@@ -41,7 +41,7 @@ class PollController extends Controller
         ]);
 
         return response()->json($poll, 201);
-    }
+    }*/
 
     public function vote(Request $request, Poll $poll)
     {
@@ -111,6 +111,7 @@ class PollController extends Controller
             'yesVoters'   => $yesVotes->map(fn($vote) => $vote->user->name ?? '—'),
             'noVoters'    => $noVotes->map(fn($vote) => $vote->user->name ?? '—'),
             'abstainVoters' => $abstainVotes->map(fn($vote) => $vote->user->name ?? '—'),
+            'residentialComplex' => $poll->residentialComplex,
         ];
 
         $pdf = PDF::loadView('pdf.poll_protocol', $data);

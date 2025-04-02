@@ -15,6 +15,7 @@ $stmt = $pdo->query("
     FROM polls 
     LEFT JOIN residential_complexes ON polls.residential_complex_id = residential_complexes.id 
     ORDER BY polls.created_at DESC");
+$complexes = $pdo->query("SELECT id, name FROM residential_complexes ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 $polls = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 function safeField($value) {
@@ -39,6 +40,42 @@ function safeDate($date) {
     <a href="main.php">
         <button>← Вернуться в меню</button>
     </a>
+
+    <section>
+        <h2>Создать новое голосование</h2>
+        <form id="pollForm">
+            <div>
+                <label>Заголовок:</label>
+                <input type="text" name="title" required>
+            </div>
+            <div>
+                <label>Описание:</label>
+                <textarea name="description" rows="3" required></textarea>
+            </div>
+            <div>
+                <label>Жилой комплекс:</label>
+                <select name="residential_complex_id">
+                    <option value="">— Не выбрано —</option>
+                    <?php foreach ($complexes as $complex): ?>
+                        <option value="<?= $complex['id'] ?>"><?= htmlspecialchars($complex['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div>
+                <label>Дата начала:</label>
+                <input type="date" name="start_date" required>
+            </div>
+            <div>
+                <label>Дата окончания:</label>
+                <input type="date" name="end_date" required>
+            </div>
+            <br>
+            <button type="submit">Создать</button>
+        </form>
+        <div id="pollResult"></div>
+    </section>
+
+
     <table class="polls-table">
         <thead>
         <tr>
@@ -76,6 +113,7 @@ function safeDate($date) {
         <?php endforeach; ?>
         </tbody>
     </table>
+    <div class="footer-margin"></div>
 </div>
 
 <script>
@@ -113,6 +151,25 @@ function safeDate($date) {
         link.click();
         document.body.removeChild(link);
     }
+</script>
+<script>
+    document.getElementById('pollForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        let formData = new FormData(this);
+
+        fetch('poll_request.php', {
+            method: 'POST',
+            body: formData
+        })
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById('pollResult').innerHTML = data;
+                setTimeout(() => location.reload(), 1000);
+            })
+            .catch(err => {
+                document.getElementById('pollResult').innerHTML = '<p style="color:red;">Ошибка: ' + err + '</p>';
+            });
+    });
 </script>
 </body>
 </html>
