@@ -120,7 +120,7 @@ class PollController extends Controller
         $generatedPdfPath = storage_path("app/temp_generated_protocol_{$poll->id}.pdf");
         file_put_contents($generatedPdfPath, $pdfContent);
 
-        $headerPdfPath = base_path('admin_panel/protocol/protocl-head.pdf');
+        $headerPdfPath = base_path('admin_panel/protocol/protocol-head.pdf');
 
         $mergedPdf = new Fpdi();
 
