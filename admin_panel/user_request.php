@@ -2,6 +2,8 @@
 require_once 'include/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name']) && !isset($_GET['update'])) {
+    $hashedPassword = password_hash($_POST['password'], PASSWORD_BCRYPT);
+
     $stmt = $pdo->prepare("
         INSERT INTO users (name, personal_account, phone_number, password, residential_complex_id, created_at) 
         VALUES (?, ?, ?, ?, ?, NOW())
@@ -10,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name']) && !isset($_G
         $_POST['name'],
         $_POST['personal_account'] ?: null,
         $_POST['phone_number'] ?: null,
-        $_POST['password'],
+        $hashedPassword,
         $_POST['residential_complex_id'] ?: null,
     ]);
 
