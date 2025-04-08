@@ -8,6 +8,9 @@
       <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Resources/DebtResource.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Resources/DebtResource.php" afterDir="false" />
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Добавление категорий вызова мастера">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_panel/user.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin_panel/user.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -362,6 +365,12 @@
       <workItem from="1743769588253" duration="1000" />
       <workItem from="1743770613380" duration="1000" />
       <workItem from="1744117132469" duration="624000" />
+      <workItem from="1744108035513" duration="2000" />
+      <workItem from="1744109807130" duration="2044000" />
+      <workItem from="1744112438107" duration="2000" />
+      <workItem from="1744112456700" duration="1027000" />
+      <workItem from="1744113806858" duration="3000" />
+      <workItem from="1744117245500" duration="463000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
@@ -523,6 +532,7 @@
     <MESSAGE value="Общие фиксы 020425 v3" />
     <MESSAGE value="Общие фиксы 020425 v4" />
     <MESSAGE value="Дашбоард главнйо страницы 040425 v1" />
-    <option name="LAST_COMMIT_MESSAGE" value="Дашбоард главнйо страницы 040425 v1" />
+    <MESSAGE value="Добавление категорий вызова мастера" />
+    <option name="LAST_COMMIT_MESSAGE" value="Добавление категорий вызова мастера" />
   </component>
 </project>

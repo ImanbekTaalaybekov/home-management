@@ -174,5 +174,37 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         this.style.display = 'none';
     });
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const phoneInput = document.getElementById('userPhone');
+
+        phoneInput.addEventListener('input', function(e) {
+            let value = phoneInput.value.replace(/\D/g, '');
+
+            if (value.startsWith('8')) {
+                value = '7' + value.slice(1);
+            }
+            if (value.length > 11) {
+                value = value.slice(0, 11);
+            }
+
+            let formatted = '+7';
+            if (value.length > 1) {
+                formatted += ' (' + value.substring(1, 4);
+            }
+            if (value.length >= 4) {
+                formatted += ') ' + value.substring(4, 7);
+            }
+            if (value.length >= 7) {
+                formatted += '-' + value.substring(7, 9);
+            }
+            if (value.length >= 9) {
+                formatted += '-' + value.substring(9, 11);
+            }
+
+            phoneInput.value = formatted;
+        });
+    });
+</script>
 </body>
 </html>
