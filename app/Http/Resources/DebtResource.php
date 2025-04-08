@@ -22,7 +22,8 @@ class DebtResource extends JsonResource
             'amount' => $this->amount,
             'due_date' => $this->due_date,
             'overdue' => $this->calculateOverdue(),
-            'deeplink'  => "kaspi://payment?service={$this->type}&amount={$this->amount}"
+            'deeplink'  => "kaspi://"
+            //'deeplink'  => "kaspi://payment?service={$this->type}&amount={$this->amount}" <------Привести к этому типу
         ];
     }
 
