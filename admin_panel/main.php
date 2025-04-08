@@ -42,7 +42,7 @@ $complexes = $pdo->query("SELECT * FROM residential_complexes ORDER BY name ASC"
 
     <main class="dashboard-content">
         <div class="dashboard-header">
-            <h1>Главная страница</h1>
+            <h1 class="main-title-h1">Главная страница</h1>
             <select id="complexFilter">
                 <option value="">Все ЖК</option>
                 <?php foreach ($complexes as $complex): ?>

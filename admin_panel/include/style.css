@@ -13,8 +13,8 @@ body {
 }
 
 .sidebar {
-    width: 300px;
-    background-color: #b5b5b5;
+    width: 30%;
+    background-color: #d0e3fb;
     color: white;
     padding: 20px;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
@@ -26,6 +26,7 @@ body {
     margin-bottom: 20px;
     font-size: 22px;
     font-weight: bold;
+    color: #165ca6;
 }
 
 .sidebar ul {
@@ -39,13 +40,14 @@ body {
 }
 
 .sidebar ul li a {
+    text-align: center;
     text-decoration: none;
     color: white;
     font-size: 16px;
     padding: 10px;
     display: block;
-    background-color: #34495e;
-    border-radius: 5px;
+    background-color: #1662af;
+    border-radius: 30px;
     transition: background 0.3s ease, transform 0.2s ease;
 }
 
@@ -132,6 +134,21 @@ button {
     font-size: 16px;
     cursor: pointer;
     transition: 0.3s;
+    margin-bottom: 2px;
+}
+
+.login-button {
+    background: #2260c5;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin: 5px auto 0 auto;
+    display: block;
+    width: fit-content;
 }
 
 button:hover {
@@ -513,16 +530,11 @@ a:hover {
 
 .login-title {
     text-align: center;
+    color: black;
 }
 
 .login-input {
     margin-top: 5px;
-}
-
-.login-button {
-    margin: 5px auto 0 auto;
-    display: block;
-    width: fit-content;
 }
 
 .login-container-logo {
@@ -593,6 +605,7 @@ a:hover {
 }
 
 .dashboard-header select {
+    width: 25%;
     padding: 8px;
     font-size: 16px;
 }
@@ -608,7 +621,6 @@ a:hover {
     border: 1px solid #ddd;
     border-radius: 12px;
     padding: 20px;
-    flex: 1 1 250px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -643,7 +655,7 @@ a:hover {
 
 .dashboard-card-btn {
     padding: 8px 15px;
-    background-color: #4CAF50;
+    background-color: #4c84af;
     color: white;
     text-decoration: none;
     border-radius: 6px;
@@ -652,4 +664,12 @@ a:hover {
 
 .dashboard-card-btn:hover {
     background-color: #45a049;
+}
+
+.side-bar-title-h2 {
+    color: white;
+}
+
+.main-title-h1 {
+    color: #3b6585;
 }

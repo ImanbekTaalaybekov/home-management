@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ServiceRequest;
+use App\Models\ServiceRequestCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,5 +36,10 @@ class ServiceRequestController extends Controller
         }
 
         return response()->json($serviceRequest, 201);
+    }
+
+    public function getCategories()
+    {
+        return response()->json(ServiceRequestCategory::all());
     }
 }
