@@ -7,6 +7,8 @@ use App\Models\VerificationCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -40,7 +42,7 @@ class AuthController extends Controller
             ['code' => $code, 'expires_at' => $expiresAt]
         );
 
-        $this->sendSms($user->phone_number, "Ваш код подтверждения: $code");
+        $this->sendSms($user->phone_number, "Ваш код подтверждения: $code. Сообщение от wires-home-kz");
 
         return response()->json([
             'message' => 'SMS code sent',
@@ -51,7 +53,54 @@ class AuthController extends Controller
 
     private function sendSms($phoneNumber, $message)
     {
-    //Добавить отправку СМС исходя от выбранного оператора (KCELL)
+        $formattedPhone = $this->formatPhoneNumber($phoneNumber);
+
+        $response = Http::get('http://kazinfoteh.org:9507/api', [
+            'action' => 'sendmessage',
+            'username' => env('KAZINFOTEH_USERNAME'),
+            'password' => env('KAZINFOTEH_PASSWORD'),
+            'recipient' => $formattedPhone,
+            'messagetype' => 'SMS:TEXT',
+            'originator' => 'KiT_Notify',
+            'messagedata' => $message,
+        ]);
+
+        if ($response->failed()) {
+            Log::error('Ошибка отправки SMS через KazInfoTeh: ' . $response->body());
+        }
+    }
+
+    private function sendSmsHttps($phoneNumber, $message)
+    {
+        $formattedPhone = $this->formatPhoneNumber($phoneNumber);
+
+        $login = env('KAZINFOTEH_USERNAME');
+        $password = env('KAZINFOTEH_PASSWORD');
+        $token = base64_encode("$login:$password");
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Basic ' . $token,
+            'Content-Type' => 'application/json',
+        ])->post('https://so.kazinfoteh.org/api/sms/send', [
+            'from' => 'KiT_Notify',
+            'to' => $formattedPhone,
+            'text' => $message,
+        ]);
+
+        if ($response->failed()) {
+            Log::error('Ошибка отправки SMS через KazInfoTeh HTTPS: ' . $response->body());
+        }
+    }
+
+    private function formatPhoneNumber($phoneNumber)
+    {
+        $digits = preg_replace('/\D+/', '', $phoneNumber);
+
+        if (substr($digits, 0, 1) === '8') {
+            $digits = '7' . substr($digits, 1);
+        }
+
+        return substr($digits, 0, 11);
     }
 
     public function verifySmsCode(Request $request)
