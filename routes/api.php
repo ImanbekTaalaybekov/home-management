@@ -41,6 +41,7 @@ Route::get('/debts', [DebtController::class, 'getUserDebts'])->middleware('auth:
 Route::get('/debts/{id}', [DebtController::class, 'getSingleDebt']);
 
 Route::post('/service-requests', [ServiceRequestController::class, 'store']);
+Route::get('/service-requests-categories', [ServiceRequestController::class, 'getCategories']);
 
 Route::get('/complaints', [ComplaintController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/complaints/{id}', [ComplaintController::class, 'show']);

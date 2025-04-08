@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Общие фиксы 020425 v6">
+    <list default="true" id="b140e605-fefd-478d-a9c3-a5e412f88dfb" name="Changes" comment="Дашбоард главнйо страницы 040425 v1">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -33,7 +33,7 @@
     </option>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="Global-fixes-020425-v5" />
+        <entry key="$PROJECT_DIR$" value="Dashboard-fixes-040425-v1" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -357,6 +357,8 @@
       <workItem from="1743650397104" duration="603000" />
       <workItem from="1743682596455" duration="2000" />
       <workItem from="1743704740545" duration="7000" />
+      <workItem from="1743769588253" duration="1000" />
+      <workItem from="1743770613380" duration="1000" />
     </task>
     <task id="LOCAL-00001" summary="First settings">
       <option name="closed" value="true" />
@@ -517,6 +519,7 @@
     <MESSAGE value="Общие фиксы 020425 v1" />
     <MESSAGE value="Общие фиксы 020425 v3" />
     <MESSAGE value="Общие фиксы 020425 v4" />
-    <option name="LAST_COMMIT_MESSAGE" value="Общие фиксы 020425 v4" />
+    <MESSAGE value="Дашбоард главнйо страницы 040425 v1" />
+    <option name="LAST_COMMIT_MESSAGE" value="Дашбоард главнйо страницы 040425 v1" />
   </component>
 </project>

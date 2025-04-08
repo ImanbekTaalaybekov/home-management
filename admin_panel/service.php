@@ -7,22 +7,17 @@ if (!isset($_SESSION['admin'])) {
 
 require_once 'include/database.php';
 
-function translateType($type){
-    $translations = [
-        'electrician' => 'Электрик',
-        'plumber' => 'Сантехник',
-        'lift-operator' => 'Лифтер'
-    ];
-    return $translations[$type] ?? htmlspecialchars($type);
-}
-
 $stmt = $pdo->query("
     SELECT service_requests.*, users.name AS user_name, 
+           categories.name_rus AS type_rus,
            (SELECT path FROM photos WHERE photoable_type = 'App\\Models\\ServiceRequest' 
             AND photoable_id = service_requests.id LIMIT 1) AS photo_path
     FROM service_requests 
     LEFT JOIN users ON service_requests.user_id = users.id 
-    ORDER BY service_requests.created_at DESC");
+    LEFT JOIN service_request_categories AS categories ON service_requests.type = categories.name
+    ORDER BY service_requests.created_at DESC
+");
+
 $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 function safeField($value) {
@@ -80,7 +75,7 @@ function safeDate($date) {
             <tr id="request-<?= $request['id'] ?>">
                 <td><?= $request['id'] ?></td>
                 <td><?= safeField($request['user_name']) ?></td>
-                <td><?= translateType($request['type']) ?></td>
+                <td><?= safeField($request['type_rus']) ?></td>
                 <td><?= nl2br(safeField($request['description'])) ?></td>
                 <td id="status-<?= $request['id'] ?>"><?= safeField($request['status']) ?></td>
                 <td><?= safeDate($request['created_at']) ?></td>
