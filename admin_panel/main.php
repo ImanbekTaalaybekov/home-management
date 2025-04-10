@@ -1,12 +1,13 @@
 <?php
 session_start();
-if (!isset($_SESSION['admin'])) {
+if (!isset($_SESSION['admin_role'])) {
     header('Location: login.php');
     exit();
 }
 
 require_once 'include/database.php';
 
+$role = $_SESSION['admin_role'];
 $complexes = $pdo->query("SELECT * FROM residential_complexes ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -25,18 +26,27 @@ $complexes = $pdo->query("SELECT * FROM residential_complexes ORDER BY name ASC"
         </div>
         <h2>Меню</h2>
         <ul>
-            <li><a href="user.php">Пользователи</a></li>
-            <li><a href="residential_complex.php">Жилые комплексы</a></li>
-            <li><a href="debt.php">Загрузка данных коммунальных услуг</a></li>
-            <li><a href="debt_view.php">Просмотр данных коммунальных услуг</a></li>
-            <li><a href="notification.php">Управление уведомлениями</a></li>
-            <li><a href="knowledge_base.php">Управление базами знаний</a></li>
-            <li><a href="complaint.php">Жалобы</a></li>
-            <li><a href="suggestion.php">Предложения</a></li>
-            <li><a href="service.php">Вызов мастера</a></li>
-            <li><a href="service_category.php">Вызов мастера - категории</a></li>
-            <li><a href="announcement.php">Объявления</a></li>
-            <li><a href="poll.php">Голосования</a></li>
+            <?php if ($role === 'admin'): ?>
+                <li><a href="user.php">Пользователи</a></li>
+                <li><a href="residential_complex.php">Жилые комплексы</a></li>
+                <li><a href="debt.php">Загрузка данных коммунальных услуг</a></li>
+                <li><a href="debt_view.php">Просмотр данных коммунальных услуг</a></li>
+            <?php endif; ?>
+
+            <?php if (in_array($role, ['admin', 'level1', 'level2', 'level3'])): ?>
+                <li><a href="notification.php">Управление уведомлениями</a></li>
+                <li><a href="knowledge_base.php">Управление базами знаний</a></li>
+                <li><a href="complaint.php">Жалобы</a></li>
+                <li><a href="suggestion.php">Предложения</a></li>
+                <li><a href="service.php">Вызов мастера</a></li>
+                <li><a href="service_category.php">Вызов мастера - категории</a></li>
+            <?php endif; ?>
+
+            <?php if (in_array($role, ['admin', 'level2', 'level3'])): ?>
+                <li><a href="announcement.php">Объявления</a></li>
+                <li><a href="poll.php">Голосования</a></li>
+            <?php endif; ?>
+
             <li><a href="logout.php">Выход</a></li>
         </ul>
     </aside>
@@ -106,7 +116,7 @@ $complexes = $pdo->query("SELECT * FROM residential_complexes ORDER BY name ASC"
                     <div class="dashboard-card">
                         <div class="dashboard-card-icon">🛠️</div>
                         <div class="dashboard-card-info">
-                            <h3>Вызовы мастеров (текущий меясц):</h3>
+                            <h3>Вызовы мастеров (текущий месяц):</h3>
                             <p>Всего: ${data.services_new} / Обработано: ${data.services_done}</p>
                             <a href="service.php" class="dashboard-card-btn">Перейти →</a>
                         </div>
