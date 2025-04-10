@@ -34,7 +34,7 @@ class AuthController extends Controller
             $user->save();
         }
 
-        $code = 1111; // Заглушка, затем заменить на mt_rand(1000,9999)
+        $code =  mt_rand(1000,9999);
         $expiresAt = now()->addMinutes(5);
 
         VerificationCode::updateOrCreate(
