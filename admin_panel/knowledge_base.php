@@ -242,5 +242,84 @@ function safeDate($date)
         }
     });
 </script>
+<script>
+    document.getElementById('knowledgeForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        let formData = new FormData(this);
+        let recordId = document.getElementById('recordId').value;
+        let url = recordId ? 'knowledge_base_request.php?update=' + recordId : 'knowledge_base_request.php';
+
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('knowledgeResult').innerHTML = data;
+                setTimeout(() => location.reload(), 1000);
+            });
+    });
+
+    document.getElementById('categoryForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        let formData = new FormData(this);
+        let categoryId = document.getElementById('categoryId').value;
+        let url = categoryId ? 'knowledge_base_request.php?update_category=' + categoryId : 'knowledge_base_request.php';
+
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('categoryResult').innerHTML = data;
+                setTimeout(() => location.reload(), 1000);
+            });
+    });
+
+    function editRecord(id, title, content, categoryId) {
+        document.getElementById('recordId').value = id;
+        document.getElementById('recordTitle').value = title;
+        document.getElementById('recordContent').value = content;
+        document.getElementById('recordCategory').value = categoryId;
+        document.getElementById('cancelEdit').style.display = 'inline-block';
+    }
+
+    function deleteRecord(id) {
+        if (confirm('Удалить запись ID ' + id + '?')) {
+            fetch('knowledge_base_request.php?delete=' + id)
+                .then(response => response.text())
+                .then(() => document.getElementById('record-' + id).remove());
+        }
+    }
+
+    function editCategory(id, name) {
+        document.getElementById('categoryId').value = id;
+        document.getElementById('categoryName').value = name;
+        document.getElementById('cancelCategoryEdit').style.display = 'inline-block';
+    }
+
+    function deleteCategory(id) {
+        if (confirm('Удалить категорию ID ' + id + '?')) {
+            fetch('knowledge_base_request.php?delete_category=' + id)
+                .then(response => response.text())
+                .then(() => document.getElementById('category-' + id).remove());
+        }
+    }
+
+
+    document.getElementById('cancelEdit').addEventListener('click', function() {
+        document.getElementById('knowledgeForm').reset();
+        document.getElementById('recordId').value = '';
+        this.style.display = 'none';
+    });
+
+    document.getElementById('cancelCategoryEdit').addEventListener('click', function() {
+        document.getElementById('categoryForm').reset();
+        document.getElementById('categoryId').value = '';
+        this.style.display = 'none';
+    });
+</script>
+
 </body>
 </html>
