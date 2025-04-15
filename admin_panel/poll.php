@@ -7,6 +7,8 @@ if (!isset($_SESSION['admin'])) {
 
 require_once 'include/database.php';
 
+$complexes = $pdo->query("SELECT id, name FROM residential_complexes ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+
 $stmt = $pdo->query("
     SELECT polls.*, residential_complexes.name AS complex_name,
            (SELECT COUNT(*) FROM poll_votes WHERE poll_id = polls.id AND vote = 'yes') AS votes_yes,
@@ -14,17 +16,20 @@ $stmt = $pdo->query("
            (SELECT COUNT(*) FROM poll_votes WHERE poll_id = polls.id AND vote = 'abstain') AS votes_abstain
     FROM polls 
     LEFT JOIN residential_complexes ON polls.residential_complex_id = residential_complexes.id 
-    ORDER BY polls.created_at DESC");
-$complexes = $pdo->query("SELECT id, name FROM residential_complexes ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+    ORDER BY polls.created_at DESC
+");
 $polls = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-function safeField($value) {
+function safeField($value)
+{
     return $value ? htmlspecialchars($value) : '—';
 }
 
-function safeDate($date) {
-    return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
+function safeDate($date)
+{
+    return $date ? date('d.m.Y', strtotime($date)) : '—';
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -35,11 +40,22 @@ function safeDate($date) {
     <link rel="stylesheet" href="include/style.css">
 </head>
 <body>
+
 <div class="poll-container">
     <h1>Голосования</h1>
     <a href="main.php">
         <button>← Вернуться в меню</button>
     </a>
+
+    <div style="margin: 20px 0;">
+        <label for="complexFilter">Фильтр по жилому комплексу:</label>
+        <select id="complexFilter">
+            <option value="">Все ЖК</option>
+            <?php foreach ($complexes as $complex): ?>
+                <option value="<?= $complex['id'] ?>"><?= safeField($complex['name']) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
 
     <section>
         <h2>Создать новое голосование</h2>
@@ -57,7 +73,7 @@ function safeDate($date) {
                 <select name="residential_complex_id">
                     <option value="">— Не выбрано —</option>
                     <?php foreach ($complexes as $complex): ?>
-                        <option value="<?= $complex['id'] ?>"><?= htmlspecialchars($complex['name']) ?></option>
+                        <option value="<?= $complex['id'] ?>"><?= safeField($complex['name']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -74,7 +90,6 @@ function safeDate($date) {
         </form>
         <div id="pollResult"></div>
     </section>
-
 
     <table class="polls-table">
         <thead>
@@ -113,25 +128,13 @@ function safeDate($date) {
         <?php endforeach; ?>
         </tbody>
     </table>
+
     <div class="footer-margin"></div>
 </div>
 
 <script>
-    function deletePoll(id){
-        if(confirm('Удалить голосование ID ' + id + '?')){
-            fetch('poll_request.php?delete=' + id)
-                .then(response => response.text())
-                .then(data => {
-                    alert(data);
-                    document.getElementById('poll-' + id).remove();
-                })
-                .catch(err => alert('Ошибка: ' + err));
-        }
-    }
-</script>
-<script>
-    function deletePoll(id){
-        if(confirm('Удалить голосование ID ' + id + '?')){
+    function deletePoll(id) {
+        if (confirm('Удалить голосование ID ' + id + '?')) {
             fetch('poll_request.php?delete=' + id)
                 .then(response => response.text())
                 .then(data => {
@@ -151,9 +154,8 @@ function safeDate($date) {
         link.click();
         document.body.removeChild(link);
     }
-</script>
-<script>
-    document.getElementById('pollForm').addEventListener('submit', function(e){
+
+    document.getElementById('pollForm').addEventListener('submit', function (e) {
         e.preventDefault();
         let formData = new FormData(this);
 
@@ -170,6 +172,21 @@ function safeDate($date) {
                 document.getElementById('pollResult').innerHTML = '<p style="color:red;">Ошибка: ' + err + '</p>';
             });
     });
+
+    document.getElementById('complexFilter').addEventListener('change', function () {
+        let complexId = this.value;
+        let url = 'poll_request.php?filter=1';
+        if (complexId) {
+            url += '&complex_id=' + complexId;
+        }
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('pollsList').innerHTML = html;
+            })
+            .catch(err => console.error('Ошибка фильтрации:', err));
+    });
 </script>
+
 </body>
 </html>

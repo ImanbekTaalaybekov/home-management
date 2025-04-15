@@ -684,3 +684,32 @@ a:hover {
 .service-category-input {
     width:30%;
 }
+
+.user-search-form {
+    width:60%;
+    margin-top: 10px;
+}
+
+.user-search-select {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    width: 50%;
+}
+
+.user-search-input {
+    width: 90%;
+}
+
+.debt-view-checkbox-label {
+    width: 40%;
+}
+
+.debt-view-checkbox {
+    width: 20%;
+}
+
+.debt-view-select-complex {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    width:50%;
+}
