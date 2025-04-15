@@ -1,6 +1,64 @@
 <?php
 require_once 'include/database.php';
 
+function safeField($value)
+{
+    return $value ? htmlspecialchars($value) : '—';
+}
+
+function safeDate($date)
+{
+    return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
+}
+
+if (isset($_GET['filter'])) {
+    $params = [];
+    $where = '';
+
+    if (!empty($_GET['category_id'])) {
+        $where = "WHERE knowledge_bases.category_id = ?";
+        $params[] = (int)$_GET['category_id'];
+    }
+
+    $stmt = $pdo->prepare("
+        SELECT knowledge_bases.*, knowledge_base_categories.name AS category_name,
+               (SELECT path FROM photos WHERE photoable_type = 'App\\Models\\KnowledgeBase' AND photoable_id = knowledge_bases.id LIMIT 1) AS photo_path
+        FROM knowledge_bases 
+        LEFT JOIN knowledge_base_categories ON knowledge_bases.category_id = knowledge_base_categories.id
+        $where
+        ORDER BY knowledge_bases.created_at DESC
+    ");
+    $stmt->execute($params);
+    $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($records as $record) {
+        echo "<tr id='record-{$record['id']}'>
+            <td>{$record['id']}</td>
+            <td>" . safeField($record['title']) . "</td>
+            <td>" . safeField($record['category_name']) . "</td>
+            <td>" . nl2br(safeField($record['content'])) . "</td>
+            <td>" . safeDate($record['created_at']) . "</td>
+            <td>";
+        if ($record['photo_path']) {
+            echo "<img src='https://212.112.105.242:443/storage/{$record['photo_path']}' class='preview-img' alt='Фото' onclick='openModal(this)'>";
+        } else {
+            echo "Нет";
+        }
+        echo "</td>
+            <td>
+                <button onclick='editRecord({$record['id']}, `" . safeField($record['title']) . "`, `" . safeField($record['content']) . "`, {$record['category_id']})'>Изменить</button>
+                <button onclick='deleteRecord({$record['id']})'>Удалить</button>
+            </td>
+        </tr>";
+    }
+    exit;
+}
+?>
+
+
+<?php
+require_once 'include/database.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title']) && !isset($_GET['update'])) {
     try {
         $postFields = [

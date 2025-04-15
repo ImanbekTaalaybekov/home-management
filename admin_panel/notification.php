@@ -7,14 +7,38 @@ if (!isset($_SESSION['admin'])) {
 
 require_once 'include/database.php';
 
-$totalNotifications = $pdo->query("SELECT COUNT(*) FROM notifications")->fetchColumn();
+$complexes = $pdo->query("SELECT id, name FROM residential_complexes ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+$typeFilter = $_GET['filter_type'] ?? '';
+$complexFilter = $_GET['filter_complex'] ?? '';
+
+$where = [];
+$params = [];
+
+if ($typeFilter !== '') {
+    $where[] = "notifications.type = :type";
+    $params[':type'] = $typeFilter;
+}
+
+if ($complexFilter !== '') {
+    $where[] = "notifications.residential_complex_id = :complex";
+    $params[':complex'] = $complexFilter;
+}
+
+$whereSql = count($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+
+$countStmt = $pdo->prepare("SELECT COUNT(*) FROM notifications $whereSql");
+$countStmt->execute($params);
+$totalNotifications = $countStmt->fetchColumn();
+
 
 $perPage = 20;
 $totalPages = ceil($totalNotifications / $perPage);
 $currentPage = isset($_GET['page']) ? max(1, min($totalPages, (int)$_GET['page'])) : 1;
 $offset = ($currentPage - 1) * $perPage;
 
-$stmt = $pdo->prepare("
+$sql = "
     SELECT notifications.*, 
            residential_complexes.name AS complex_name, 
            users.name AS user_name, 
@@ -22,13 +46,20 @@ $stmt = $pdo->prepare("
     FROM notifications
     LEFT JOIN residential_complexes ON notifications.residential_complex_id = residential_complexes.id
     LEFT JOIN users ON notifications.user_id = users.id
+    $whereSql
     ORDER BY notifications.created_at DESC
     LIMIT :limit OFFSET :offset
-");
+";
+
+$stmt = $pdo->prepare($sql);
+foreach ($params as $key => $val) {
+    $stmt->bindValue($key, $val);
+}
 $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 function safeField($value){
     return $value ? htmlspecialchars($value) : '—';
@@ -102,6 +133,31 @@ function safeDate($date){
 
     <section class="notification-section">
         <h2>Существующие уведомления</h2>
+
+        <form method="get" style="margin-bottom: 20px;">
+            <label for="filter_type">Тип:</label>
+            <select name="filter_type" id="filter_type">
+                <option value="">— Все —</option>
+                <option value="complex" <?= $typeFilter == 'complex' ? 'selected' : '' ?>>Для комплекса</option>
+                <option value="global" <?= $typeFilter == 'global' ? 'selected' : '' ?>>Общее</option>
+                <option value="personal" <?= $typeFilter == 'personal' ? 'selected' : '' ?>>Личное</option>
+            </select>
+
+            <label for="filter_complex">ЖК:</label>
+            <select name="filter_complex" id="filter_complex">
+                <option value="">— Все —</option>
+                <?php foreach ($complexes as $c): ?>
+                    <option value="<?= $c['id'] ?>" <?= $complexFilter == $c['id'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($c['name']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <button type="submit">Применить</button>
+            <a href="notification.php"><button type="button">Сбросить</button></a>
+        </form>
+
+
         <table class="notification-table">
             <thead>
             <tr>

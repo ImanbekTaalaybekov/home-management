@@ -7,6 +7,23 @@ if (!isset($_SESSION['admin'])) {
 
 require_once 'include/database.php';
 
+function safeField($value)
+{
+    return $value ? htmlspecialchars($value) : '—';
+}
+
+function safeDate($date)
+{
+    return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
+}
+
+function humanStatus($status)
+{
+    return $status === 'done' ? 'Готово' : 'В обработке';
+}
+
+$categories = $pdo->query("SELECT DISTINCT name_rus FROM service_request_categories ORDER BY name_rus ASC")->fetchAll(PDO::FETCH_COLUMN);
+
 $stmt = $pdo->query("
     SELECT service_requests.*, users.name AS user_name, 
            categories.name_rus AS type_rus,
@@ -19,14 +36,6 @@ $stmt = $pdo->query("
 ");
 
 $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-function safeField($value) {
-    return $value ? htmlspecialchars($value) : '—';
-}
-
-function safeDate($date) {
-    return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
-}
 ?>
 
 <!DOCTYPE html>
@@ -45,18 +54,37 @@ function safeDate($date) {
     </style>
 </head>
 <body>
+
 <div id="imageModal" class="modal-overlay">
     <span class="close-modal">&times;</span>
     <div class="modal-content">
         <img id="modalImage" src="" alt="Увеличенное изображение">
     </div>
 </div>
+
 <div class="service-container">
     <h1>Заявки на вызов мастера</h1>
-    <h1>Жалобы жителей</h1>
     <a href="main.php">
         <button>← Вернуться в меню</button>
     </a>
+
+    <div style="margin: 20px 0;">
+        <label for="statusFilter">Фильтр по статусу:</label>
+        <select id="statusFilter">
+            <option value="">Все</option>
+            <option value="pending">В обработке</option>
+            <option value="done">Готово</option>
+        </select>
+
+        <label for="typeFilter" style="margin-left: 20px;">Фильтр по типу мастера:</label>
+        <select id="typeFilter">
+            <option value="">Все</option>
+            <?php foreach ($categories as $category): ?>
+                <option value="<?= htmlspecialchars($category) ?>"><?= htmlspecialchars($category) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
     <table class="service-requests-table">
         <thead>
         <tr>
@@ -70,21 +98,19 @@ function safeDate($date) {
             <th>Действия</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody id="requestsList">
         <?php foreach ($requests as $request): ?>
             <tr id="request-<?= $request['id'] ?>">
                 <td><?= $request['id'] ?></td>
                 <td><?= safeField($request['user_name']) ?></td>
                 <td><?= safeField($request['type_rus']) ?></td>
                 <td><?= nl2br(safeField($request['description'])) ?></td>
-                <td id="status-<?= $request['id'] ?>"><?= safeField($request['status']) ?></td>
+                <td id="status-<?= $request['id'] ?>"><?= humanStatus($request['status']) ?></td>
                 <td><?= safeDate($request['created_at']) ?></td>
                 <td>
                     <?php if ($request['photo_path']): ?>
                         <img src="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $request['photo_path']) ?>"
-                             class="preview-img"
-                             alt="Фото"
-                             onclick="openModal(this)">
+                             class="preview-img" alt="Фото" onclick="openModal(this)">
                     <?php else: ?>
                         Нет
                     <?php endif; ?>
@@ -106,7 +132,7 @@ function safeDate($date) {
         fetch('service_request.php?action=done&id=' + id)
             .then(response => response.text())
             .then(data => {
-                document.getElementById('status-' + id).innerText = 'done';
+                document.getElementById('status-' + id).innerText = 'Готово';
                 alert(data);
             })
             .catch(err => alert('Ошибка: ' + err));
@@ -123,25 +149,43 @@ function safeDate($date) {
                 .catch(err => alert('Ошибка: ' + err));
         }
     }
-</script>
-<script>
+
     function openModal(imgElement) {
         const modal = document.getElementById("imageModal");
         const modalImg = document.getElementById("modalImage");
-
         modal.style.display = "flex";
         modalImg.src = imgElement.src;
     }
 
-    document.querySelector(".close-modal").addEventListener("click", function() {
+    document.querySelector(".close-modal").addEventListener("click", function () {
         document.getElementById("imageModal").style.display = "none";
     });
 
-    document.getElementById("imageModal").addEventListener("click", function(event) {
+    document.getElementById("imageModal").addEventListener("click", function (event) {
         if (event.target === this) {
             this.style.display = "none";
         }
     });
+
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('typeFilter').addEventListener('change', applyFilters);
+
+    function applyFilters() {
+        const status = document.getElementById('statusFilter').value;
+        const type = document.getElementById('typeFilter').value;
+
+        let url = 'service_request.php?filter=1';
+        if (status) url += '&status=' + status;
+        if (type) url += '&type=' + encodeURIComponent(type);
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('requestsList').innerHTML = html;
+            })
+            .catch(err => console.error('Ошибка фильтрации:', err));
+    }
 </script>
+
 </body>
 </html>

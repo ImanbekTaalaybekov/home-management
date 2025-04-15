@@ -1,13 +1,13 @@
 <?php
 session_start();
-if (!isset($_SESSION['admin_role'])) {
+if (!isset($_SESSION['admin'])) {
     header('Location: login.php');
     exit();
 }
 
 require_once 'include/database.php';
 
-$role = $_SESSION['admin_role'];
+$role = $_SESSION['admin'];
 $complexes = $pdo->query("SELECT * FROM residential_complexes ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -134,7 +134,7 @@ $complexes = $pdo->query("SELECT * FROM residential_complexes ORDER BY name ASC"
             });
     }
 
-    document.getElementById('complexFilter').addEventListener('change', function(){
+    document.getElementById('complexFilter').addEventListener('change', function () {
         loadDashboard(this.value);
     });
 

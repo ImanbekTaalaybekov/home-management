@@ -122,7 +122,18 @@ function safeDate($date)
     </div>
     <section class="knowledge-base-section">
         <h2>Записи базы знаний</h2>
-        <table class="knowledge-table">
+
+        <div style="margin-bottom: 10px;">
+            <label for="categoryFilter">Фильтр по категории:</label>
+            <select id="categoryFilter">
+                <option value="">Все категории</option>
+                <?php foreach ($categories as $cat): ?>
+                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <table class="knowledge-table" id="knowledgeTable">
             <thead>
             <tr>
                 <th>ID</th>
@@ -134,7 +145,7 @@ function safeDate($date)
                 <th>Действия</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody id="knowledgeTableBody">
             <?php foreach ($records as $record): ?>
                 <tr id="record-<?= $record['id'] ?>">
                     <td><?= $record['id'] ?></td>
@@ -153,7 +164,7 @@ function safeDate($date)
                         <?php endif; ?>
                     </td>
                     <td>
-                        <button onclick="editRecord(<?= $record['id'] ?>, '<?= htmlspecialchars($record['title']) ?>', '<?= htmlspecialchars($record['content']) ?>', <?= $record['category_id'] ?>)">
+                        <button onclick="editRecord(<?= $record['id'] ?>, '<?= safeField($record['title']) ?>', '<?= safeField($record['content']) ?>', <?= $record['category_id'] ?>)">
                             Изменить
                         </button>
                         <button onclick="deleteRecord(<?= $record['id'] ?>)">Удалить</button>
@@ -163,8 +174,24 @@ function safeDate($date)
             </tbody>
         </table>
     </section>
+
     <div class="footer-margin"></div>
 </div>
+<script>
+    document.getElementById('categoryFilter').addEventListener('change', function () {
+        const categoryId = this.value;
+        let url = 'knowledge_base_request.php?filter=1';
+        if (categoryId) {
+            url += '&category_id=' + categoryId;
+        }
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('knowledgeTableBody').innerHTML = html;
+            });
+    });
+</script>
 
 <script>
     document.getElementById('knowledgeForm').addEventListener('submit', function (e) {
@@ -308,13 +335,13 @@ function safeDate($date)
     }
 
 
-    document.getElementById('cancelEdit').addEventListener('click', function() {
+    document.getElementById('cancelEdit').addEventListener('click', function () {
         document.getElementById('knowledgeForm').reset();
         document.getElementById('recordId').value = '';
         this.style.display = 'none';
     });
 
-    document.getElementById('cancelCategoryEdit').addEventListener('click', function() {
+    document.getElementById('cancelCategoryEdit').addEventListener('click', function () {
         document.getElementById('categoryForm').reset();
         document.getElementById('categoryId').value = '';
         this.style.display = 'none';

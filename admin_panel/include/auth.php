@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($admin) {
-        $_SESSION['admin_role'] = $admin['role'];
+        $_SESSION['admin'] = $admin['role'];
         header('Location: main.php');
         exit();
     } else {

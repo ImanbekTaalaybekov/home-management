@@ -7,15 +7,6 @@ if (!isset($_SESSION['admin'])) {
 
 require_once 'include/database.php';
 
-$stmt = $pdo->query("
-    SELECT complaints.*, users.name AS user_name, 
-           (SELECT path FROM photos WHERE photoable_type = 'App\\Models\\Complaint' AND photoable_id = complaints.id LIMIT 1) AS photo_path
-    FROM complaints
-    LEFT JOIN users ON complaints.user_id = users.id
-    ORDER BY complaints.created_at DESC
-");
-$complaints = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 function safeField($value)
 {
     return $value ? htmlspecialchars($value) : '—';
@@ -26,6 +17,19 @@ function safeDate($date)
     return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
 }
 
+function humanStatus($status)
+{
+    return $status === 'done' ? 'Готово' : 'В обработке';
+}
+
+$stmt = $pdo->query("
+    SELECT complaints.*, users.name AS user_name, 
+           (SELECT path FROM photos WHERE photoable_type = 'App\\Models\\Complaint' AND photoable_id = complaints.id LIMIT 1) AS photo_path
+    FROM complaints
+    LEFT JOIN users ON complaints.user_id = users.id
+    ORDER BY complaints.created_at DESC
+");
+$complaints = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -36,19 +40,31 @@ function safeDate($date)
     <link rel="stylesheet" href="include/style.css">
 </head>
 <body>
+
 <div id="imageModal" class="modal-overlay">
     <span class="close-modal">&times;</span>
     <div class="modal-content">
         <img id="modalImage" src="" alt="Увеличенное изображение">
     </div>
 </div>
+
 <div class="complaint-container">
     <div class="complaint-block">
         <h1>Жалобы жителей</h1>
         <a href="main.php">
             <button>← Вернуться в меню</button>
         </a>
+
+        <div style="margin-top: 10px; margin-bottom: 20px;">
+            <label for="statusFilter">Фильтр по статусу:</label>
+            <select id="statusFilter">
+                <option value="">Все</option>
+                <option value="pending">В обработке</option>
+                <option value="done">Готово</option>
+            </select>
+        </div>
     </div>
+
     <div class="complaint-block">
         <table class="complaints-table">
             <thead>
@@ -69,7 +85,7 @@ function safeDate($date)
                     <td><?= safeField($complaint['user_name']) ?></td>
                     <td><?= nl2br(safeField($complaint['message'])) ?></td>
                     <td id="status-<?= $complaint['id'] ?>">
-                        <?= safeField($complaint['status']) ?>
+                        <?= humanStatus($complaint['status']) ?>
                     </td>
                     <td><?= safeDate($complaint['created_at']) ?></td>
                     <td>
@@ -100,7 +116,7 @@ function safeDate($date)
         fetch('complaint_request.php?action=done&id=' + id)
             .then(response => response.text())
             .then(data => {
-                document.getElementById('status-' + id).innerText = 'done';
+                document.getElementById('status-' + id).innerText = 'Готово';
                 alert(data);
             })
             .catch(err => alert('Ошибка: ' + err));
@@ -117,8 +133,7 @@ function safeDate($date)
                 .catch(err => alert('Ошибка: ' + err));
         }
     }
-</script>
-<script>
+
     function openModal(imgElement) {
         const modal = document.getElementById("imageModal");
         const modalImg = document.getElementById("modalImage");
@@ -136,6 +151,21 @@ function safeDate($date)
             this.style.display = "none";
         }
     });
+
+    document.getElementById('statusFilter').addEventListener('change', function () {
+        const status = this.value;
+        let url = 'complaint_request.php?filter=1';
+        if (status) {
+            url += '&status=' + status;
+        }
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('complaintsList').innerHTML = html;
+            });
+    });
 </script>
+
 </body>
 </html>

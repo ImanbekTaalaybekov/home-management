@@ -7,19 +7,44 @@ if (!isset($_SESSION['admin'])) {
 
 require_once 'include/database.php';
 
-$totalUsers = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+$complexes = $pdo->query("SELECT * FROM residential_complexes ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 
 $perPage = 20;
+$where = [];
+$params = [];
+
+if (!empty($_GET['search'])) {
+    $where[] = "(users.name ILIKE :search OR users.phone_number ILIKE :search OR users.personal_account ILIKE :search)";
+    $params[':search'] = '%' . $_GET['search'] . '%';
+}
+
+if (!empty($_GET['complex_id'])) {
+    $where[] = "users.residential_complex_id::bigint = :complex_id";
+    $params[':complex_id'] = (int)$_GET['complex_id'];
+}
+
+$whereSql = $where ? "WHERE " . implode(" AND ", $where) : "";
+
+$countStmt = $pdo->prepare("SELECT COUNT(*) FROM users $whereSql");
+$countStmt->execute($params);
+$totalUsers = $countStmt->fetchColumn();
+
 $totalPages = ceil($totalUsers / $perPage);
 $currentPage = isset($_GET['page']) ? max(1, min($totalPages, (int)$_GET['page'])) : 1;
 $offset = ($currentPage - 1) * $perPage;
 
-$complexes = $pdo->query("SELECT * FROM residential_complexes")->fetchAll(PDO::FETCH_ASSOC);
-
-$stmt = $pdo->prepare("SELECT users.*, residential_complexes.name AS complex_name FROM users 
-LEFT JOIN residential_complexes ON users.residential_complex_id::bigint = residential_complexes.id 
+$sql = "
+SELECT users.*, residential_complexes.name AS complex_name 
+FROM users 
+LEFT JOIN residential_complexes ON users.residential_complex_id::bigint = residential_complexes.id
+$whereSql
 ORDER BY users.created_at DESC
-LIMIT :limit OFFSET :offset");
+LIMIT :limit OFFSET :offset";
+
+$stmt = $pdo->prepare($sql);
+foreach ($params as $key => $value) {
+    $stmt->bindValue($key, $value);
+}
 $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
@@ -72,7 +97,26 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </section>
 
     <section class="user-list-section">
-        <a href="main.php"><button>← Вернуться в меню</button></a>
+        <a href="main.php">
+            <button>← Вернуться в меню</button>
+        </a>
+
+        <h2>Фильтрация и поиск</h2>
+
+        <form id="searchForm" method="get" style="margin-bottom: 20px;" class="user-search-form">
+            <input type="text" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
+                   placeholder="Поиск (лицевой счет / имя / номер телефона)" class="user-search-input">
+            <select name="complex_id" class="user-search-select">
+                <option value="">Все ЖК</option>
+                <?php foreach ($complexes as $complex): ?>
+                    <option value="<?= $complex['id'] ?>" <?= (isset($_GET['complex_id']) && $_GET['complex_id'] == $complex['id']) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($complex['name']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <button type="submit">Поиск</button>
+        </form>
+
         <h2>Список пользователей</h2>
         <table class="users-table">
             <thead>
@@ -96,7 +140,9 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td><?= htmlspecialchars($user['complex_name'] ?: '-') ?></td>
                     <td><?= date('d.m.Y H:i', strtotime($user['created_at'])) ?></td>
                     <td>
-                        <button onclick="editUser(<?= $user['id'] ?>, '<?= $user['name'] ?>', '<?= $user['personal_account'] ?>', '<?= $user['phone_number'] ?>', '<?= $user['residential_complex_id'] ?>')">Изменить</button>
+                        <button onclick="editUser(<?= $user['id'] ?>, '<?= $user['name'] ?>', '<?= $user['personal_account'] ?>', '<?= $user['phone_number'] ?>', '<?= $user['residential_complex_id'] ?>')">
+                            Изменить
+                        </button>
                         <button class="delete-btn" onclick="deleteUser(<?= $user['id'] ?>)">Удалить</button>
                     </td>
                 </tr>
@@ -107,15 +153,15 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php if ($totalPages > 1): ?>
             <div class="pagination">
                 <?php if ($currentPage > 1): ?>
-                    <a href="?page=<?= $currentPage - 1 ?>">&laquo;</a>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $currentPage - 1])) ?>">&laquo;</a>
                 <?php endif; ?>
 
                 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <a href="?page=<?= $i ?>" <?= $i == $currentPage ? 'class="active"' : '' ?>><?= $i ?></a>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" <?= $i == $currentPage ? 'class="active"' : '' ?>><?= $i ?></a>
                 <?php endfor; ?>
 
                 <?php if ($currentPage < $totalPages): ?>
-                    <a href="?page=<?= $currentPage + 1 ?>">&raquo;</a>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $currentPage + 1])) ?>">&raquo;</a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
@@ -124,7 +170,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
-    document.getElementById('userForm').addEventListener('submit', function(e){
+    document.getElementById('userForm').addEventListener('submit', function (e) {
         e.preventDefault();
         let formData = new FormData(this);
         let userId = document.getElementById('userId').value;
@@ -145,8 +191,8 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             });
     });
 
-    function deleteUser(id){
-        if(confirm('Удалить пользователя ID ' + id + '?')){
+    function deleteUser(id) {
+        if (confirm('Удалить пользователя ID ' + id + '?')) {
             let currentPage = new URLSearchParams(window.location.search).get('page') || 1;
             fetch(`user_request.php?delete=${id}&page=${currentPage}`)
                 .then(res => res.text())
@@ -168,17 +214,17 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('cancelEdit').style.display = 'inline-block';
     }
 
-    document.getElementById('cancelEdit').addEventListener('click', function(){
+    document.getElementById('cancelEdit').addEventListener('click', function () {
         document.getElementById('userForm').reset();
         document.getElementById('userId').value = '';
         this.style.display = 'none';
     });
 </script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         const phoneInput = document.getElementById('userPhone');
 
-        phoneInput.addEventListener('input', function(e) {
+        phoneInput.addEventListener('input', function (e) {
             let value = phoneInput.value.replace(/\D/g, '');
 
             if (value.startsWith('8')) {

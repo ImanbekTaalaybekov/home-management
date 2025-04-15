@@ -1,14 +1,70 @@
 <?php
 require_once 'include/database.php';
 
+function safeField($value)
+{
+    return $value ? htmlspecialchars($value) : '—';
+}
+
+function safeDate($date)
+{
+    return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
+}
+
+if (isset($_GET['filter'])) {
+    $conditions = [];
+    $params = [];
+
+    if (!empty($_GET['type'])) {
+        $conditions[] = "notifications.type = ?";
+        $params[] = $_GET['type'];
+    }
+
+    if (!empty($_GET['complex'])) {
+        $conditions[] = "notifications.residential_complex_id = ?";
+        $params[] = (int)$_GET['complex'];
+    }
+
+    $whereClause = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
+
+    $stmt = $pdo->prepare("
+        SELECT notifications.*, residential_complexes.name AS complex_name, users.name AS user_name
+        FROM notifications
+        LEFT JOIN residential_complexes ON notifications.residential_complex_id = residential_complexes.id
+        LEFT JOIN users ON notifications.user_id = users.id
+        $whereClause
+        ORDER BY notifications.created_at DESC
+    ");
+    $stmt->execute($params);
+    $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($notifications as $notification) {
+        echo "<tr id='notification-{$notification['id']}'>
+            <td>{$notification['id']}</td>
+            <td>" . safeField($notification['type']) . "</td>
+            <td>" . safeField($notification['title']) . "</td>
+            <td>" . safeField($notification['message']) . "</td>
+            <td>" . safeField($notification['complex_name']) . "</td>
+            <td>" . safeField($notification['user_name']) . "</td>
+            <td>" . safeDate($notification['created_at']) . "</td>
+            <td>
+                <button onclick='showNotification({$notification['id']})'>Просмотр</button>
+                <button onclick='deleteNotification({$notification['id']})'>Удалить</button>
+            </td>
+        </tr>";
+    }
+
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title']) && !isset($_GET['update'])) {
     try {
         $postFields = [
-            'type'                  => $_POST['type'],
-            'title'                 => $_POST['title'],
-            'message'               => $_POST['message'],
-            'residential_complex_id'=> $_POST['residential_complex_id'] ?: null,
-            'user_id'               => $_POST['user_id'] ?: null
+            'type' => $_POST['type'],
+            'title' => $_POST['title'],
+            'message' => $_POST['message'],
+            'residential_complex_id' => $_POST['residential_complex_id'] ?: null,
+            'user_id' => $_POST['user_id'] ?: null
         ];
 
         if (!empty($_FILES['photos']['name'][0])) {
@@ -112,3 +168,4 @@ if (isset($_GET['show'])) {
     $data['photos'] = $photos;
     echo json_encode($data);
 }
+?>
