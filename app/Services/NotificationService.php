@@ -68,7 +68,7 @@ class NotificationService
         if (empty($tokens)) return;
 
         $fcmMessage = FcmMessage::create()
-            ->setNotification(
+            ->notification(
                 FcmNotification::create()
                     ->title($title)
                     ->body($message)
