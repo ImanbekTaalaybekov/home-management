@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\Notification;
@@ -21,7 +22,9 @@ class NotificationService
 
         $this->attachPhotos($notification, $photos);
 
-        $this->sendPushNotification($title, $message, User::pluck('fcm_token')->toArray());
+        $tokens = User::whereNotNull('fcm_token')->pluck('fcm_token')->toArray();
+        $this->sendPushNotification($title, $message, $tokens);
+
     }
 
     public function sendComplexNotification($complexId, $title, $message, array $photos = [], $document = null)
@@ -36,7 +39,11 @@ class NotificationService
 
         $this->attachPhotos($notification, $photos);
 
-        $tokens = User::where('residential_complex_id', $complexId)->pluck('fcm_token')->toArray();
+        $tokens = User::where('residential_complex_id', $complexId)
+            ->whereNotNull('fcm_token')
+            ->pluck('fcm_token')
+            ->toArray();
+
         $this->sendPushNotification($title, $message, $tokens);
     }
 
@@ -52,8 +59,10 @@ class NotificationService
 
         $this->attachPhotos($notification, $photos);
 
-        $token = User::find($userId)->fcm_token;
-        $this->sendPushNotification($title, $message, [$token]);
+        $user = User::find($userId);
+        if (!$user || !$user->fcm_token) return;
+
+        $this->sendPushNotification($title, $message, [$user->fcm_token]);
     }
 
     private function attachPhotos(Notification $notification, array $photos)
@@ -74,9 +83,10 @@ class NotificationService
                     ->body($message)
             );
 
-        foreach ($tokens as $token) {
-            if (!$token) continue;
+        $tokens = array_filter($tokens);
+        if (empty($tokens)) return;
 
+        foreach ($tokens as $token) {
             try {
                 \Illuminate\Support\Facades\Notification::route('fcm', $token)
                     ->notify(new PushNotification($fcmMessage));
