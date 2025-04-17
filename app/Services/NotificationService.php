@@ -5,6 +5,7 @@ use App\Models\Notification;
 use App\Notifications\PushNotification;
 use Illuminate\Support\Facades\Log;
 use NotificationChannels\Fcm\FcmMessage;
+use NotificationChannels\Fcm\Resources\Notification as FcmNotification;
 use App\Models\User;
 
 class NotificationService
@@ -67,14 +68,18 @@ class NotificationService
         if (empty($tokens)) return;
 
         $fcmMessage = FcmMessage::create()
-            ->setNotification([
-                'title' => $title,
-                'body' => $message,
-            ]);
+            ->setNotification(
+                FcmNotification::create()
+                    ->title($title)
+                    ->body($message)
+            );
 
         foreach ($tokens as $token) {
+            if (!$token) continue;
+
             try {
-                Notification::route('fcm', $token)->notify(new PushNotification($fcmMessage));
+                \Illuminate\Support\Facades\Notification::route('fcm', $token)
+                    ->notify(new PushNotification($fcmMessage));
             } catch (\Exception $e) {
                 Log::error("FCM push notification failed: " . $e->getMessage());
             }
