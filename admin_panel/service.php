@@ -109,7 +109,7 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?= safeDate($request['created_at']) ?></td>
                 <td>
                     <?php if ($request['photo_path']): ?>
-                        <img src="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $request['photo_path']) ?>"
+                        <img src="<?= htmlspecialchars('https://home-folder.wires.kz/storage/' . $request['photo_path']) ?>"
                              class="preview-img" alt="Фото" onclick="openModal(this)">
                     <?php else: ?>
                         Нет

@@ -185,14 +185,14 @@ function safeDate($date){
                     <td><?= safeDate($notification['created_at']) ?></td>
                     <td>
                         <?php if ($notification['photo_path']): ?>
-                            <img src="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $notification['photo_path']) ?>" class="preview-img" alt="Фото" onclick="openModal(this)">
+                            <img src="<?= htmlspecialchars('https://home-folder.wires.kz/storage/' . $notification['photo_path']) ?>" class="preview-img" alt="Фото" onclick="openModal(this)">
                         <?php else: ?>
                             Нет
                         <?php endif; ?>
                     </td>
                     <td>
                         <?php if (!empty($notification['document'])): ?>
-                            <a href="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $notification['document']) ?>" target="_blank">Скачать</a>
+                            <a href="<?= htmlspecialchars('https://home-folder.wires.kz/storage/' . $notification['document']) ?>" target="_blank">Скачать</a>
                         <?php else: ?>
                             —
                         <?php endif; ?>
