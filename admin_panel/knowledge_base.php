@@ -155,7 +155,7 @@ function safeDate($date)
                     <td><?= safeDate($record['created_at']) ?></td>
                     <td>
                         <?php if ($record['photo_path']): ?>
-                            <img src="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $record['photo_path']) ?>"
+                            <img src="<?= htmlspecialchars('https://home-folder.wires.kz/storage/' . $record['photo_path']) ?>"
                                  class="preview-img"
                                  alt="Фото"
                                  onclick="openModal(this)">

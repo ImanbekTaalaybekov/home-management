@@ -93,7 +93,7 @@ function safeDate($date)
                 <td><?= safeDate($announcement['created_at']) ?></td>
                 <td>
                     <?php if ($announcement['photo_path']): ?>
-                        <img src="<?= htmlspecialchars('https://212.112.105.242:443/storage/' . $announcement['photo_path']) ?>"
+                        <img src="<?= htmlspecialchars('https://home-folder.wires.kz/storage/' . $announcement['photo_path']) ?>"
                              class="preview-img" alt="Фото" onclick="openModal(this)">
                     <?php else: ?>
                         Нет
