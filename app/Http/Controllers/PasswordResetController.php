@@ -46,7 +46,7 @@ class PasswordResetController extends Controller
         $user = User::where('email', $email)->first();
 
         if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
+            return response()->json(['message' => 'Пользователь не найден'], 404);
         }
 
         $user->password = Hash::make($newPassword);

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('content');
             $table->foreignId('residential_complex_id')->nullable()->constrained();
+            $table->integer('created_by')->nullable();
             $table->timestamps();
         });
     }

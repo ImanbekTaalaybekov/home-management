@@ -24,7 +24,7 @@ class PollController extends Controller
         return response()->json($polls);
     }
 
-    /*public function store(Request $request)
+    public function store(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
 
@@ -42,7 +42,7 @@ class PollController extends Controller
         ]);
 
         return response()->json($poll, 201);
-    }*/
+    }
 
     public function vote(Request $request, Poll $poll)
     {
