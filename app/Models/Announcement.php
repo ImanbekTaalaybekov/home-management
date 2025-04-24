@@ -13,6 +13,7 @@ class Announcement extends Model
         'title',
         'content',
         'residential_complex_id',
+        'created_by'
     ];
 
     public function photos()

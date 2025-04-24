@@ -36,7 +36,8 @@ class AnnouncementController extends Controller
         $announcement = Announcement::create([
             'title' => $request->title,
             'content' => $request->message,
-            'residential_complex_id' => $user->residential_complex_id
+            'residential_complex_id' => $user->residential_complex_id,
+            'created_by' => $user->id
         ]);
 
         if ($request->hasFile('photos')) {
@@ -61,7 +62,10 @@ class AnnouncementController extends Controller
             ->where('residential_complex_id', $user->residential_complex_id)
             ->firstOrFail();
 
-        return response()->json($announcement);
+        return response()->json([
+            'announcement' => $announcement,
+            'deletable' => $announcement->created_by === $user->id,
+        ]);
     }
 
     public function destroy($id)

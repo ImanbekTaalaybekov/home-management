@@ -25,7 +25,7 @@ class AuthController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
-                'message' => 'Invalid personal account or password'
+                'message' => 'Неверные данные для входа в систему'
             ], 401);
         }
 
@@ -117,7 +117,7 @@ class AuthController extends Controller
 
         if (!$verificationCode) {
             return response()->json([
-                'message' => 'Invalid or expired code'
+                'message' => 'Код верификации неверный либо истек'
             ], 401);
         }
 
@@ -196,7 +196,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();
-        return response()->json(['message' => 'Logged out successfully']);
+        return response()->json(['message' => 'Вы вышли из системы']);
     }
 
     public function updateFcmToken(Request $request)
