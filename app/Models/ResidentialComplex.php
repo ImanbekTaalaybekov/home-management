@@ -12,6 +12,7 @@ class ResidentialComplex extends Model
     protected $fillable = [
         'name',
         'address',
+        'client_id'
     ];
 
     public function polls()

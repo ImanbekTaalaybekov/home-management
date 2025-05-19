@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('role')->nullable();
             $table->string('username');
             $table->string('password');
+            $table->integer('client_id')->nullable();
             $table->timestamps();
         });
     }
