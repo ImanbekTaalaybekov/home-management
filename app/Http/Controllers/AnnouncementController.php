@@ -17,7 +17,7 @@ class AnnouncementController extends Controller
             ->where('residential_complex_id', $user->residential_complex_id)
             ->where('created_at', '>=', Carbon::now()->subDays(30))
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
 
         return response()->json($announcements);
     }
@@ -57,14 +57,14 @@ class AnnouncementController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
 
-        $announcement = Announcement::with('photos')
+        $announcement = Announcement::with(['photos', 'createdBy'])
             ->where('id', $id)
             ->where('residential_complex_id', $user->residential_complex_id)
             ->firstOrFail();
 
         return response()->json([
             'announcement' => $announcement,
-            'deletable' => $announcement->created_by === $user->id,
+            'deletable' => $announcement->created_by === $user->id
         ]);
     }
 
@@ -80,5 +80,18 @@ class AnnouncementController extends Controller
         $announcement->delete();
 
         return response()->json(['message' => 'Объявление успешно удалено.']);
+    }
+
+    public function showOwn()
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        $announcements = Announcement::with('photos')
+            ->where('residential_complex_id', $user->residential_complex_id)
+            ->where('created_by', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return response()->json($announcements);
     }
 }

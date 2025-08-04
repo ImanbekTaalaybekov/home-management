@@ -142,4 +142,33 @@ class PollController extends Controller
 
         return response()->download($finalPath)->deleteFileAfterSend(true);
     }
+
+    public function showLatestPoll()
+    {
+        $user = Auth::guard('sanctum')->user();
+        $today = Carbon::today()->toDateString();
+
+        $poll = Poll::where('residential_complex_id', $user->residential_complex_id)
+            ->where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$poll) {
+            return response()->json(['message' => 'Нет актуальных опросов'], 404);
+        }
+
+        $yesVotes = PollVote::where('poll_id', $poll->id)->where('vote', 'yes')->count();
+        $noVotes = PollVote::where('poll_id', $poll->id)->where('vote', 'no')->count();
+        $abstainVotes = PollVote::where('poll_id', $poll->id)->where('vote', 'abstain')->count();
+
+        return response()->json([
+            'poll' => $poll,
+            'votes' => [
+                'yes' => $yesVotes,
+                'no' => $noVotes,
+                'abstain' => $abstainVotes,
+            ]
+        ]);
+    }
 }

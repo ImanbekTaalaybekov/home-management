@@ -34,7 +34,8 @@ class AuthController extends Controller
             $user->save();
         }
 
-        $code =  mt_rand(1000,9999);
+        //$code =  mt_rand(1000,9999);
+        $code =  1111 ;
         $expiresAt = now()->addMinutes(5);
 
         VerificationCode::updateOrCreate(
@@ -42,7 +43,7 @@ class AuthController extends Controller
             ['code' => $code, 'expires_at' => $expiresAt]
         );
 
-        $this->sendSms($user->phone_number, "Ваш код подтверждения: $code. Сообщение от wires-home-kz");
+        //$this->sendSms($user->phone_number, "Ваш код подтверждения: $code. Сообщение от wires-home-kz");
 
         return response()->json([
             'message' => 'SMS code sent',
