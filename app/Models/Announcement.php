@@ -20,4 +20,9 @@ class Announcement extends Model
     {
         return $this->morphMany(Photo::class, 'photoable');
     }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

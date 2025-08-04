@@ -50,12 +50,14 @@ Route::post('/complaints', [ComplaintController::class, 'store']);
 Route::post('/suggestions', [SuggestionController::class, 'store']);
 
 Route::get('/polls', [PollController::class, 'index'])->middleware('auth:sanctum');
+Route::get('/polls/latest', [PollController::class, 'showLatestPoll'])->middleware('auth:sanctum');
 Route::post('/polls', [PollController::class, 'store'])->middleware('auth:sanctum');
 Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])->middleware('auth:sanctum');
 Route::get('/polls/{poll}', [PollController::class, 'show'])->middleware('auth:sanctum');
 Route::get('/polls/protocol/{poll}', [PollController::class, 'generateProtocol']);
 
 Route::get('/announcements', [AnnouncementController::class, 'index'])->middleware('auth:sanctum');
+Route::get('/announcements/own', [AnnouncementController::class, 'showOwn'])->middleware('auth:sanctum');
 Route::get('/announcements/{id}', [AnnouncementController::class, 'show'])->middleware('auth:sanctum');
 Route::post('/announcements', [AnnouncementController::class, 'store'])->middleware('auth:sanctum');
 Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->middleware('auth:sanctum');

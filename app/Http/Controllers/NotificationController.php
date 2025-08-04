@@ -6,12 +6,13 @@ use App\Http\Resources\NotificationResource;
 use Illuminate\Http\Request;
 use App\Models\Notification;
 use App\Services\NotificationService;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $user = $request->user();
+        $user = Auth::guard('sanctum')->user();
         $notifications = Notification::with('photos')
         ->where('user_id', $user->id)
             ->orWhere('residential_complex_id', $user->residential_complex_id)
@@ -37,17 +38,17 @@ class NotificationController extends Controller
     {
         $request->validate([
             'type' => 'required|in:global,complex,personal',
+            'category' => 'required|in:technical,common',
             'title' => 'required|string',
             'message' => 'required|string',
             'user_id' => 'nullable|exists:users,id',
             'residential_complex_id' => 'nullable|exists:residential_complexes,id',
             'photos' => 'nullable|array',
-            'photos.*' => 'nullable',
+            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg',
             'document' => 'nullable|file|mimes:pdf',
         ]);
 
         $photos = [];
-
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
                 $photos[] = $photo->store('photos/notification', 'public');

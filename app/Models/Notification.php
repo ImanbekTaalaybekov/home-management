@@ -13,7 +13,8 @@ class Notification extends Model
         'type',
         'user_id',
         'residential_complex_id',
-        'document'
+        'document',
+        'category'
     ];
 
     public function user()
