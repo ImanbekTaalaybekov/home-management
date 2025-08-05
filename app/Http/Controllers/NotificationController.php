@@ -62,13 +62,13 @@ class NotificationController extends Controller
 
         switch ($request->type) {
             case 'global':
-                $notificationService->sendGlobalNotification($request->title, $request->message, $photos, $documentPath);
+                $notificationService->sendGlobalNotification($request->title, $request->message, $photos, $documentPath, $request->category);
                 break;
             case 'complex':
-                $notificationService->sendComplexNotification($request->residential_complex_id, $request->title, $request->message, $photos, $documentPath);
+                $notificationService->sendComplexNotification($request->residential_complex_id, $request->title, $request->message, $photos, $documentPath, $request->category);
                 break;
             case 'personal':
-                $notificationService->sendPersonalNotification($request->user_id, $request->title, $request->message, $photos, $documentPath);
+                $notificationService->sendPersonalNotification($request->user_id, $request->title, $request->message, $photos, $documentPath, $request->category);
                 break;
         }
 

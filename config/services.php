@@ -31,9 +31,7 @@ return [
         ],
     ],
 
-    'fcm' => [
-        'project_id' => env('FCM_PROJECT_ID'),
-        'private_key' => str_replace("\\n", "\n", env('FCM_PRIVATE_KEY')),
-        'client_email' => env('FCM_CLIENT_EMAIL'),
+    'firebase' => [
+        'credentials' => env('GOOGLE_APPLICATION_CREDENTIALS'),
     ],
 ];
