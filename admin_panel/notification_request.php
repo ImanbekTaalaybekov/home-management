@@ -3,14 +3,36 @@ require_once 'include/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_GET['update'])) {
     try {
+        $type = $_POST['type'] ?? '';
+        $category = $_POST['category'] ?? '';
+        $title = $_POST['title'] ?? '';
+        $message = $_POST['message'] ?? '';
+        $residential_complex_id = $_POST['residential_complex_id'] ?? '';
+        $personal_account = trim($_POST['personal_account'] ?? '');
+
+        if ($type === 'complex' && $residential_complex_id === '') {
+            http_response_code(422);
+            echo "<p style='color:red;'>Для типа 'Для комплекса' нужно выбрать ЖК.</p>";
+            exit;
+        }
+        if ($type === 'personal' && $personal_account === '') {
+            http_response_code(422);
+            echo "<p style='color:red;'>Для типа 'Личное' требуется лицевой счёт пользователя.</p>";
+            exit;
+        }
+
         $postFields = [
-            'type' => $_POST['type'],
-            'category' => $_POST['category'],
-            'title' => $_POST['title'],
-            'message' => $_POST['message'],
-            'residential_complex_id' => $_POST['residential_complex_id'] ?: null,
-            'user_id' => $_POST['user_id'] ?: null
+            'type' => $type,
+            'category' => $category,
+            'title' => $title,
+            'message' => $message,
         ];
+
+        if ($type === 'complex') {
+            $postFields['residential_complex_id'] = $residential_complex_id ?: null;
+        } elseif ($type === 'personal') {
+            $postFields['personal_account'] = $personal_account;
+        }
 
         if (!empty($_FILES['photos']['name'][0])) {
             foreach ($_FILES['photos']['tmp_name'] as $i => $tmp) {
@@ -43,35 +65,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_GET['update'])) {
 
         $response = curl_exec($ch);
         $error = curl_error($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        echo $error ? "<p style='color:red;'>Ошибка: $error</p>" : "<p style='color:green;'>Уведомление создано!</p>";
+        if ($error) {
+            echo "<p style='color:red;'>Ошибка cURL: " . htmlspecialchars($error, ENT_QUOTES) . "</p>";
+            exit;
+        }
+        if ($httpCode >= 300) {
+            echo "<p style='color:red;'>API вернуло статус {$httpCode}. Ответ: " . htmlspecialchars((string)$response, ENT_QUOTES) . "</p>";
+            exit;
+        }
+
+        echo "<p style='color:green;'>Уведомление создано!</p>";
     } catch (Exception $e) {
-        echo "<p style='color:red;'>Ошибка: {$e->getMessage()}</p>";
+        echo "<p style='color:red;'>Ошибка: " . htmlspecialchars($e->getMessage(), ENT_QUOTES) . "</p>";
     }
+    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['update'])) {
     try {
         $id = (int)$_GET['update'];
-        $stmt = $pdo->prepare("UPDATE notifications SET type=?, category=?, title=?, message=?, residential_complex_id=?, user_id=? WHERE id=?");
+        $type = $_POST['type'] ?? '';
+        $category = $_POST['category'] ?? '';
+        $title = $_POST['title'] ?? '';
+        $message = $_POST['message'] ?? '';
+        $residential_complex_id = $_POST['residential_complex_id'] ?? '';
+        $personal_account = trim($_POST['personal_account'] ?? '');
+
+        $user_id = null;
+        $rc_id = null;
+
+        if ($type === 'complex') {
+            if ($residential_complex_id === '') {
+                http_response_code(422);
+                echo "<p style='color:red;'>Для типа 'Для комплекса' нужно выбрать ЖК.</p>";
+                exit;
+            }
+            $rc_id = (int)$residential_complex_id;
+        } elseif ($type === 'personal') {
+            if ($personal_account === '') {
+                http_response_code(422);
+                echo "<p style='color:red;'>Для типа 'Личное' требуется лицевой счёт пользователя.</p>";
+                exit;
+            }
+            $uStmt = $pdo->prepare("SELECT id FROM users WHERE personal_account = ? LIMIT 1");
+            $uStmt->execute([$personal_account]);
+            $foundUserId = $uStmt->fetchColumn();
+            if (!$foundUserId) {
+                http_response_code(422);
+                echo "<p style='color:red;'>Пользователь с лицевым счётом не найден.</p>";
+                exit;
+            }
+            $user_id = (int)$foundUserId;
+        } else {
+            $user_id = null;
+            $rc_id = null;
+        }
+
+        $stmt = $pdo->prepare("
+            UPDATE notifications
+               SET type = ?,
+                   category = ?,
+                   title = ?,
+                   message = ?,
+                   residential_complex_id = ?,
+                   user_id = ?
+             WHERE id = ?
+        ");
         $stmt->execute([
-            $_POST['type'],
-            $_POST['category'],
-            $_POST['title'],
-            $_POST['message'],
-            $_POST['residential_complex_id'] ?: null,
-            $_POST['user_id'] ?: null,
+            $type,
+            $category,
+            $title,
+            $message,
+            $rc_id,
+            $user_id,
             $id
         ]);
+
         echo "<p style='color:blue;'>Уведомление обновлено!</p>";
     } catch (Exception $e) {
-        echo "<p style='color:red;'>Ошибка: {$e->getMessage()}</p>";
+        echo "<p style='color:red;'>Ошибка: " . htmlspecialchars($e->getMessage(), ENT_QUOTES) . "</p>";
     }
+    exit;
 }
 
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
-    $pdo->prepare("DELETE FROM notifications WHERE id=?")->execute([$id]);
+    $pdo->prepare("DELETE FROM notifications WHERE id = ?")->execute([$id]);
     echo "Уведомление удалено!";
+    exit;
 }
+
+http_response_code(400);
+echo "<p style='color:red;'>Некорректный запрос.</p>";

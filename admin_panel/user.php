@@ -27,9 +27,9 @@ $whereSql = $where ? "WHERE " . implode(" AND ", $where) : "";
 
 $countStmt = $pdo->prepare("SELECT COUNT(*) FROM users $whereSql");
 $countStmt->execute($params);
-$totalUsers = $countStmt->fetchColumn();
+$totalUsers = (int)$countStmt->fetchColumn();
 
-$totalPages = ceil($totalUsers / $perPage);
+$totalPages = max(1, (int)ceil($totalUsers / $perPage));
 $currentPage = isset($_GET['page']) ? max(1, min($totalPages, (int)$_GET['page'])) : 1;
 $offset = ($currentPage - 1) * $perPage;
 
@@ -49,8 +49,9 @@ $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-?>
 
+function e($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -70,7 +71,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <input type="text" name="name" id="userName" required>
             </div>
             <div class="form-group">
-                <label>Лицевой счет:</label>
+                <label>Лицевой счёт:</label>
                 <input type="text" name="personal_account" id="userAccount">
             </div>
             <div class="form-group">
@@ -81,12 +82,22 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <label>Пароль:</label>
                 <input type="password" name="password" id="userPassword" required>
             </div>
+
+            <div class="form-group">
+                <label>Номер блока:</label>
+                <input type="text" name="block_number" id="userBlock">
+            </div>
+            <div class="form-group">
+                <label>Номер квартиры:</label>
+                <input type="text" name="apartment_number" id="userApartment">
+            </div>
+
             <div class="form-group">
                 <label>Жилой комплекс:</label>
                 <select name="residential_complex_id" id="userComplex">
                     <option value="">- Выберите ЖК -</option>
                     <?php foreach ($complexes as $complex): ?>
-                        <option value="<?= $complex['id'] ?>"><?= htmlspecialchars($complex['name']) ?></option>
+                        <option value="<?= e($complex['id']) ?>"><?= e($complex['name']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -104,13 +115,13 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <h2>Фильтрация и поиск</h2>
 
         <form id="searchForm" method="get" style="margin-bottom: 20px;" class="user-search-form">
-            <input type="text" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
-                   placeholder="Поиск (лицевой счет / имя / номер телефона)" class="user-search-input">
+            <input type="text" name="search" value="<?= e($_GET['search'] ?? '') ?>"
+                   placeholder="Поиск (лицевой счёт / имя / телефон)" class="user-search-input">
             <select name="complex_id" class="user-search-select">
                 <option value="">Все ЖК</option>
                 <?php foreach ($complexes as $complex): ?>
-                    <option value="<?= $complex['id'] ?>" <?= (isset($_GET['complex_id']) && $_GET['complex_id'] == $complex['id']) ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($complex['name']) ?>
+                    <option value="<?= e($complex['id']) ?>" <?= (isset($_GET['complex_id']) && $_GET['complex_id'] == $complex['id']) ? 'selected' : '' ?>>
+                        <?= e($complex['name']) ?>
                     </option>
                 <?php endforeach; ?>
             </select>
@@ -123,8 +134,10 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <tr>
                 <th>ID</th>
                 <th>Имя</th>
-                <th>Лицевой счет</th>
+                <th>Лицевой счёт</th>
                 <th>Телефон</th>
+                <th>Блок</th>
+                <th>Квартира</th>
                 <th>Жилой комплекс</th>
                 <th>Дата создания</th>
                 <th>Действия</th>
@@ -132,18 +145,26 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </thead>
             <tbody>
             <?php foreach ($users as $user): ?>
-                <tr id="user-<?= $user['id'] ?>">
-                    <td><?= $user['id'] ?></td>
-                    <td><?= htmlspecialchars($user['name']) ?></td>
-                    <td><?= htmlspecialchars($user['personal_account']) ?></td>
-                    <td><?= htmlspecialchars($user['phone_number']) ?></td>
-                    <td><?= htmlspecialchars($user['complex_name'] ?: '-') ?></td>
-                    <td><?= date('d.m.Y H:i', strtotime($user['created_at'])) ?></td>
+                <tr id="user-<?= e($user['id']) ?>">
+                    <td><?= e($user['id']) ?></td>
+                    <td><?= e($user['name']) ?></td>
+                    <td><?= e($user['personal_account']) ?></td>
+                    <td><?= e($user['phone_number']) ?></td>
+                    <td><?= e($user['block_number']) ?></td>
+                    <td><?= e($user['apartment_number']) ?></td>
+                    <td><?= e($user['complex_name'] ?: '-') ?></td>
+                    <td><?= e(date('d.m.Y H:i', strtotime($user['created_at']))) ?></td>
                     <td>
-                        <button onclick="editUser(<?= $user['id'] ?>, '<?= $user['name'] ?>', '<?= $user['personal_account'] ?>', '<?= $user['phone_number'] ?>', '<?= $user['residential_complex_id'] ?>')">
-                            Изменить
-                        </button>
-                        <button class="delete-btn" onclick="deleteUser(<?= $user['id'] ?>)">Удалить</button>
+                        <button onclick="editUser(
+                        <?= (int)$user['id'] ?>,
+                                '<?= e($user['name']) ?>',
+                                '<?= e($user['personal_account']) ?>',
+                                '<?= e($user['phone_number']) ?>',
+                                '<?= e($user['residential_complex_id']) ?>',
+                                '<?= e($user['block_number']) ?>',
+                                '<?= e($user['apartment_number']) ?>'
+                                )">Изменить</button>
+                        <button class="delete-btn" onclick="deleteUser(<?= (int)$user['id'] ?>)">Удалить</button>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -172,15 +193,12 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script>
     document.getElementById('userForm').addEventListener('submit', function (e) {
         e.preventDefault();
-        let formData = new FormData(this);
-        let userId = document.getElementById('userId').value;
-        let currentPage = new URLSearchParams(window.location.search).get('page') || 1;
-        let url = userId ? `user_request.php?update=${userId}&page=${currentPage}` : `user_request.php?page=${currentPage}`;
+        const formData = new FormData(this);
+        const userId = document.getElementById('userId').value;
+        const currentPage = new URLSearchParams(window.location.search).get('page') || 1;
+        const url = userId ? `user_request.php?update=${encodeURIComponent(userId)}&page=${encodeURIComponent(currentPage)}` : `user_request.php?page=${encodeURIComponent(currentPage)}`;
 
-        fetch(url, {
-            method: 'POST',
-            body: formData
-        })
+        fetch(url, { method: 'POST', body: formData })
             .then(res => res.text())
             .then(response => {
                 document.getElementById('userResult').innerHTML = response;
@@ -193,8 +211,8 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     function deleteUser(id) {
         if (confirm('Удалить пользователя ID ' + id + '?')) {
-            let currentPage = new URLSearchParams(window.location.search).get('page') || 1;
-            fetch(`user_request.php?delete=${id}&page=${currentPage}`)
+            const currentPage = new URLSearchParams(window.location.search).get('page') || 1;
+            fetch(`user_request.php?delete=${encodeURIComponent(id)}&page=${encodeURIComponent(currentPage)}`)
                 .then(res => res.text())
                 .then(response => {
                     alert(response);
@@ -204,49 +222,41 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     }
 
-    function editUser(id, name, account, phone, complex) {
+    function editUser(id, name, account, phone, complex, block, apartment) {
         document.getElementById('userId').value = id;
         document.getElementById('userName').value = name;
         document.getElementById('userAccount').value = account;
         document.getElementById('userPhone').value = phone;
         document.getElementById('userComplex').value = complex || '';
-
+        document.getElementById('userBlock').value = block || '';
+        document.getElementById('userApartment').value = apartment || '';
+        document.getElementById('userPassword').required = false;
         document.getElementById('cancelEdit').style.display = 'inline-block';
     }
 
     document.getElementById('cancelEdit').addEventListener('click', function () {
         document.getElementById('userForm').reset();
         document.getElementById('userId').value = '';
+        document.getElementById('userPassword').required = true;
         this.style.display = 'none';
     });
 </script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const phoneInput = document.getElementById('userPhone');
 
-        phoneInput.addEventListener('input', function (e) {
+        phoneInput.addEventListener('input', function () {
             let value = phoneInput.value.replace(/\D/g, '');
 
-            if (value.startsWith('8')) {
-                value = '7' + value.slice(1);
-            }
-            if (value.length > 11) {
-                value = value.slice(0, 11);
-            }
+            if (value.startsWith('8')) value = '7' + value.slice(1);
+            if (value.length > 11) value = value.slice(0, 11);
 
             let formatted = '+7';
-            if (value.length > 1) {
-                formatted += ' (' + value.substring(1, 4);
-            }
-            if (value.length >= 4) {
-                formatted += ') ' + value.substring(4, 7);
-            }
-            if (value.length >= 7) {
-                formatted += '-' + value.substring(7, 9);
-            }
-            if (value.length >= 9) {
-                formatted += '-' + value.substring(9, 11);
-            }
+            if (value.length > 1) formatted += ' (' + value.substring(1, 4);
+            if (value.length >= 4) formatted += ') ' + value.substring(4, 7);
+            if (value.length >= 7) formatted += '-' + value.substring(7, 9);
+            if (value.length >= 9) formatted += '-' + value.substring(9, 11);
 
             phoneInput.value = formatted;
         });

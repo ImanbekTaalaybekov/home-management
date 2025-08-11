@@ -54,7 +54,7 @@ class NotificationController extends Controller
             'category' => 'required|in:technical,common',
             'title' => 'required|string',
             'message' => 'required|string',
-            'user_id' => 'nullable|exists:users,id',
+            'personal_account' => 'nullable',
             'residential_complex_id' => 'nullable|exists:residential_complexes,id',
             'photos' => 'nullable|array',
             'photos.*' => 'nullable|image|mimes:jpeg,png,jpg',
@@ -81,7 +81,7 @@ class NotificationController extends Controller
                 $notificationService->sendComplexNotification($request->residential_complex_id, $request->title, $request->message, $photos, $documentPath, $request->category);
                 break;
             case 'personal':
-                $notificationService->sendPersonalNotification($request->user_id, $request->title, $request->message, $photos, $documentPath, $request->category);
+                $notificationService->sendPersonalNotification($request->personal_account, $request->title, $request->message, $photos, $documentPath, $request->category);
                 break;
         }
 

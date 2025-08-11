@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Notification;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 
 class NotificationService
 {
@@ -44,24 +45,40 @@ class NotificationService
         $this->sendPushNotification($title, $message, $tokens);
     }
 
-    public function sendPersonalNotification($userId, $title, $message, array $photos = [], $document = null, $category)
+    public function sendPersonalNotification($personalAccount, $title, $message, array $photos = [], $document = null, $category)
     {
+        $user = User::where('personal_account', $personalAccount)->first();
+
+        if (!$user) {
+            return null;
+        }
+
+        $documentPath = null;
+        if ($document instanceof UploadedFile) {
+            $documentPath = $document->store('notifications', 'public');
+        } elseif (is_string($document) && $document !== '') {
+            $documentPath = $document;
+        }
+
         $notification = Notification::create([
             'title' => $title,
             'message' => $message,
             'type' => 'personal',
-            'user_id' => $userId,
-            'document' => $document,
             'category' => $category,
+            'user_id' => $user->id,
+            'residential_complex_id' => null,
+            'document' => $documentPath,
         ]);
 
         $this->attachPhotos($notification, $photos);
 
-        $user = User::find($userId);
-        if (!$user || !$user->fcm_token) return;
+        if ($user->fcm_token) {
+            $this->sendPushNotification($title, $message, [$user->fcm_token]);
+        }
 
-        $this->sendPushNotification($title, $message, [$user->fcm_token]);
+        return $notification;
     }
+
 
     private function attachPhotos(Notification $notification, array $photos)
     {
