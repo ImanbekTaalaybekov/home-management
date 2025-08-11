@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\NotificationResource;
+use App\Models\NotificationStatus;
 use Illuminate\Http\Request;
 use App\Models\Notification;
 use App\Services\NotificationService;
@@ -13,12 +14,24 @@ class NotificationController extends Controller
     public function index()
     {
         $user = Auth::guard('sanctum')->user();
+
+        $readIds = NotificationStatus::where('user_id', $user->id)
+            ->pluck('notification_id')
+            ->toArray();
+
         $notifications = Notification::with('photos')
-        ->where('user_id', $user->id)
-            ->orWhere('residential_complex_id', $user->residential_complex_id)
-            ->orWhere('type', 'global')
+            ->where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->orWhere('residential_complex_id', $user->residential_complex_id)
+                    ->orWhere('type', 'global');
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        $notifications->getCollection()->transform(function ($notification) use ($readIds) {
+            $notification->been_read = in_array($notification->id, $readIds);
+            return $notification;
+        });
 
         return response()->json($notifications);
     }
@@ -73,5 +86,21 @@ class NotificationController extends Controller
         }
 
         return response()->json(['message' => 'Уведомление отправлено'], 201);
+    }
+
+    public function status(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        $request->validate([
+            'notification_id' => 'required',
+        ]);
+
+        $complaint = NotificationStatus::create([
+            'user_id' => $user->id,
+            'notification_id' => $request->notification_id,
+        ]);
+
+        return response()->json($complaint, 201);
     }
 }
