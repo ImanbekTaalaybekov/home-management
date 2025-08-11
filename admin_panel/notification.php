@@ -29,23 +29,24 @@ $whereSql = count($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
 $countStmt = $pdo->prepare("SELECT COUNT(*) FROM notifications $whereSql");
 $countStmt->execute($params);
-$totalNotifications = $countStmt->fetchColumn();
+$totalNotifications = (int)$countStmt->fetchColumn();
 
 $perPage = 20;
-$totalPages = ceil($totalNotifications / $perPage);
+$totalPages = max(1, (int)ceil($totalNotifications / $perPage));
 $currentPage = isset($_GET['page']) ? max(1, min($totalPages, (int)$_GET['page'])) : 1;
 $offset = ($currentPage - 1) * $perPage;
 
 $sql = "
-    SELECT notifications.*, 
-           residential_complexes.name AS complex_name, 
-           users.name AS user_name, 
-           (SELECT path FROM photos WHERE photoable_type = 'App\\Models\\Notification' AND photoable_id = notifications.id LIMIT 1) AS photo_path
-    FROM notifications
-    LEFT JOIN residential_complexes ON notifications.residential_complex_id = residential_complexes.id
-    LEFT JOIN users ON notifications.user_id = users.id
+    SELECT n.*,
+           rc.name AS complex_name,
+           u.name AS user_name,
+           u.personal_account AS user_personal_account,
+           (SELECT path FROM photos WHERE photoable_type = 'App\\Models\\Notification' AND photoable_id = n.id LIMIT 1) AS photo_path
+    FROM notifications n
+    LEFT JOIN residential_complexes rc ON n.residential_complex_id = rc.id
+    LEFT JOIN users u ON n.user_id = u.id
     $whereSql
-    ORDER BY notifications.created_at DESC
+    ORDER BY n.created_at DESC
     LIMIT :limit OFFSET :offset
 ";
 
@@ -58,15 +59,9 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-function safeField($value){
-    return $value ? htmlspecialchars($value) : '—';
-}
-
-function safeDate($date){
-    return $date ? date('d.m.Y H:i', strtotime($date)) : '—';
-}
+function safeField($value){ return $value !== null && $value !== '' ? htmlspecialchars($value, ENT_QUOTES, 'UTF-8') : '—'; }
+function safeDate($date){ return $date ? date('d.m.Y H:i', strtotime($date)) : '—'; }
 ?>
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -84,6 +79,7 @@ function safeDate($date){
 
         <form id="notificationForm" enctype="multipart/form-data">
             <input type="hidden" name="id" id="notificationId">
+
             <div>
                 <label>Тип уведомления:</label>
                 <select name="type" id="notificationType" required>
@@ -92,6 +88,7 @@ function safeDate($date){
                     <option value="personal">Личное</option>
                 </select>
             </div>
+
             <div>
                 <label>Категория:</label>
                 <select name="category" id="notificationCategory" required>
@@ -99,33 +96,48 @@ function safeDate($date){
                     <option value="common">Общая</option>
                 </select>
             </div>
+
             <div>
                 <label>Заголовок:</label>
                 <input type="text" name="title" id="notificationTitle" required>
             </div>
+
             <div>
                 <label>Сообщение:</label>
                 <textarea name="message" id="notificationMessage" rows="3" required></textarea>
             </div>
-            <div>
-                <label>ID ЖК (если нужно):</label>
-                <input type="text" name="residential_complex_id" id="notificationComplexId">
+
+            <div id="complexWrapper">
+                <label>Жилой комплекс:</label>
+                <select name="residential_complex_id" id="notificationComplexId">
+                    <option value="">— Выберите ЖК —</option>
+                    <?php foreach ($complexes as $c): ?>
+                        <option value="<?= htmlspecialchars($c['id'], ENT_QUOTES) ?>">
+                            <?= htmlspecialchars($c['name'], ENT_QUOTES) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
-            <div>
-                <label>ID пользователя (если нужно адресно):</label>
-                <input type="text" name="user_id" id="notificationUserId">
+
+            <div id="personalWrapper" style="display:none;">
+                <label>Лицевой счёт пользователя:</label>
+                <input type="text" name="personal_account" id="notificationPersonalAccount" placeholder="например, 123456">
             </div>
+
             <div>
                 <label>Фотографии:</label>
                 <input type="file" name="photos[]" multiple>
             </div>
+
             <div>
                 <label>PDF-документ:</label>
                 <input type="file" name="document" accept="application/pdf">
             </div>
+
             <button type="submit">Сохранить</button>
             <button type="button" id="cancelEdit" style="display:none;">Отмена</button>
         </form>
+
         <div id="notificationResult"></div>
     </section>
 
@@ -142,6 +154,7 @@ function safeDate($date){
                 <th>Сообщение</th>
                 <th>ЖК</th>
                 <th>Пользователь</th>
+                <th>Лицевой счёт</th>
                 <th>Дата</th>
                 <th>Фото</th>
                 <th>Документ</th>
@@ -149,37 +162,38 @@ function safeDate($date){
             </tr>
             </thead>
             <tbody id="notificationList">
-            <?php foreach ($notifications as $notification): ?>
-                <tr id="notification-<?= $notification['id'] ?>">
-                    <td><?= $notification['id'] ?></td>
-                    <td><?= safeField($notification['type']) ?></td>
-                    <td><?= safeField($notification['category']) ?></td>
-                    <td><?= safeField($notification['title']) ?></td>
-                    <td><?= safeField($notification['message']) ?></td>
-                    <td><?= safeField($notification['complex_name']) ?></td>
-                    <td><?= safeField($notification['user_name']) ?></td>
-                    <td><?= safeDate($notification['created_at']) ?></td>
+            <?php foreach ($notifications as $n): ?>
+                <tr id="notification-<?= (int)$n['id'] ?>">
+                    <td><?= (int)$n['id'] ?></td>
+                    <td><?= safeField($n['type']) ?></td>
+                    <td><?= safeField($n['category']) ?></td>
+                    <td><?= safeField($n['title']) ?></td>
+                    <td><?= safeField($n['message']) ?></td>
+                    <td><?= safeField($n['complex_name']) ?></td>
+                    <td><?= safeField($n['user_name']) ?></td>
+                    <td><?= safeField($n['user_personal_account']) ?></td>
+                    <td><?= safeDate($n['created_at']) ?></td>
                     <td>
-                        <?php if ($notification['photo_path']): ?>
-                            <img src="<?= 'https://home-folder.wires.kz/storage/' . $notification['photo_path'] ?>" class="preview-img" alt="Фото" onclick="openModal(this)">
+                        <?php if (!empty($n['photo_path'])): ?>
+                            <img src="<?= 'https://home-folder.wires.kz/storage/' . htmlspecialchars($n['photo_path'], ENT_QUOTES) ?>" class="preview-img" alt="Фото" onclick="openModal(this)">
                         <?php else: ?>Нет<?php endif; ?>
                     </td>
                     <td>
-                        <?php if (!empty($notification['document'])): ?>
-                            <a href="<?= 'https://home-folder.wires.kz/storage/' . $notification['document'] ?>" target="_blank">Скачать</a>
+                        <?php if (!empty($n['document'])): ?>
+                            <a href="<?= 'https://home-folder.wires.kz/storage/' . htmlspecialchars($n['document'], ENT_QUOTES) ?>" target="_blank">Скачать</a>
                         <?php else: ?>—<?php endif; ?>
                     </td>
                     <td>
                         <button onclick="editNotification(
-                        <?= $notification['id'] ?>,
-                                '<?= $notification['type'] ?>',
-                                '<?= htmlspecialchars($notification['title']) ?>',
-                                '<?= htmlspecialchars($notification['message']) ?>',
-                                '<?= $notification['residential_complex_id'] ?: '' ?>',
-                                '<?= $notification['user_id'] ?: '' ?>',
-                                '<?= $notification['category'] ?>'
+                        <?= (int)$n['id'] ?>,
+                                '<?= htmlspecialchars($n['type'], ENT_QUOTES) ?>',
+                                '<?= htmlspecialchars($n['title'], ENT_QUOTES) ?>',
+                                '<?= htmlspecialchars($n['message'], ENT_QUOTES) ?>',
+                                '<?= htmlspecialchars($n['residential_complex_id'] ?? '', ENT_QUOTES) ?>',
+                                '<?= htmlspecialchars($n['user_personal_account'] ?? '', ENT_QUOTES) ?>',
+                                '<?= htmlspecialchars($n['category'], ENT_QUOTES) ?>'
                                 )">Изменить</button>
-                        <button onclick="deleteNotification(<?= $notification['id'] ?>)">Удалить</button>
+                        <button onclick="deleteNotification(<?= (int)$n['id'] ?>)">Удалить</button>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -189,41 +203,98 @@ function safeDate($date){
 </div>
 
 <script>
-    function editNotification(id, type, title, message, complexId, userId, category) {
+    function toggleTargetFields() {
+        const type = document.getElementById('notificationType').value;
+        const complexWrapper = document.getElementById('complexWrapper');
+        const personalWrapper = document.getElementById('personalWrapper');
+        const complexSelect = document.getElementById('notificationComplexId');
+        const personalInput = document.getElementById('notificationPersonalAccount');
+
+        if (type === 'complex') {
+            complexWrapper.style.display = '';
+            personalWrapper.style.display = 'none';
+            complexSelect.required = true;
+            personalInput.required = false;
+            personalInput.value = '';
+        } else if (type === 'personal') {
+            complexWrapper.style.display = 'none';
+            personalWrapper.style.display = '';
+            complexSelect.required = false;
+            personalInput.required = true;
+            complexSelect.value = '';
+        } else {
+            complexWrapper.style.display = 'none';
+            personalWrapper.style.display = 'none';
+            complexSelect.required = false;
+            personalInput.required = false;
+            complexSelect.value = '';
+            personalInput.value = '';
+        }
+    }
+
+    function editNotification(id, type, title, message, complexId, personalAccount, category) {
         document.getElementById('notificationId').value = id;
         document.getElementById('notificationType').value = type;
         document.getElementById('notificationTitle').value = title;
         document.getElementById('notificationMessage').value = message;
-        document.getElementById('notificationComplexId').value = complexId;
-        document.getElementById('notificationUserId').value = userId;
         document.getElementById('notificationCategory').value = category;
+
+        toggleTargetFields();
+
+        if (type === 'complex') {
+            document.getElementById('notificationComplexId').value = complexId || '';
+            document.getElementById('notificationPersonalAccount').value = '';
+        } else if (type === 'personal') {
+            document.getElementById('notificationPersonalAccount').value = personalAccount || '';
+            document.getElementById('notificationComplexId').value = '';
+        } else {
+            document.getElementById('notificationComplexId').value = '';
+            document.getElementById('notificationPersonalAccount').value = '';
+        }
+
         document.getElementById('cancelEdit').style.display = 'inline-block';
     }
+
+    document.getElementById('notificationType').addEventListener('change', toggleTargetFields);
+    toggleTargetFields();
 
     document.getElementById('cancelEdit').addEventListener('click', function(){
         document.getElementById('notificationForm').reset();
         document.getElementById('notificationId').value = '';
+        toggleTargetFields();
         this.style.display = 'none';
     });
 
     document.getElementById('notificationForm').addEventListener('submit', function(e){
         e.preventDefault();
-        let formData = new FormData(this);
-        let id = document.getElementById('notificationId').value;
-        let url = id ? `notification_request.php?update=${id}` : `notification_request.php`;
+        const formData = new FormData(this);
+        const id = document.getElementById('notificationId').value;
+        const type = document.getElementById('notificationType').value;
+        const complexId = document.getElementById('notificationComplexId').value;
+        const personalAccount = document.getElementById('notificationPersonalAccount').value.trim();
 
-        fetch(url, {
-            method: 'POST',
-            body: formData
-        }).then(r => r.text()).then(html => {
-            document.getElementById('notificationResult').innerHTML = html;
-            setTimeout(() => location.reload(), 1000);
-        });
+        if (type === 'complex' && !complexId) {
+            document.getElementById('notificationResult').innerHTML = "<p style='color:red;'>Для типа 'Для комплекса' нужно выбрать ЖК.</p>";
+            return;
+        }
+        if (type === 'personal' && !personalAccount) {
+            document.getElementById('notificationResult').innerHTML = "<p style='color:red;'>Для типа 'Личное' укажите лицевой счёт пользователя.</p>";
+            return;
+        }
+
+        const url = id ? `notification_request.php?update=${encodeURIComponent(id)}` : `notification_request.php`;
+
+        fetch(url, { method: 'POST', body: formData })
+            .then(r => r.text())
+            .then(html => {
+                document.getElementById('notificationResult').innerHTML = html;
+                setTimeout(() => location.reload(), 1000);
+            });
     });
 
     function deleteNotification(id){
         if(confirm("Удалить уведомление?")){
-            fetch(`notification_request.php?delete=${id}`)
+            fetch(`notification_request.php?delete=${encodeURIComponent(id)}`)
                 .then(r => r.text())
                 .then(alert)
                 .then(() => location.reload());
@@ -231,10 +302,7 @@ function safeDate($date){
     }
 
     function openModal(img) {
-        const modal = document.getElementById("imageModal");
-        const modalImg = document.getElementById("modalImage");
-        modal.style.display = "flex";
-        modalImg.src = img.src;
+        alert('Открытие превью не реализовано в этом шаблоне.');
     }
 </script>
 </body>
