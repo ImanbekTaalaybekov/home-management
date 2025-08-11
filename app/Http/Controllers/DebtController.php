@@ -22,4 +22,12 @@ class DebtController extends Controller
         $debt = Debt::findOrFail($id);
         return new DebtResource($debt);
     }
+
+    public function getUserDebtsSum()
+    {
+        $user = Auth::user();
+        $total = Debt::where('user_id', $user->id)->sum('amount');
+
+        return response()->json(['total_debt' => $total]);
+    }
 }

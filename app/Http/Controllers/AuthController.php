@@ -212,4 +212,13 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'FCM-токен обновлён']);
     }
+
+    public function removeFcmToken(Request $request)
+    {
+        $request->user()->update([
+            'fcm_token' => null
+        ]);
+
+        return response()->json(['message' => 'FCM-токен удален']);
+    }
 }
