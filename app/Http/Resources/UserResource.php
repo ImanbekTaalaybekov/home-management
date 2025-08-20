@@ -13,7 +13,7 @@ class UserResource extends JsonResource
 
     public function toArray($request)
     {
-        return  [
+        return [
             'id' => $this->id,
             'name' => $this->name,
             'personal_account' => $this->personal_account,
@@ -21,6 +21,9 @@ class UserResource extends JsonResource
             'residential_complex_id' => $this->residential_complex_id,
             'block_number' => $this->block_number,
             'apartment_number' => $this->apartment_number,
+
+            'residential_complex_name' => $this->residentialComplex?->name,
+            'residential_complex_address' => $this->residentialComplex?->address,
         ];
     }
 }
