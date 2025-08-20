@@ -166,8 +166,10 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
+        $user = $request->user()->load('residentialComplex');
+
         return response()->json([
-            'user' => new UserResource($request->user()),
+            'user' => new UserResource($user),
         ]);
     }
 

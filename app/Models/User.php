@@ -41,7 +41,7 @@ class User extends Authenticatable implements CanResetPassword
 
     public function residentialComplex()
     {
-        return $this->belongsTo(ResidentialComplex::class);
+        return $this->belongsTo(ResidentialComplex::class, 'residential_complex_id');
     }
 
     public function notifications()

@@ -9,6 +9,7 @@ use App\Http\Controllers\InputDebtDataController;
 use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PollController;
+use App\Http\Controllers\PrivacyDocumentController;
 use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\SuggestionController;
 use Illuminate\Http\Request;
@@ -75,3 +76,6 @@ Route::get('/knowledge-base/categories', [KnowledgeBaseController::class, 'index
 Route::post('/knowledge-base/articles', [KnowledgeBaseController::class, 'storeArticle']);
 Route::get('/knowledge-base/articles', [KnowledgeBaseController::class, 'indexArticles']);
 Route::get('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'showArticle']);
+
+Route::get('/company-documents/user-agreement', [PrivacyDocumentController::class, 'getUserAgreement']);
+Route::get('/company-documents/privacy-policy', [PrivacyDocumentController::class, 'getPrivacyPolicy']);
