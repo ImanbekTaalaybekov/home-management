@@ -10,7 +10,9 @@ class ServiceRequest extends Model
         'user_id',
         'type',
         'description',
-        'status'
+        'status',
+        'master_id',
+        'rate'
     ];
 
     public function user()
