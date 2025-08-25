@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('service_requests', function (Blueprint $table) {
+        Schema::create('service_request_masters', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
-            $table->string('type');
-            $table->text('description');
-            $table->string('status')->default('pending');
-            $table->integer('master_id')->nullable();
-            $table->integer('rate')->nullable();
+            $table->string('name')->nullable();
+            $table->integer('service_request_category_id')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('service_requests');
+        Schema::dropIfExists('service_request_masters');
     }
 };
