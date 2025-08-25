@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Complaint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ComplaintController extends Controller
 {
@@ -47,5 +48,28 @@ class ComplaintController extends Controller
         }
 
         return response()->json($complaint);
+    }
+
+    public function remove($id)
+    {
+        $complaint = Complaint::with('photos')->find($id);
+
+        if (!$complaint) {
+            return response()->json(['message' => 'Жалоба не найдена'], 404);
+        }
+
+        foreach ($complaint->photos as $photo) {
+            $fullPath = 'photos/complaint/' . $photo->path;
+
+            if ($photo->path && Storage::disk('public')->exists($fullPath)) {
+                Storage::disk('public')->delete($fullPath);
+            }
+
+            $photo->delete();
+        }
+
+        $complaint->delete();
+
+        return response()->json(['message' => 'Жалоба удалена']);
     }
 }
