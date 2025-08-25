@@ -46,6 +46,10 @@ Route::get('/debts-sum', [DebtController::class, 'getUserDebtsSum'])->middleware
 
 Route::post('/service-requests', [ServiceRequestController::class, 'store']);
 Route::get('/service-requests-categories', [ServiceRequestController::class, 'getCategories']);
+Route::get('/service-requests', [ServiceRequestController::class, 'index'])->middleware('auth:sanctum');
+Route::get('/service-requests/{id}', [ServiceRequestController::class, 'show'])->middleware('auth:sanctum');
+Route::delete('/service-requests/{id}', [ServiceRequestController::class, 'remove'])->middleware('auth:sanctum');
+Route::post('/service-requests/{id}/rate', [ServiceRequestController::class, 'rate'])->middleware('auth:sanctum');
 
 Route::get('/complaints', [ComplaintController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/complaints/{id}', [ComplaintController::class, 'show']);
