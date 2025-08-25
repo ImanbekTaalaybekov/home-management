@@ -53,10 +53,25 @@ class ServiceRequestController extends Controller
         $perPage = (int) $request->query('per_page', 10);
         $perPage = max(1, min($perPage, 100));
 
-        $requests = ServiceRequest::with('photos')
+        $requests = ServiceRequest::with(['photos', 'category', 'master'])
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
+
+        $requests->getCollection()->transform(function ($item) {
+            return [
+                'id'          => $item->id,
+                'description' => $item->description,
+                'status'      => $item->status,
+                'rate'        => $item->rate,
+                'created_at'  => $item->created_at,
+                'updated_at'  => $item->updated_at,
+                'photos'      => $item->photos,
+                // подменяем поля:
+                'type'        => $item->category?->name_rus ?? null,
+                'master'      => $item->master?->name ?? null,
+            ];
+        });
 
         return response()->json($requests);
     }
@@ -65,7 +80,7 @@ class ServiceRequestController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
 
-        $serviceRequest = ServiceRequest::with('photos')
+        $serviceRequest = ServiceRequest::with(['photos', 'category', 'master'])
             ->where('id', $id)
             ->where('user_id', $user->id)
             ->first();
@@ -74,7 +89,19 @@ class ServiceRequestController extends Controller
             return response()->json(['message' => 'Заявка не найдена'], 404);
         }
 
-        return response()->json($serviceRequest);
+        $result = [
+            'id'          => $serviceRequest->id,
+            'description' => $serviceRequest->description,
+            'status'      => $serviceRequest->status,
+            'rate'        => $serviceRequest->rate,
+            'created_at'  => $serviceRequest->created_at,
+            'updated_at'  => $serviceRequest->updated_at,
+            'photos'      => $serviceRequest->photos,
+            'type'        => $serviceRequest->category?->name_rus ?? null,
+            'master'      => $serviceRequest->master?->name ?? null,
+        ];
+
+        return response()->json($result);
     }
 
     public function remove($id)

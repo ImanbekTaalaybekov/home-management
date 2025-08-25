@@ -24,4 +24,15 @@ class ServiceRequest extends Model
     {
         return $this->morphMany(Photo::class, 'photoable');
     }
+
+    public function category()
+    {
+        return $this->belongsTo(ServiceRequestCategory::class, 'type', 'name');
+    }
+
+    public function master()
+    {
+        return $this->belongsTo(ServiceRequestMaster::class, 'master_id');
+    }
+
 }
