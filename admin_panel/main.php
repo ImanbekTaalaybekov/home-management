@@ -40,6 +40,7 @@ $complexes = $pdo->query("SELECT * FROM residential_complexes ORDER BY name ASC"
                 <li><a href="suggestion.php">Предложения</a></li>
                 <li><a href="service.php">Вызов мастера</a></li>
                 <li><a href="service_category.php">Вызов мастера + категории</a></li>
+                <li><a href="company_report.php">Отчеты УК</a></li>
             <?php endif; ?>
 
             <?php if (in_array($role, ['admin', 'level2', 'level3'])): ?>
