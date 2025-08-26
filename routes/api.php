@@ -83,3 +83,8 @@ Route::get('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'sh
 
 Route::get('/company-documents/user-agreement', [PrivacyDocumentController::class, 'getUserAgreement']);
 Route::get('/company-documents/privacy-policy', [PrivacyDocumentController::class, 'getPrivacyPolicy']);
+
+Route::post('/company-report/store', [PrivacyDocumentController::class, 'store']);
+Route::get('/company-report/show', [PrivacyDocumentController::class, 'index']);
+Route::get('/company-report/show/{id}', [PrivacyDocumentController::class, 'show']);
+Route::delete('/company-report/remove/{id}', [PrivacyDocumentController::class, 'remove']);
