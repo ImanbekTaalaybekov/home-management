@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompanyReportController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\DebtImportController;
@@ -84,7 +85,7 @@ Route::get('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'sh
 Route::get('/company-documents/user-agreement', [PrivacyDocumentController::class, 'getUserAgreement']);
 Route::get('/company-documents/privacy-policy', [PrivacyDocumentController::class, 'getPrivacyPolicy']);
 
-Route::post('/company-report/store', [PrivacyDocumentController::class, 'store']);
-Route::get('/company-report/show', [PrivacyDocumentController::class, 'index']);
-Route::get('/company-report/show/{id}', [PrivacyDocumentController::class, 'show']);
-Route::delete('/company-report/remove/{id}', [PrivacyDocumentController::class, 'remove']);
+Route::post('/company-report/store', [CompanyReportController::class, 'store']);
+Route::get('/company-report/show', [CompanyReportController::class, 'index'])->middleware('auth:sanctum');
+Route::get('/company-report/show/{id}', [CompanyReportController::class, 'show'])->middleware('auth:sanctum');
+Route::delete('/company-report/remove/{id}', [CompanyReportController::class, 'remove'])->middleware('auth:sanctum');

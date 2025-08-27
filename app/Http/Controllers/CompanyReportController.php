@@ -12,20 +12,15 @@ class CompanyReportController extends Controller
 {
     public function store(Request $request)
     {
-        $request->validate([
-            'title'                  => 'required|string|max:255',
-            'message'                => 'nullable|string|max:255',
-            'residential_complex_id' => 'nullable|exists:residential_complexes,id',
-            'document'               => 'required|file|mimes:pdf|max:20480',
-        ]);
-
-
-        $documentPath = $request->file('document')
-            ->store('documents/company-report', 'public');
+        $documentPath = null;
+        if ($request->hasFile('document')) {
+            $documentPath = $request->file('document')
+                ->store('documents/company-report', 'public');
+        }
 
         $report = CompanyReport::create([
             'title'                  => $request->title,
-            'content'                => $request->message,
+            'message'                => $request->message,
             'document'               => $documentPath,
             'residential_complex_id' => $request->residential_complex_id,
         ]);
