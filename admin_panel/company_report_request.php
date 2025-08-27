@@ -4,7 +4,7 @@ require_once 'include/database.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_GET['update'])) {
     try {
         $title = $_POST['title'] ?? '';
-        $content = $_POST['content'] ?? '';
+        $message = $_POST['message'] ?? '';
         $rcId = $_POST['residential_complex_id'] ?? '';
 
         if ($title === '') {
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_GET['update'])) {
 
         $postFields = [
             'title' => $title,
-            'content' => $content,
+            'message' => $message,
             'residential_complex_id' => $rcId !== '' ? $rcId : null,
         ];
 
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_GET['update'])) {
             );
         }
 
-        $ch = curl_init('https://212.112.105.242/api/company-reports');
+        $ch = curl_init('https://212.112.105.242/api/company-report/store');
         curl_setopt_array($ch, [
             CURLOPT_POST => true,
             CURLOPT_RETURNTRANSFER => true,
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['update'])) {
     try {
         $id = (int)$_GET['update'];
         $title = $_POST['title'] ?? '';
-        $content = $_POST['content'] ?? '';
+        $message = $_POST['message'] ?? '';
         $rcId = $_POST['residential_complex_id'] ?? '';
 
         if ($title === '') {
@@ -72,12 +72,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['update'])) {
 
         $stmt = $pdo->prepare("
             UPDATE company_reports
-               SET title = ?, content = ?, residential_complex_id = ?
+               SET title = ?, message = ?, residential_complex_id = ?
              WHERE id = ?
         ");
         $stmt->execute([
             $title,
-            $content,
+            $message,
             ($rcId !== '' ? (int)$rcId : null),
             $id
         ]);
