@@ -53,8 +53,8 @@ function sdate($d){ return $d ? date('d.m.Y H:i', strtotime($d)) : '—'; }
             </div>
 
             <div>
-                <label>Краткое описание:</label>
-                <input type="text" name="content" id="content">
+                <label>Сообщение:</label>
+                <input type="text" name="message" id="message">
             </div>
 
             <div>
@@ -86,7 +86,7 @@ function sdate($d){ return $d ? date('d.m.Y H:i', strtotime($d)) : '—'; }
             <tr>
                 <th>ID</th>
                 <th>Заголовок</th>
-                <th>Описание</th>
+                <th>Сообщение</th>
                 <th>ЖК</th>
                 <th>Документ</th>
                 <th>Создан</th>
@@ -98,7 +98,7 @@ function sdate($d){ return $d ? date('d.m.Y H:i', strtotime($d)) : '—'; }
                 <tr id="report-<?= (int)$r['id'] ?>">
                     <td><?= (int)$r['id'] ?></td>
                     <td><?= safe($r['title']) ?></td>
-                    <td><?= safe($r['content']) ?></td>
+                    <td><?= safe($r['message']) ?></td>
                     <td><?= safe($r['complex_name']) ?></td>
                     <td>
                         <?php if (!empty($r['document'])): ?>
@@ -109,10 +109,10 @@ function sdate($d){ return $d ? date('d.m.Y H:i', strtotime($d)) : '—'; }
                     <td>
                         <button onclick="editReport(
                         <?= (int)$r['id'] ?>,
-                            '<?= safe($r['title']) ?>',
-                            '<?= safe($r['content']) ?>',
-                            '<?= safe($r['residential_complex_id'] ?? '') ?>'
-                            )">Изменить</button>
+                                '<?= safe($r['title']) ?>',
+                                '<?= safe($r['message']) ?>',
+                                '<?= safe($r['residential_complex_id'] ?? '') ?>'
+                                )">Изменить</button>
                         <button onclick="deleteReport(<?= (int)$r['id'] ?>)">Удалить</button>
                     </td>
                 </tr>
@@ -135,10 +135,10 @@ function sdate($d){ return $d ? date('d.m.Y H:i', strtotime($d)) : '—'; }
 </div>
 
 <script>
-    function editReport(id, title, content, rcId){
+    function editReport(id, title, message, rcId){
         document.getElementById('reportId').value = id;
         document.getElementById('title').value = title;
-        document.getElementById('content').value = content === '—' ? '' : content;
+        document.getElementById('message').value = message === '—' ? '' : message;
         document.getElementById('rcId').value = rcId === '—' ? '' : rcId;
         document.getElementById('formTitle').innerText = 'Редактировать отчёт';
         document.getElementById('cancelEdit').style.display = 'inline-block';
@@ -152,23 +152,34 @@ function sdate($d){ return $d ? date('d.m.Y H:i', strtotime($d)) : '—'; }
         document.getElementById('result').innerHTML = '';
     });
 
-    document.getElementById('reportForm').addEventListener('submit', function(e){
+        document.getElementById('reportForm').addEventListener('submit', function(e){
         e.preventDefault();
         const formData = new FormData(this);
         const id = document.getElementById('reportId').value;
         const url = id ? 'company_report_request.php?update=' + encodeURIComponent(id)
-            : 'company_report_request.php';
+        : 'company_report_request.php';
 
         fetch(url, { method: 'POST', body: formData })
-            .then(r => r.text())
-            .then(html => {
-                document.getElementById('result').innerHTML = html;
-                setTimeout(() => location.reload(), 1000);
-            })
-            .catch(err => {
-                document.getElementById('result').innerHTML = '<p style="color:red;">Ошибка: ' + err + '</p>';
-            });
+        .then(async r => {
+        const text = await r.text();
+        document.getElementById('result').innerHTML = text;
+
+        if (r.ok && /Отчёт (создан|обновлён)!/i.test(text)) {
+        const btn = document.createElement('button');
+        btn.textContent = 'Обновить список';
+        btn.onclick = () => location.reload();
+        document.getElementById('result').appendChild(document.createElement('br'));
+        document.getElementById('result').appendChild(btn);
+    }
+        console.log('Ответ сервера:', text);
+    })
+        .catch(err => {
+        document.getElementById('result').innerHTML = '<pre style="color:red;">' + err + '</pre>';
+        console.error(err);
     });
+    });
+
+
 
     function deleteReport(id){
         if (!confirm('Удалить отчёт ID ' + id + '?')) return;
