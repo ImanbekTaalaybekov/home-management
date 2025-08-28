@@ -11,32 +11,10 @@ class DebtController extends Controller
     public function getUserDebts()
     {
         $user = Auth::user();
-        $allNames = Debt::distinct()->pluck('name');
-        $userDebts = Debt::where('user_id', $user->id)->get();
 
-        $grouped = $allNames->map(function ($name) use ($userDebts) {
-            $debtsByName = $userDebts->where('name', $name);
+        $debts = Debt::where('user_id', $user->id)->get();
 
-            if ($debtsByName->isEmpty()) {
-                return [
-                    'name' => $name,
-                    'amount' => 0,
-                    'current_charges' => 0,
-                    'due_date' => null,
-                    'type' => null,
-                ];
-            }
-
-            return [
-                'name' => $name,
-                'amount' => $debtsByName->sum('amount'),
-                'current_charges' => $debtsByName->sum('current_charges'),
-                'due_date' => $debtsByName->first()->due_date,
-                'type' => $debtsByName->first()->type,
-            ];
-        });
-
-        return DebtResource::collection($grouped);
+        return DebtResource::collection($debts);
     }
 
     public function getSingleDebt($id)
