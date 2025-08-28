@@ -25,6 +25,7 @@ class DebtImportController extends Controller
                     'name' => $alsecoDebt->service,
                     'amount' => abs($alsecoDebt->debt_amount),
                     'due_date' => $alsecoDebt->last_payment_date,
+                    'current_charges' => $alsecoDebt->current_charges,
                 ]);
             }
         }

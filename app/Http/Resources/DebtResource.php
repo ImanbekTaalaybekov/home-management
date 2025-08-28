@@ -7,23 +7,20 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class DebtResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray($request)
     {
+        $amount = (float) $this->amount;
+        $currentCharges = (float) $this->current_charges;
+
         return [
-            'id' => $this->id,
-            'user_id' => $this->user_id,
-            'type' => $this->type,
-            'name' => $this->name,
-            'amount' => $this->amount,
-            'due_date' => $this->due_date,
-            'overdue' => $this->calculateOverdue(),
-            'deeplink'  => "kaspi://"
-            //'deeplink'  => "kaspi://payment?service={$this->type}&amount={$this->amount}" <------Привести к этому типу
+            'name'            => $this->name,
+            'type'            => $this->type,
+            'amount'          => $amount,
+            'current_charges' => $currentCharges,
+            'opening_balance' => $amount - $currentCharges,
+            'due_date'        => $this->due_date,
+            'overdue'         => $this->calculateOverdue(),
+            'deeplink'        => "kaspi://payment?service={$this->type}&amount={$amount}",
         ];
     }
 
