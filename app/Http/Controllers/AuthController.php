@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FcmUserToken;
 use App\Models\User;
 use App\Models\VerificationCode;
 use Illuminate\Http\Request;
@@ -198,29 +199,51 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
+        $user = $request->user();
+        $pat  = $user->currentAccessToken();
+
+        if ($pat) {
+            FcmUserToken::where('user_id', $user->id)
+                ->where('device', $pat->name)
+                ->delete();
+
+            $pat->delete();
+        }
+
         return response()->json(['message' => 'Вы вышли из системы']);
     }
 
     public function updateFcmToken(Request $request)
     {
         $request->validate([
-            'fcm_token' => 'required|string'
+            'fcm_token' => 'required|string',
+            'device'    => 'required|string',
         ]);
 
-        $request->user()->update([
-            'fcm_token' => $request->fcm_token
-        ]);
+        $user   = $request->user();
+        $device = (string) $request->input('device');
 
-        return response()->json(['message' => 'FCM-токен обновлён']);
+        FcmUserToken::updateOrCreate(
+            ['user_id' => $user->id, 'device' => $device],
+            ['fcm_token' => $request->fcm_token]
+        );
+
+        return response()->json(['message' => 'FCM-токен сохранён']);
     }
 
     public function removeFcmToken(Request $request)
     {
-        $request->user()->update([
-            'fcm_token' => null
+        $request->validate([
+            'device' => 'required|string',
         ]);
 
-        return response()->json(['message' => 'FCM-токен удален']);
+        $user   = $request->user();
+        $device = (string) $request->input('device');
+
+        FcmUserToken::where('user_id', $user->id)
+            ->where('device', $device)
+            ->delete();
+
+        return response()->json(['message' => 'FCM-токен удалён']);
     }
 }
