@@ -22,7 +22,6 @@ class User extends Authenticatable implements CanResetPassword
         'apartment_number',
         'phone_number',
         'non_residential_premises',
-        'fcm_token'
     ];
 
     protected $hidden = [
