@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('apartment_number')->nullable();
             $table->string('non_residential_premises')->nullable();
             $table->foreignId('residential_complex_id')->nullable()->constrained('residential_complexes');
+            $table->string('fcm_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

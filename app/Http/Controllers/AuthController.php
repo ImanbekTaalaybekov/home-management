@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FcmUserToken;
 use App\Models\User;
 use App\Models\VerificationCode;
 use Illuminate\Http\Request;
@@ -199,18 +198,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $user = $request->user();
-        $plainToken = $request->bearerToken();
-        if ($plainToken) {
-            $tokenHash = hash('sha256', $plainToken);
-
-            FcmUserToken::where('user_id', $user->id)
-                ->where('token', $tokenHash)
-                ->delete();
-
-            $user->currentAccessToken()?->delete();
-        }
-
+        $request->user()->tokens()->delete();
         return response()->json(['message' => 'Вы вышли из системы']);
     }
 
@@ -220,41 +208,19 @@ class AuthController extends Controller
             'fcm_token' => 'required|string'
         ]);
 
-        $user = $request->user();
+        $request->user()->update([
+            'fcm_token' => $request->fcm_token
+        ]);
 
-        $plainToken = $request->bearerToken();
-        if (!$plainToken) {
-            return response()->json(['message' => 'Bearer token не найден'], 401);
-        }
-        $tokenHash = hash('sha256', $plainToken);
-
-        FcmUserToken::updateOrCreate(
-            [
-                'user_id' => $user->id,
-                'token'   => $tokenHash,
-            ],
-            [
-                'fcm_token' => $request->fcm_token,
-            ]
-        );
-
-        return response()->json(['message' => 'FCM-токен сохранён']);
+        return response()->json(['message' => 'FCM-токен обновлён']);
     }
 
     public function removeFcmToken(Request $request)
     {
-        $user = $request->user();
+        $request->user()->update([
+            'fcm_token' => null
+        ]);
 
-        $plainToken = $request->bearerToken();
-        if (!$plainToken) {
-            return response()->json(['message' => 'Bearer token не найден'], 401);
-        }
-        $tokenHash = hash('sha256', $plainToken);
-
-        FcmUserToken::where('user_id', $user->id)
-            ->where('token', $tokenHash)
-            ->delete();
-
-        return response()->json(['message' => 'FCM-токен удалён']);
+        return response()->json(['message' => 'FCM-токен удален']);
     }
 }
