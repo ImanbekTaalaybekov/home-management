@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Notification;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class NotificationController extends Controller
 {
@@ -102,5 +103,25 @@ class NotificationController extends Controller
         ]);
 
         return response()->json($complaint, 201);
+    }
+
+
+    public function statusIcon()
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        $unreadCount = Notification::where(function ($query) use ($user) {
+            $query->where('user_id', $user->id)
+                ->orWhere('residential_complex_id', $user->residential_complex_id)
+                ->orWhere('type', 'global');
+        })
+            ->whereNotIn('id', DB::table('notification_statuses')
+                ->select('notification_id')
+                ->where('user_id', $user->id))
+            ->count();
+
+        return response()->json([
+            'unread_count' => $unreadCount,
+        ]);
     }
 }
