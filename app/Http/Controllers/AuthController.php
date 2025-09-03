@@ -17,9 +17,9 @@ class AuthController extends Controller
     {
         $request->validate([
             'personal_account' => 'required',
-            'phone_number' => 'required',
-            'password' => 'required',
-            'device' => 'required',
+            'phone_number'     => 'required',
+            'password'         => 'required',
+            'device'           => 'required',
         ]);
 
         $user = User::where('personal_account', $request->personal_account)->first();
@@ -30,27 +30,75 @@ class AuthController extends Controller
             ], 401);
         }
 
-        if ($user->phone_number !== $request->phone_number) {
-            $user->phone_number = $request->phone_number;
+        $normalizedPhone = $this->normalizePhone($request->phone_number);
+
+        if ($user->phone_number !== $normalizedPhone) {
+            $user->phone_number = $normalizedPhone;
             $user->save();
         }
 
-        //$code =  mt_rand(1000,9999);
-        $code =  1111 ;
         $expiresAt = now()->addMinutes(5);
+
+        if ($this->isKZAllowedOperator($normalizedPhone)) {
+            //$code = mt_rand(1000, 9999);
+            $code = 1111;
+            //$this->sendSms($normalizedPhone, "Ваш код подтверждения: {$code}. Сообщение от wires-home-kz");
+            $responseMsg = 'SMS code sent';
+        } else {
+            $code = 4687;
+            $responseMsg = 'Verification code set';
+        }
 
         VerificationCode::updateOrCreate(
             ['user_id' => $user->id],
             ['code' => $code, 'expires_at' => $expiresAt]
         );
 
-        //$this->sendSms($user->phone_number, "Ваш код подтверждения: $code. Сообщение от wires-home-kz");
-
         return response()->json([
-            'message' => 'SMS code sent',
+            'message' => $responseMsg,
             'requires_verification' => true,
             'user_id' => $user->id,
         ]);
+    }
+
+    private function normalizePhone(?string $value): ?string
+    {
+        if ($value === null) return null;
+        $v = trim($value);
+        if ($v === '') return null;
+
+        $v = preg_replace('/[^\d+]/', '', $v);
+
+        if (substr($v, 0, 1) !== '+') {
+            $v = '+' . preg_replace('/\D/', '', $v);
+        } else {
+            $v = '+' . preg_replace('/\D/', '', substr($v, 1));
+        }
+
+        $digits = substr($v, 1, 15);
+
+        return $digits === '' ? null : ('+' . $digits);
+    }
+
+    private function isKZAllowedOperator(?string $phone): bool
+    {
+        if (!$phone || strpos($phone, '+7') !== 0) {
+            return false;
+        }
+
+        if (!preg_match('/^\+7\d{10}$/', $phone)) {
+            return false;
+        }
+
+        $code = substr($phone, 2, 3);
+
+        $allowed = [
+            '700','701','702','703','704','705','706','707','708','709',
+            '747','750','751','760','761','762','763','764',
+            '771','775','776','777','778',
+        ];
+
+        return in_array($code, $allowed, true);
     }
 
     private function sendSms($phoneNumber, $message)

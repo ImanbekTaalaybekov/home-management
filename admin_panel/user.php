@@ -76,7 +76,7 @@ function e($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
             </div>
             <div class="form-group">
                 <label>Телефон:</label>
-                <input type="text" name="phone_number" id="userPhone">
+                <input type="text" name="phone_number" id="userPhone" placeholder="+XXXXXXXXXXXXXXX" inputmode="tel">
             </div>
             <div class="form-group">
                 <label>Пароль:</label>
@@ -246,19 +246,39 @@ function e($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
     document.addEventListener("DOMContentLoaded", function () {
         const phoneInput = document.getElementById('userPhone');
 
+        function normalizePhone(value) {
+            let v = value.replace(/[^\d+]/g, '');
+
+            if (!v.startsWith('+')) {
+                v = '+' + v.replace(/\D/g, '');
+            } else {
+                v = '+' + v.slice(1).replace(/\D/g, '');
+            }
+
+            const digits = v.slice(1, 1 + 15);
+            return '+' + digits;
+        }
+
         phoneInput.addEventListener('input', function () {
-            let value = phoneInput.value.replace(/\D/g, '');
+            const before = phoneInput.value;
+            const pos = phoneInput.selectionStart || before.length;
+            phoneInput.value = normalizePhone(before);
+            const delta = phoneInput.value.length - before.length;
+            try {
+                const newPos = Math.max(1, pos + delta);
+                phoneInput.setSelectionRange(newPos, newPos);
+            } catch(e) {}
+        });
 
-            if (value.startsWith('8')) value = '7' + value.slice(1);
-            if (value.length > 11) value = value.slice(0, 11);
-
-            let formatted = '+7';
-            if (value.length > 1) formatted += ' (' + value.substring(1, 4);
-            if (value.length >= 4) formatted += ') ' + value.substring(4, 7);
-            if (value.length >= 7) formatted += '-' + value.substring(7, 9);
-            if (value.length >= 9) formatted += '-' + value.substring(9, 11);
-
-            phoneInput.value = formatted;
+        const form = document.getElementById('userForm');
+        form.addEventListener('submit', function (e) {
+            const v = phoneInput.value.trim();
+            if (v !== '' && !/^\+\d{5,15}$/.test(v)) {
+                e.preventDefault();
+                document.getElementById('userResult').innerHTML =
+                    '<p style="color:red;">Телефон должен быть в формате: + и от 5 до 15 цифр (E.164).</p>';
+                return false;
+            }
         });
     });
 </script>
