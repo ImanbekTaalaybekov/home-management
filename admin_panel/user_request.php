@@ -1,6 +1,26 @@
 <?php
 require_once 'include/database.php';
 
+function normalize_phone(?string $s): ?string {
+    if ($s === null) return null;
+    $s = trim($s);
+    if ($s === '') return null;
+
+    $s = preg_replace('/[^\d+]/', '', $s);
+
+    if (strpos($s, '+') === 0) {
+        $digits = preg_replace('/\D/', '', substr($s, 1));
+    } else {
+        $digits = preg_replace('/\D/', '', $s);
+    }
+
+    $digits = substr($digits, 0, 15);
+
+    if ($digits === '') return null;
+
+    return '+' . $digits;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name']) && !isset($_GET['update'])) {
     $name = trim($_POST['name']);
     if ($name === '' || empty($_POST['password'])) {
@@ -10,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name']) && !isset($_G
     }
 
     $hashedPassword = password_hash($_POST['password'], PASSWORD_BCRYPT);
+    $phone = normalize_phone($_POST['phone_number'] ?? null);
 
     $stmt = $pdo->prepare("
         INSERT INTO users 
@@ -19,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name']) && !isset($_G
     $stmt->execute([
         $name,
         $_POST['personal_account'] !== '' ? $_POST['personal_account'] : null,
-        $_POST['phone_number'] !== '' ? $_POST['phone_number'] : null,
+        $phone,
         $hashedPassword,
         $_POST['block_number'] !== '' ? $_POST['block_number'] : null,
         $_POST['apartment_number'] !== '' ? $_POST['apartment_number'] : null,
@@ -32,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name']) && !isset($_G
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['update'])) {
     $id = (int)$_GET['update'];
+    $phone = normalize_phone($_POST['phone_number'] ?? null);
 
     if (!empty($_POST['password'])) {
         $hashedPassword = password_hash($_POST['password'], PASSWORD_BCRYPT);
@@ -43,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['update'])) {
         $stmt->execute([
             $_POST['name'],
             $_POST['personal_account'] !== '' ? $_POST['personal_account'] : null,
-            $_POST['phone_number'] !== '' ? $_POST['phone_number'] : null,
+            $phone,
             $_POST['block_number'] !== '' ? $_POST['block_number'] : null,
             $_POST['apartment_number'] !== '' ? $_POST['apartment_number'] : null,
             $_POST['residential_complex_id'] !== '' ? (int)$_POST['residential_complex_id'] : null,
@@ -59,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['update'])) {
         $stmt->execute([
             $_POST['name'],
             $_POST['personal_account'] !== '' ? $_POST['personal_account'] : null,
-            $_POST['phone_number'] !== '' ? $_POST['phone_number'] : null,
+            $phone,
             $_POST['block_number'] !== '' ? $_POST['block_number'] : null,
             $_POST['apartment_number'] !== '' ? $_POST['apartment_number'] : null,
             $_POST['residential_complex_id'] !== '' ? (int)$_POST['residential_complex_id'] : null,
