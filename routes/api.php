@@ -40,7 +40,7 @@ Route::get('/notifications', [NotificationController::class, 'index'])->middlewa
 Route::get('/notifications/{id}', [NotificationController::class, 'show']);
 Route::post('/notifications', [NotificationController::class, 'store']);
 Route::post('/notifications/status', [NotificationController::class, 'status'])->middleware('auth:sanctum');
-Route::get('/notifications/status-icon', [NotificationController::class, 'statusIcon'])->middleware('auth:sanctum');
+Route::get('/notifications/status/icon', [NotificationController::class, 'statusIcon'])->middleware('auth:sanctum');
 
 Route::get('/debts', [DebtController::class, 'getUserDebts'])->middleware('auth:sanctum');
 Route::get('/debts/{id}', [DebtController::class, 'getSingleDebt']);
