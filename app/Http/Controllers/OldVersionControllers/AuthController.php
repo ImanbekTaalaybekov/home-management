@@ -1,72 +1,53 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\OldVersionControllers;
 
+use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\FcmUserToken;
 use App\Models\User;
 use App\Models\VerificationCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     public function auth(Request $request)
     {
         $request->validate([
-            'login'   => 'required|string',
-            'password'=> 'required|string',
-            'device'  => 'required|string',
+            'personal_account' => 'required',
+            'phone_number'     => 'required',
+            'password'         => 'required',
+            'device'           => 'required',
         ]);
 
-        $user = User::where('login', $request->login)->first();
+        $user = User::where('personal_account', $request->personal_account)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Неверные данные для входа в систему'], 401);
+            return response()->json([
+                'message' => 'Неверные данные для входа в систему'
+            ], 401);
         }
 
-        $token = $user->createToken($request->device)->plainTextToken;
-
-        return response()->json([
-            'auth_token' => $token,
-            'user'       => new UserResource($user),
-        ]);
-    }
-
-    public function requestPhoneVerification(Request $request)
-    {
-        $request->validate([
-            'phone_number' => 'required|string',
-        ]);
-
-        $user = $request->user();
         $normalizedPhone = $this->normalizePhone($request->phone_number);
-        if (!$normalizedPhone) {
-            throw ValidationException::withMessages(['phone_number' => 'Некорректный номер телефона']);
-        }
 
-        $exists = User::where('phone_number', $normalizedPhone)
-            ->where('id', '!=', $user->id)
-            ->exists();
-
-        if ($exists) {
-            throw ValidationException::withMessages(['phone_number' => 'Этот номер уже используется другим пользователем']);
+        if ($user->phone_number !== $normalizedPhone) {
+            $user->phone_number = $normalizedPhone;
+            $user->save();
         }
 
         $expiresAt = now()->addMinutes(5);
 
         if ($this->isKZAllowedOperator($normalizedPhone)) {
+            //$code = mt_rand(1000, 9999);
             $code = 1111;
+            //$this->sendSms($normalizedPhone, "Ваш код подтверждения: {$code}. Сообщение от wires-home-kz");
             $responseMsg = 'SMS code sent';
-            $this->sendSms($normalizedPhone, "Ваш код подтверждения: {$code}. Сообщение от wires-home-kz");
         } else {
             $code = 4687;
             $responseMsg = 'Verification code set';
-            $this->sendSms($normalizedPhone, "Ваш код подтверждения: {$code}. Сообщение от wires-home-kz");
         }
 
         VerificationCode::updateOrCreate(
@@ -74,60 +55,11 @@ class AuthController extends Controller
             ['code' => $code, 'expires_at' => $expiresAt]
         );
 
-        Cache::put($this->pendingPhoneCacheKey($user->id), $normalizedPhone, $expiresAt);
-
         return response()->json([
             'message' => $responseMsg,
-            'expires_at' => $expiresAt->toIso8601String(),
+            'requires_verification' => true,
+            'user_id' => $user->id,
         ]);
-    }
-
-
-    public function confirmPhoneVerification(Request $request)
-    {
-        $request->validate([
-            'code' => 'required|string',
-        ]);
-
-        $user = $request->user();
-
-        $verificationCode = VerificationCode::where('user_id', $user->id)
-            ->where('code', $request->code)
-            ->where('expires_at', '>', now())
-            ->first();
-
-        if (!$verificationCode) {
-            return response()->json(['message' => 'Код верификации неверный либо истёк'], 401);
-        }
-
-        $pendingPhone = Cache::get($this->pendingPhoneCacheKey($user->id));
-        if (!$pendingPhone) {
-            return response()->json(['message' => 'Не найден ожидающий подтверждения номер. Запросите код ещё раз.'], 422);
-        }
-
-        $exists = User::where('phone_number', $pendingPhone)
-            ->where('id', '!=', $user->id)
-            ->exists();
-
-        if ($exists) {
-            return response()->json(['message' => 'Этот номер уже используется другим пользователем'], 422);
-        }
-
-        $user->phone_number = $pendingPhone;
-        $user->save();
-
-        $verificationCode->delete();
-        Cache::forget($this->pendingPhoneCacheKey($user->id));
-
-        return response()->json([
-            'message' => 'Номер телефона успешно подтверждён и сохранён',
-            'user'    => new UserResource($user),
-        ]);
-    }
-
-    private function pendingPhoneCacheKey(int $userId): string
-    {
-        return "phone_update:{$userId}";
     }
 
     private function normalizePhone(?string $value): ?string
@@ -160,6 +92,7 @@ class AuthController extends Controller
         }
 
         $code = substr($phone, 2, 3);
+
         $allowed = [
             '700','701','702','703','704','705','706','707','708','709',
             '747','750','751','760','761','762','763','764',
@@ -174,12 +107,12 @@ class AuthController extends Controller
         $formattedPhone = $this->formatPhoneNumber($phoneNumber);
 
         $response = Http::get('http://kazinfoteh.org:9507/api', [
-            'action'      => 'sendmessage',
-            'username'    => env('KAZINFOTEH_USERNAME'),
-            'password'    => env('KAZINFOTEH_PASSWORD'),
-            'recipient'   => $formattedPhone,
+            'action' => 'sendmessage',
+            'username' => env('KAZINFOTEH_USERNAME'),
+            'password' => env('KAZINFOTEH_PASSWORD'),
+            'recipient' => $formattedPhone,
             'messagetype' => 'SMS:TEXT',
-            'originator'  => 'KiT_Notify',
+            'originator' => 'KiT_Notify',
             'messagedata' => $message,
         ]);
 
@@ -198,10 +131,10 @@ class AuthController extends Controller
 
         $response = Http::withHeaders([
             'Authorization' => 'Basic ' . $token,
-            'Content-Type'  => 'application/json',
+            'Content-Type' => 'application/json',
         ])->post('https://so.kazinfoteh.org/api/sms/send', [
             'from' => 'KiT_Notify',
-            'to'   => $formattedPhone,
+            'to' => $formattedPhone,
             'text' => $message,
         ]);
 
@@ -213,9 +146,11 @@ class AuthController extends Controller
     private function formatPhoneNumber($phoneNumber)
     {
         $digits = preg_replace('/\D+/', '', $phoneNumber);
+
         if (substr($digits, 0, 1) === '8') {
             $digits = '7' . substr($digits, 1);
         }
+
         return substr($digits, 0, 11);
     }
 
@@ -223,7 +158,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'code'    => 'required',
+            'code' => 'required',
         ]);
 
         $verificationCode = VerificationCode::where('user_id', $request->user_id)
@@ -232,51 +167,52 @@ class AuthController extends Controller
             ->first();
 
         if (!$verificationCode) {
-            return response()->json(['message' => 'Код верификации неверный либо истек'], 401);
+            return response()->json([
+                'message' => 'Код верификации неверный либо истек'
+            ], 401);
         }
 
         $verificationCode->delete();
-        $user  = User::find($request->user_id);
-        $token = $user->createToken($request->device ?? 'device')->plainTextToken;
+        $user = User::find($request->user_id);
+        $token = $user->createToken($request->device)->plainTextToken;
 
         return response()->json([
             'auth_token' => $token,
-            'user'       => new UserResource($user),
+            'user' => new UserResource($user),
         ]);
     }
 
     public function register(Request $request)
     {
         $request->validate([
-            'name'                   => 'required|string|max:255',
-            'login'                  => 'required|string|max:255|unique:users,login',
-            'personal_account'       => 'required|string|unique:users,personal_account',
-            'phone_number'           => 'required|string|unique:users,phone_number',
-            'password'               => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9]{6,}$/'],
-            'device'                 => 'required|string',
+            'name' => 'required|string|max:255',
+            'personal_account' => 'required|string|unique:users,personal_account',
+            'phone_number' => 'required|string|unique:users,phone_number',
+            'password' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9]{6,}$/'],
+            'device' => 'required|string',
             'residential_complex_id' => 'nullable|integer|exists:residential_complexes,id',
-            'block_number'           => 'nullable|string|max:255',
-            'apartment_number'       => 'nullable|string|max:255',
+            'block_number' => 'nullable|string|max:255',
+            'apartment_number' => 'nullable|string|max:255',
         ]);
 
         $user = User::create([
-            'name'                   => $request->name,
-            'login'                  => $request->login,
-            'personal_account'       => $request->personal_account,
-            'phone_number'           => $request->phone_number,
-            'password'               => Hash::make($request->password),
+            'name' => $request->name,
+            'personal_account' => $request->personal_account,
+            'phone_number' => $request->phone_number,
+            'password' => Hash::make($request->password),
             'residential_complex_id' => $request->residential_complex_id,
-            'block_number'           => $request->block_number,
-            'apartment_number'       => $request->apartment_number,
+            'block_number' => $request->block_number,
+            'apartment_number' => $request->apartment_number,
         ]);
 
         $token = $user->createToken($request->device)->plainTextToken;
 
         return response()->json([
             'auth_token' => $token,
-            'user'       => new UserResource($user),
+            'user' => new UserResource($user),
         ]);
     }
+
 
     public function me(Request $request)
     {
@@ -290,11 +226,11 @@ class AuthController extends Controller
     public function update(Request $request)
     {
         $input = $request->validate([
-            'name'                   => 'nullable|string|max:255',
-            'password'               => ['nullable', 'string', 'min:6', 'regex:/^[a-zA-Z0-9]{6,}$/'],
+            'name' => 'nullable|string|max:255',
+            'password' => ['nullable', 'string', 'min:6', 'regex:/^[a-zA-Z0-9]{6,}$/'],
             'residential_complex_id' => 'nullable|integer|exists:residential_complexes,id',
-            'block_number'           => 'nullable|string|max:255',
-            'apartment_number'       => 'nullable|string|max:255',
+            'block_number' => 'nullable|string|max:255',
+            'apartment_number' => 'nullable|string|max:255',
         ]);
 
         $user = $request->user();

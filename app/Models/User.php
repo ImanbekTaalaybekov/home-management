@@ -15,6 +15,7 @@ class User extends Authenticatable implements CanResetPassword
 
     protected $fillable = [
         'name',
+        'login',
         'personal_account',
         'password',
         'residential_complex_id',
@@ -22,7 +23,8 @@ class User extends Authenticatable implements CanResetPassword
         'apartment_number',
         'phone_number',
         'non_residential_premises',
-        'fcm_token'
+        'fcm_token',
+        'role'
     ];
 
     protected $hidden = [
