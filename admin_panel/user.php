@@ -14,7 +14,7 @@ $where = [];
 $params = [];
 
 if (!empty($_GET['search'])) {
-    $where[] = "(users.name ILIKE :search OR users.phone_number ILIKE :search OR users.personal_account ILIKE :search)";
+    $where[] = "(users.name ILIKE :search OR users.phone_number ILIKE :search OR users.personal_account ILIKE :search OR users.login ILIKE :search)";
     $params[':search'] = '%' . $_GET['search'] . '%';
 }
 
@@ -58,26 +58,50 @@ function e($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
     <meta charset="UTF-8">
     <title>Wires Home</title>
     <link rel="stylesheet" href="include/style.css">
+    <style>
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 999; }
+        .modal { width: 100%; max-width: 520px; background: #fff; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.2); overflow: hidden; }
+        .modal-header, .modal-footer { padding: 14px 16px; background: #f6f7f8; }
+        .modal-header { display:flex; justify-content:space-between; align-items:center; }
+        .modal-title { margin: 0; font-size: 18px; }
+        .modal-close { border:0; background:transparent; font-size:20px; cursor:pointer; }
+        .modal-body { padding: 16px; }
+        .modal .form-row { margin-bottom: 12px; }
+        .modal label { display:block; margin-bottom: 6px; font-weight: 600; }
+        .modal input[type="text"], .modal input[type="password"], .modal select { width:100%; padding:8px 10px; border:1px solid #d0d7de; border-radius:6px; }
+        .modal .hint { color:#6a737d; font-size: 12px; margin-top: 4px; }
+        .modal .row-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-footer .btn { padding: 8px 14px; border-radius: 6px; border: 0; cursor: pointer; }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-secondary { background: #e5e7eb; color: #111827; }
+        .btn-danger { background: #ef4444; color: #fff; }
+        .actions-cell button { margin-right: 6px; }
+        .plus-btn { padding: 4px 10px; font-size: 18px; line-height: 1; }
+        .text-muted { color: #6b7280; }
+    </style>
 </head>
 <body>
 <div class="container">
     <section class="user-form-section">
         <h1 class="user-h1">Управление пользователями</h1>
-        <h2>Создать нового пользователя</h2>
+        <h2>Создать нового пользователя (роль: owner)</h2>
         <form id="userForm">
             <input type="hidden" name="id" id="userId">
             <div class="form-group">
                 <label>Имя:</label>
                 <input type="text" name="name" id="userName" required>
             </div>
+
+            <div class="form-group">
+                <label>Логин:</label>
+                <input type="text" name="login" id="userLogin" required>
+            </div>
+
             <div class="form-group">
                 <label>Лицевой счёт:</label>
                 <input type="text" name="personal_account" id="userAccount">
             </div>
-            <div class="form-group">
-                <label>Телефон:</label>
-                <input type="text" name="phone_number" id="userPhone" placeholder="+XXXXXXXXXXXXXXX" inputmode="tel">
-            </div>
+
             <div class="form-group">
                 <label>Пароль:</label>
                 <input type="password" name="password" id="userPassword" required>
@@ -101,7 +125,8 @@ function e($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                     <?php endforeach; ?>
                 </select>
             </div>
-            <button type="submit">Сохранить</button>
+
+            <button type="submit">Сохранить (owner)</button>
             <button type="button" id="cancelEdit" style="display:none;">Отмена</button>
         </form>
         <div id="userResult"></div>
@@ -116,7 +141,7 @@ function e($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 
         <form id="searchForm" method="get" style="margin-bottom: 20px;" class="user-search-form">
             <input type="text" name="search" value="<?= e($_GET['search'] ?? '') ?>"
-                   placeholder="Поиск (лицевой счёт / имя / телефон)" class="user-search-input">
+                   placeholder="Поиск (лицевой счёт / имя / телефон / логин)" class="user-search-input">
             <select name="complex_id" class="user-search-select">
                 <option value="">Все ЖК</option>
                 <?php foreach ($complexes as $complex): ?>
@@ -134,6 +159,8 @@ function e($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
             <tr>
                 <th>ID</th>
                 <th>Имя</th>
+                <th>Логин</th>
+                <th>Роль</th>
                 <th>Лицевой счёт</th>
                 <th>Телефон</th>
                 <th>Блок</th>
@@ -148,23 +175,30 @@ function e($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
                 <tr id="user-<?= e($user['id']) ?>">
                     <td><?= e($user['id']) ?></td>
                     <td><?= e($user['name']) ?></td>
+                    <td><?= e($user['login'] ?? '') ?></td>
+                    <td><?= e($user['role'] ?? '-') ?></td>
                     <td><?= e($user['personal_account']) ?></td>
                     <td><?= e($user['phone_number']) ?></td>
                     <td><?= e($user['block_number']) ?></td>
                     <td><?= e($user['apartment_number']) ?></td>
                     <td><?= e($user['complex_name'] ?: '-') ?></td>
                     <td><?= e(date('d.m.Y H:i', strtotime($user['created_at']))) ?></td>
-                    <td>
+                    <td class="actions-cell">
                         <button onclick="editUser(
                         <?= (int)$user['id'] ?>,
                                 '<?= e($user['name']) ?>',
+                                '<?= e($user['login']) ?>',
                                 '<?= e($user['personal_account']) ?>',
-                                '<?= e($user['phone_number']) ?>',
                                 '<?= e($user['residential_complex_id']) ?>',
                                 '<?= e($user['block_number']) ?>',
                                 '<?= e($user['apartment_number']) ?>'
                                 )">Изменить</button>
-                        <button class="delete-btn" onclick="deleteUser(<?= (int)$user['id'] ?>)">Удалить</button>
+                        <button class="delete-btn btn-danger" onclick="deleteUser(<?= (int)$user['id'] ?>)">Удалить</button>
+
+                        <?php if (($user['role'] ?? '') === 'owner'): ?>
+                            <button class="plus-btn" title="Добавить пользователя (family/tenant) этого владельца"
+                                    onclick="openSubUserModal(<?= (int)$user['id'] ?>, '<?= e($user['login']) ?>')">＋</button>
+                        <?php endif; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -190,13 +224,71 @@ function e($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
     </section>
 </div>
 
+<div id="subUserBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="subUserTitle">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="subUserTitle">Новый пользователь (family/tenant)</h3>
+            <button class="modal-close" type="button" aria-label="Закрыть" onclick="closeSubUserModal()">×</button>
+        </div>
+        <form id="subUserForm">
+            <div class="modal-body">
+                <input type="hidden" id="subOwnerId">
+                <div class="form-row">
+                    <label>Логин владельца</label>
+                    <input type="text" id="subOwnerLogin" readonly>
+                    <div class="hint">К логину владельца добавится суффикс: <code>owner_login_suffix</code></div>
+                </div>
+
+                <div class="form-row">
+                    <label>Имя под-пользователя *</label>
+                    <input type="text" id="subName" placeholder="Например: Иван Иванов" required>
+                </div>
+
+                <div class="row-two">
+                    <div class="form-row">
+                        <label>Суффикс логина *</label>
+                        <input type="text" id="subSuffix" placeholder="например: wife, son, t1" required>
+                        <div class="hint">Разрешены буквы/цифры/._-</div>
+                    </div>
+                    <div class="form-row">
+                        <label>Итоговый логин</label>
+                        <input type="text" id="subPreviewLogin" readonly class="text-muted">
+                    </div>
+                </div>
+
+                <div class="row-two">
+                    <div class="form-row">
+                        <label>Роль *</label>
+                        <select id="subRole" required>
+                            <option value="family">family</option>
+                            <option value="tenant">tenant</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Пароль *</label>
+                        <input type="password" id="subPassword" placeholder="Пароль" required>
+                    </div>
+                </div>
+
+                <div id="subUserMsg" class="hint"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeSubUserModal()">Отмена</button>
+                <button type="submit" class="btn btn-primary">Создать</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     document.getElementById('userForm').addEventListener('submit', function (e) {
         e.preventDefault();
         const formData = new FormData(this);
         const userId = document.getElementById('userId').value;
         const currentPage = new URLSearchParams(window.location.search).get('page') || 1;
-        const url = userId ? `user_request.php?update=${encodeURIComponent(userId)}&page=${encodeURIComponent(currentPage)}` : `user_request.php?page=${encodeURIComponent(currentPage)}`;
+        const url = userId
+            ? `user_request.php?update=${encodeURIComponent(userId)}&page=${encodeURIComponent(currentPage)}`
+            : `user_request.php?page=${encodeURIComponent(currentPage)}`;
 
         fetch(url, { method: 'POST', body: formData })
             .then(res => res.text())
@@ -222,11 +314,11 @@ function e($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
         }
     }
 
-    function editUser(id, name, account, phone, complex, block, apartment) {
+    function editUser(id, name, login, account, complex, block, apartment) {
         document.getElementById('userId').value = id;
         document.getElementById('userName').value = name;
-        document.getElementById('userAccount').value = account;
-        document.getElementById('userPhone').value = phone;
+        document.getElementById('userLogin').value = login || '';
+        document.getElementById('userAccount').value = account || '';
         document.getElementById('userComplex').value = complex || '';
         document.getElementById('userBlock').value = block || '';
         document.getElementById('userApartment').value = apartment || '';
@@ -240,46 +332,103 @@ function e($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
         document.getElementById('userPassword').required = true;
         this.style.display = 'none';
     });
-</script>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const phoneInput = document.getElementById('userPhone');
+    const backdrop = document.getElementById('subUserBackdrop');
+    const formSub = document.getElementById('subUserForm');
+    const ownerIdInput = document.getElementById('subOwnerId');
+    const ownerLoginInput = document.getElementById('subOwnerLogin');
+    const nameInput = document.getElementById('subName');
+    const suffixInput = document.getElementById('subSuffix');
+    const previewLoginInput = document.getElementById('subPreviewLogin');
+    const roleSelect = document.getElementById('subRole');
+    const passwordInput = document.getElementById('subPassword');
+    const msgBox = document.getElementById('subUserMsg');
 
-        function normalizePhone(value) {
-            let v = value.replace(/[^\d+]/g, '');
+    function openSubUserModal(ownerId, ownerLogin) {
+        ownerIdInput.value = ownerId;
+        ownerLoginInput.value = ownerLogin || '';
+        nameInput.value = '';
+        suffixInput.value = '';
+        roleSelect.value = 'family';
+        passwordInput.value = '';
+        msgBox.textContent = '';
+        updatePreviewLogin();
+        backdrop.style.display = 'flex';
+        setTimeout(() => nameInput.focus(), 0);
+    }
 
-            if (!v.startsWith('+')) {
-                v = '+' + v.replace(/\D/g, '');
-            } else {
-                v = '+' + v.slice(1).replace(/\D/g, '');
-            }
+    function closeSubUserModal() {
+        backdrop.style.display = 'none';
+    }
 
-            const digits = v.slice(1, 1 + 15);
-            return '+' + digits;
+    function updatePreviewLogin() {
+        const base = ownerLoginInput.value.trim();
+        const suf  = suffixInput.value.trim();
+        previewLoginInput.value = suf ? (base + '_' + suf) : base;
+    }
+
+    suffixInput.addEventListener('input', updatePreviewLogin);
+
+    formSub.addEventListener('submit', function (e) {
+        e.preventDefault();
+        msgBox.textContent = '';
+
+        const ownerId = ownerIdInput.value;
+        const name = nameInput.value.trim();
+        const suffix = suffixInput.value.trim();
+        const role = roleSelect.value.trim().toLowerCase();
+        const password = passwordInput.value;
+
+        if (!name) {
+            msgBox.textContent = 'Имя обязательно';
+            nameInput.focus();
+            return;
+        }
+        if (!suffix || !/^[a-zA-Z0-9_\-\.]+$/.test(suffix)) {
+            msgBox.textContent = 'Некорректный суффикс. Разрешены буквы/цифры/._-';
+            suffixInput.focus();
+            return;
+        }
+        if (!['family','tenant'].includes(role)) {
+            msgBox.textContent = 'Некорректная роль. Разрешены: family, tenant';
+            roleSelect.focus();
+            return;
+        }
+        if (!password) {
+            msgBox.textContent = 'Пароль обязателен';
+            passwordInput.focus();
+            return;
         }
 
-        phoneInput.addEventListener('input', function () {
-            const before = phoneInput.value;
-            const pos = phoneInput.selectionStart || before.length;
-            phoneInput.value = normalizePhone(before);
-            const delta = phoneInput.value.length - before.length;
-            try {
-                const newPos = Math.max(1, pos + delta);
-                phoneInput.setSelectionRange(newPos, newPos);
-            } catch(e) {}
-        });
+        const fd = new FormData();
+        fd.append('name', name);
+        fd.append('suffix', suffix);
+        fd.append('role', role);
+        fd.append('password', password);
 
-        const form = document.getElementById('userForm');
-        form.addEventListener('submit', function (e) {
-            const v = phoneInput.value.trim();
-            if (v !== '' && !/^\+\d{5,15}$/.test(v)) {
-                e.preventDefault();
-                document.getElementById('userResult').innerHTML =
-                    '<p style="color:red;">Телефон должен быть в формате: + и от 5 до 15 цифр (E.164).</p>';
-                return false;
-            }
-        });
+        fetch('user_request.php?create_sub=' + encodeURIComponent(ownerId), {
+            method: 'POST',
+            body: fd
+        })
+            .then(r => r.text())
+            .then(t => {
+                alert(t);
+                closeSubUserModal();
+                location.reload();
+            })
+            .catch(e => {
+                msgBox.textContent = 'Ошибка: ' + e;
+            });
+    });
+
+    backdrop.addEventListener('click', function (e) {
+        if (e.target === backdrop) closeSubUserModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && backdrop.style.display === 'flex') {
+            closeSubUserModal();
+        }
     });
 </script>
 </body>

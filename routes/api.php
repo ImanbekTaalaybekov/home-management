@@ -21,17 +21,19 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/auth', [AuthController::class, 'auth']);
-Route::post('/verify-sms', [AuthController::class, 'verifySmsCode']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/user/request-phone-verification', [AuthController::class, 'requestPhoneVerification'])->middleware('auth:sanctum');
+Route::post('/user/confirm-phone-verification', [AuthController::class, 'confirmPhoneVerification'])->middleware('auth:sanctum');
 Route::put('/user', [AuthController::class, 'update'])->middleware('auth:sanctum');
 Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-Route::post('/user-fcm-token', [AuthController::class, 'updateFcmToken'])->middleware('auth:sanctum');
-Route::post('/user-fcm-token-remove', [AuthController::class, 'removeFcmToken'])->middleware('auth:sanctum');
+Route::post('/user/fcm-token', [AuthController::class, 'updateFcmToken'])->middleware('auth:sanctum');
+Route::post('/user/fcm-token/remove', [AuthController::class, 'removeFcmToken'])->middleware('auth:sanctum');
 
 Route::get('/complaints', [ComplaintController::class, 'index'])->middleware('auth:sanctum');
 Route::post('/complaints', [ComplaintController::class, 'store'])->middleware('auth:sanctum');
 Route::get('/complaints/{id}', [ComplaintController::class, 'show']);
+Route::post('/complaints/remove/{id}', [ComplaintController::class, 'remove']);
 
 Route::get('/suggestions', [SuggestionController::class, 'index']);
 Route::post('/suggestions', [SuggestionController::class, 'store']);

@@ -13,15 +13,17 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->string('login')->nullable();
             $table->string('personal_account')->nullable();
             $table->string('phone_number')->nullable();
-            $table->string('name')->unique();
+            $table->string('name');
             $table->string('password');
             $table->string('block_number')->nullable();
             $table->string('apartment_number')->nullable();
             $table->string('non_residential_premises')->nullable();
             $table->foreignId('residential_complex_id')->nullable()->constrained('residential_complexes');
             $table->string('fcm_token')->nullable();
+            $table->string('role')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
