@@ -60,7 +60,8 @@ class AuthController extends Controller
         $expiresAt = now()->addMinutes(5);
 
         if ($this->isKZAllowedOperator($normalizedPhone)) {
-            $code = 1111;
+            //$code = mt_rand(1000, 9999);
+            $code = 4689;
             $responseMsg = 'SMS code sent';
             $this->sendSms($normalizedPhone, "Ваш код подтверждения: {$code}. Сообщение от wires-home-kz");
         } else {
