@@ -21,7 +21,8 @@ class UserResource extends JsonResource
             'residential_complex_id' => $this->residential_complex_id,
             'block_number' => $this->block_number,
             'apartment_number' => $this->apartment_number,
-
+            'role' => $this->role,
+            'login' => $this->login,
             'residential_complex_name' => $this->residentialComplex?->name,
             'residential_complex_address' => $this->residentialComplex?->address,
         ];

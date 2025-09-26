@@ -28,7 +28,7 @@ Route::put('/user', [AuthController::class, 'update'])->middleware('auth:sanctum
 Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::post('/user/fcm-token', [AuthController::class, 'updateFcmToken'])->middleware('auth:sanctum');
-Route::post('/user/fcm-token/remove', [AuthController::class, 'removeFcmToken'])->middleware('auth:sanctum');
+Route::post('/user/fcm-token-remove', [AuthController::class, 'removeFcmToken'])->middleware('auth:sanctum');
 
 Route::get('/complaints', [ComplaintController::class, 'index'])->middleware('auth:sanctum');
 Route::post('/complaints', [ComplaintController::class, 'store'])->middleware('auth:sanctum');
