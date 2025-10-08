@@ -34,7 +34,7 @@ class ComplaintController extends Controller
 
         $complaints = Complaint::with('photos')
             ->where('user_id', $user->id)
-            ->get();
+            ->paginate(10);
 
         return response()->json($complaints);
     }

@@ -50,13 +50,10 @@ class ServiceRequestController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
 
-        $perPage = (int) $request->query('per_page', 10);
-        $perPage = max(1, min($perPage, 100));
-
         $requests = ServiceRequest::with(['photos', 'category', 'master'])
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+            ->paginate(10);
 
         $requests->getCollection()->transform(function ($item) {
             return [
@@ -67,7 +64,6 @@ class ServiceRequestController extends Controller
                 'created_at'  => $item->created_at,
                 'updated_at'  => $item->updated_at,
                 'photos'      => $item->photos,
-                // подменяем поля:
                 'type'        => $item->category?->name_rus ?? null,
                 'master'      => $item->master?->name ?? null,
             ];
