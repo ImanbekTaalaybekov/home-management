@@ -35,14 +35,11 @@ class CompanyReportController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
 
-        $perPage = (int) $request->query('per_page', 10);
-        $perPage = max(1, min($perPage, 100));
-
         $reports = CompanyReport::query()
             ->whereNull('residential_complex_id')
             ->orWhere('residential_complex_id', $user->residential_complex_id)
             ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+            ->paginate(10);
 
         $reports->getCollection()->transform(function ($r) {
             $r->document_url = $r->document ? asset('storage/' . $r->document) : null;

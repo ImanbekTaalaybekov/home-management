@@ -35,8 +35,10 @@ Route::post('/complaints', [ComplaintController::class, 'store'])->middleware('a
 Route::get('/complaints/{id}', [ComplaintController::class, 'show']);
 Route::post('/complaints/remove/{id}', [ComplaintController::class, 'remove']);
 
-Route::get('/suggestions', [SuggestionController::class, 'index']);
+Route::get('/suggestions', [SuggestionController::class, 'index'])->middleware('auth:sanctum');
 Route::post('/suggestions', [SuggestionController::class, 'store']);
+Route::get('/suggestions/{id}', [SuggestionController::class, 'show']);
+Route::post('/suggestions/remove/{id}', [SuggestionController::class, 'remove']);
 
 Route::get('/notifications', [NotificationController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/notifications/{id}', [NotificationController::class, 'show']);
@@ -47,6 +49,9 @@ Route::get('/notifications/status/icon', [NotificationController::class, 'status
 Route::get('/debts', [DebtController::class, 'getUserDebts'])->middleware('auth:sanctum');
 Route::get('/debts/{id}', [DebtController::class, 'getSingleDebt']);
 Route::get('/debts-sum', [DebtController::class, 'getUserDebtsSum'])->middleware('auth:sanctum');
+Route::get('/debts/checked', [DebtController::class, 'getCheckedDebts'])->middleware('auth:sanctum');
+Route::post('/debts/{id}/toggle-check', [DebtController::class, 'toggleDebtCheck'])->middleware('auth:sanctum');
+Route::get('/debts/{id}/is-checked', [DebtController::class, 'isDebtChecked'])->middleware('auth:sanctum');
 
 Route::post('/service-requests', [ServiceRequestController::class, 'store']);
 Route::get('/service-requests-categories', [ServiceRequestController::class, 'getCategories']);
