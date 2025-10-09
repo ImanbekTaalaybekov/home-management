@@ -49,7 +49,7 @@ Route::get('/notifications/status/icon', [NotificationController::class, 'status
 Route::get('/debts', [DebtController::class, 'getUserDebts'])->middleware('auth:sanctum');
 Route::get('/debts/{id}', [DebtController::class, 'getSingleDebt']);
 Route::get('/debts-sum', [DebtController::class, 'getUserDebtsSum'])->middleware('auth:sanctum');
-Route::get('/debts/checked', [DebtController::class, 'getCheckedDebts'])->middleware('auth:sanctum');
+Route::get('/debts-checked', [DebtController::class, 'getCheckedDebts'])->middleware('auth:sanctum');
 Route::post('/debts/{id}/toggle-check', [DebtController::class, 'toggleDebtCheck'])->middleware('auth:sanctum');
 Route::get('/debts/{id}/is-checked', [DebtController::class, 'isDebtChecked'])->middleware('auth:sanctum');
 
@@ -72,6 +72,7 @@ Route::post('/polls', [PollController::class, 'store'])->middleware('auth:sanctu
 Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])->middleware('auth:sanctum');
 Route::get('/polls/{poll}', [PollController::class, 'show'])->middleware('auth:sanctum');
 Route::get('/polls/protocol/{poll}', [PollController::class, 'generateProtocol']);
+Route::get('/polls/{poll}/current-vote', [PollController::class, 'showCurrentVote'])->middleware('auth:sanctum');
 
 Route::get('/announcements', [AnnouncementController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/announcements/own', [AnnouncementController::class, 'showOwn'])->middleware('auth:sanctum');
