@@ -17,9 +17,8 @@ class PollController extends Controller
         $user = Auth::guard('sanctum')->user();
 
         $polls = Poll::where('residential_complex_id', $user->residential_complex_id)
-            ->where('created_at', '>=', Carbon::now()->subDays(30))
             ->orderBy('start_date', 'desc')
-            ->get();
+            ->paginate(10);
 
         return response()->json($polls);
     }
@@ -56,22 +55,41 @@ class PollController extends Controller
             return response()->json(['message' => 'Вы не можете голосовать в этом опросе'], 403);
         }
 
-        $existingVote = PollVote::where('poll_id', $poll->id)
-            ->where('user_id', $user->id)
-            ->exists();
+        PollVote::updateOrCreate(
+            [
+                'poll_id' => $poll->id,
+                'user_id' => $user->id,
+            ],
+            [
+                'vote' => $request->vote,
+            ]
+        );
 
-        if ($existingVote) {
-            return response()->json(['message' => 'Вы уже проголосовали'], 400);
+        return response()->json(['message' => 'Ваш голос учтён']);
+    }
+
+    public function showCurrentVote(Poll $poll)
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        $vote = PollVote::where('poll_id', $poll->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$vote) {
+            return response()->json([
+                'has_voted' => false,
+                'vote'      => '',
+                'message'   => 'Вы ещё не голосовали в этом опросе',
+            ]);
         }
 
-        PollVote::create([
-            'poll_id' => $poll->id,
-            'user_id' => $user->id,
-            'vote' => $request->vote,
+        return response()->json([
+            'has_voted' => true,
+            'vote'      => $vote->vote,
         ]);
-
-        return response()->json(['message' => 'Ваш голос учтен']);
     }
+
 
     public function show(Poll $poll)
     {

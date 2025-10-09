@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Debt;
+use App\Models\DebtPaymentCheck;
 use App\Models\InputDebtDataAlseco;
-use App\Models\InputDebtDataIvc;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -13,6 +13,7 @@ class DebtImportController extends Controller
     public function importDebt()
     {
         Debt::truncate();
+        DebtPaymentCheck::truncate();
 
         $services = InputDebtDataAlseco::query()
             ->whereNotNull('service')

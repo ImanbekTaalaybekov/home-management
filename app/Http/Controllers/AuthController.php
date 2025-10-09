@@ -45,8 +45,11 @@ class AuthController extends Controller
 
         $user = $request->user();
         $normalizedPhone = $this->normalizePhone($request->phone_number);
+
         if (!$normalizedPhone) {
-            throw ValidationException::withMessages(['phone_number' => 'Некорректный номер телефона']);
+            return response()->json([
+                'message' => 'Некорректный номер телефона',
+            ], 422);
         }
 
         $exists = User::where('phone_number', $normalizedPhone)
@@ -54,21 +57,15 @@ class AuthController extends Controller
             ->exists();
 
         if ($exists) {
-            throw ValidationException::withMessages(['phone_number' => 'Этот номер уже используется другим пользователем']);
+            return response()->json([
+                'message' => 'Этот номер уже используется другим пользователем',
+            ], 422);
         }
 
         $expiresAt = now()->addMinutes(5);
 
-        if ($this->isKZAllowedOperator($normalizedPhone)) {
-            //$code = mt_rand(1000, 9999);
-            $code = 4689;
-            $responseMsg = 'SMS code sent';
-            $this->sendSms($normalizedPhone, "Ваш код подтверждения: {$code}. Сообщение от wires-home-kz");
-        } else {
-            $code = 4687;
-            $responseMsg = 'Verification code set';
-            $this->sendSms($normalizedPhone, "Ваш код подтверждения: {$code}. Сообщение от wires-home-kz");
-        }
+        $code = random_int(1000, 9999);
+        $this->sendSms($normalizedPhone, "Ваш код подтверждения: {$code}. Сообщение от ZD Home");
 
         VerificationCode::updateOrCreate(
             ['user_id' => $user->id],
@@ -78,11 +75,10 @@ class AuthController extends Controller
         Cache::put($this->pendingPhoneCacheKey($user->id), $normalizedPhone, $expiresAt);
 
         return response()->json([
-            'message' => $responseMsg,
-            'expires_at' => $expiresAt->toIso8601String(),
+            'message'     => 'SMS code sent',
+            'expires_at'  => $expiresAt->toIso8601String(),
         ]);
     }
-
 
     public function confirmPhoneVerification(Request $request)
     {
@@ -150,26 +146,6 @@ class AuthController extends Controller
         return $digits === '' ? null : ('+' . $digits);
     }
 
-    private function isKZAllowedOperator(?string $phone): bool
-    {
-        if (!$phone || strpos($phone, '+7') !== 0) {
-            return false;
-        }
-
-        if (!preg_match('/^\+7\d{10}$/', $phone)) {
-            return false;
-        }
-
-        $code = substr($phone, 2, 3);
-        $allowed = [
-            '700','701','702','703','704','705','706','707','708','709',
-            '747','750','751','760','761','762','763','764',
-            '771','775','776','777','778',
-        ];
-
-        return in_array($code, $allowed, true);
-    }
-
     private function sendSms($phoneNumber, $message)
     {
         $formattedPhone = $this->formatPhoneNumber($phoneNumber);
@@ -180,34 +156,12 @@ class AuthController extends Controller
             'password'    => env('KAZINFOTEH_PASSWORD'),
             'recipient'   => $formattedPhone,
             'messagetype' => 'SMS:TEXT',
-            'originator'  => 'KiT_Notify',
+            'originator'  => 'ZD Home',
             'messagedata' => $message,
         ]);
 
         if ($response->failed()) {
             Log::error('Ошибка отправки SMS через KazInfoTeh: ' . $response->body());
-        }
-    }
-
-    private function sendSmsHttps($phoneNumber, $message)
-    {
-        $formattedPhone = $this->formatPhoneNumber($phoneNumber);
-
-        $login = env('KAZINFOTEH_USERNAME');
-        $password = env('KAZINFOTEH_PASSWORD');
-        $token = base64_encode("$login:$password");
-
-        $response = Http::withHeaders([
-            'Authorization' => 'Basic ' . $token,
-            'Content-Type'  => 'application/json',
-        ])->post('https://so.kazinfoteh.org/api/sms/send', [
-            'from' => 'KiT_Notify',
-            'to'   => $formattedPhone,
-            'text' => $message,
-        ]);
-
-        if ($response->failed()) {
-            Log::error('Ошибка отправки SMS через KazInfoTeh HTTPS: ' . $response->body());
         }
     }
 
