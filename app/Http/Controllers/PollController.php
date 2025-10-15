@@ -20,6 +20,15 @@ class PollController extends Controller
             ->orderBy('start_date', 'desc')
             ->paginate(10);
 
+        $polls->getCollection()->transform(function ($poll) use ($user) {
+            $hasVoted = PollVote::where('poll_id', $poll->id)
+                ->where('user_id', $user->id)
+                ->exists();
+
+            $poll->votes = $hasVoted;
+            return $poll;
+        });
+
         return response()->json($polls);
     }
 
