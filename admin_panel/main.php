@@ -31,6 +31,7 @@ $complexes = $pdo->query("SELECT * FROM residential_complexes ORDER BY name ASC"
                 <li><a href="residential_complex.php">Жилые комплексы</a></li>
                 <li><a href="debt.php">Загрузка данных коммунальных услуг</a></li>
                 <li><a href="debt_view.php">Просмотр данных коммунальных услуг</a></li>
+                <li><a href="debt_osv_import.php">Загрузка коммунальных данных для аналитики</a></li>
             <?php endif; ?>
 
             <?php if (in_array($role, ['admin', 'level1', 'level2', 'level3'])): ?>
