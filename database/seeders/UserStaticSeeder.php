@@ -10,7 +10,7 @@ class UserStaticSeeder extends Seeder
 {
     public function run(): void
     {
-        $rawUsers = include database_path('seeders/users_seed_array.php');
+        $rawUsers = include database_path('seeders/users_seed_satpaeva_array.php');
 
         foreach ($rawUsers as $data) {
             $user = [

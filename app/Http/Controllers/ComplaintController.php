@@ -34,7 +34,7 @@ class ComplaintController extends Controller
 
         $complaints = Complaint::with('photos')
             ->where('user_id', $user->id)
-            ->paginate(10);
+            ->get();
 
         return response()->json($complaints);
     }
@@ -71,5 +71,16 @@ class ComplaintController extends Controller
         $complaint->delete();
 
         return response()->json(['message' => 'Жалоба удалена']);
+    }
+
+    public function indexTest()
+    {
+        $user = Auth::user();
+
+        $complaints = Complaint::with('photos')
+            ->where('user_id', $user->id)
+            ->paginate(10);
+
+        return response()->json($complaints);
     }
 }

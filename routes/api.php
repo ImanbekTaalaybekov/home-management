@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyReportController;
@@ -98,3 +99,9 @@ Route::post('/company-report/store', [CompanyReportController::class, 'store']);
 Route::get('/company-report/show', [CompanyReportController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/company-report/show/{id}', [CompanyReportController::class, 'show'])->middleware('auth:sanctum');
 Route::delete('/company-report/remove/{id}', [CompanyReportController::class, 'remove'])->middleware('auth:sanctum');
+
+Route::post('analytics/upload-data-alseco', [AnalyticsController::class, 'uploadAlseco']);
+
+Route::prefix('test')->group(function () {
+    Route::get('/complaints', [ComplaintController::class, 'indexTest'])->middleware('auth:sanctum');
+});
