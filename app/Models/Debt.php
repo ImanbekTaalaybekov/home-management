@@ -12,7 +12,10 @@ class Debt extends Model
         'name',
         'amount',
         'due_date',
-        'current_charges'
+        'current_charges',
+        'payment_amount',
+        'initial_amount',
+        'period_start_balance'
     ];
 
     public function user()

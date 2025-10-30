@@ -24,7 +24,11 @@ class DebtResource extends JsonResource
             'opening_balance' => round($this->amount - $this->current_charges, 2),
             'due_date' => $this->due_date,
             'overdue' => $this->calculateOverdue(),
-            'deeplink'  => "kaspi://"
+            'deeplink'  => "kaspi://",
+            'period_start_balance' => $this->period_start_balance,
+            'initial_amount' => $this->initial_amount,
+            'payment_amount' => $this->payment_amount,
+            'payment_date' => $this->due_date
             //'deeplink'  => "kaspi://payment?service={$this->type}&amount={$this->amount}"
         ];
     }

@@ -2,34 +2,47 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnalyticsAlsecoData;
 use App\Models\Debt;
 use App\Models\DebtPaymentCheck;
-use App\Models\InputDebtDataAlseco;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 
 class DebtImportController extends Controller
 {
     public function importDebt()
     {
+        set_time_limit(3600);
+
         Debt::truncate();
         DebtPaymentCheck::truncate();
 
-        $services = InputDebtDataAlseco::query()
-            ->whereNotNull('service')
-            ->distinct()
-            ->pluck('service')
-            ->values();
+        $lastKey = AnalyticsAlsecoData::query()
+            ->whereNotNull('year')
+            ->whereNotNull('month')
+            ->selectRaw('MAX(year * 100 + month) as k')
+            ->value('k');
 
-        if ($services->isEmpty()) {
-            return response()->json(['message' => 'Нет данных Alseco для импорта'], 200);
+        if (!$lastKey) {
+            return response()->json(['message' => 'Нет данных AnalyticsAlsecoData для импорта'], 200);
         }
 
-        $accounts = InputDebtDataAlseco::query()
+        $lastYear  = intdiv((int)$lastKey, 100);
+        $lastMonth = (int)$lastKey % 100;
+
+        $accounts = AnalyticsAlsecoData::query()
+            ->where('year',  $lastYear)
+            ->where('month', $lastMonth)
+            ->whereNotNull('account_number')
             ->distinct()
             ->pluck('account_number')
             ->filter()
             ->values();
+
+        if ($accounts->isEmpty()) {
+            return response()->json(['message' => 'Нет лицевых счетов за последний период'], 200);
+        }
+
+        $totalWritten = 0;
 
         foreach ($accounts->chunk(500) as $accountChunk) {
 
@@ -38,35 +51,32 @@ class DebtImportController extends Controller
                 ->get()
                 ->keyBy('personal_account');
 
-            $agg = InputDebtDataAlseco::query()
+            $agg = AnalyticsAlsecoData::query()
                 ->whereIn('account_number', $accountChunk)
+                ->where('year',  $lastYear)
+                ->where('month', $lastMonth)
                 ->whereNotNull('service')
                 ->select([
                     'account_number',
                     'service',
-                    DB::raw('SUM(ABS(debt_amount)) AS amount'),
-                    DB::raw('SUM(current_charges) AS current_charges'),
-                    DB::raw('MAX(last_payment_date) AS due_date'),
                 ])
+                ->selectRaw('SUM(ABS(COALESCE(balance_start, 0)))   AS period_start_balance')
+                ->selectRaw('SUM(ABS(COALESCE(balance_end, 0)))     AS amount')
+                ->selectRaw('SUM(ABS(COALESCE(accrual_change, 0)))  AS current_charges')
+                ->selectRaw('SUM(ABS(COALESCE(payment, 0)))         AS payment_amount')
+                ->selectRaw('SUM(ABS(COALESCE(initial_accrual, 0))) AS initial_amount')
+                ->selectRaw("MAX(NULLIF(payment_date, ''))          AS due_date")
                 ->groupBy('account_number', 'service')
                 ->get()
                 ->groupBy('account_number');
 
             foreach ($accountChunk as $account) {
                 $user = $usersByAccount->get($account);
-                if (!$user) {
-                    continue;
-                }
+                if (!$user) continue;
 
                 $rowsByService = ($agg->get($account) ?? collect())->keyBy('service');
 
-                foreach ($services as $serviceName) {
-                    $row = $rowsByService->get($serviceName);
-
-                    $amount          = $row ? (float)$row->amount : 0.0;
-                    $currentCharges  = $row ? (float)$row->current_charges : 0.0;
-                    $dueDate         = $row ? $row->due_date : null;
-
+                foreach ($rowsByService as $serviceName => $row) {
                     Debt::updateOrCreate(
                         [
                             'user_id' => $user->id,
@@ -74,31 +84,23 @@ class DebtImportController extends Controller
                             'name'    => $serviceName,
                         ],
                         [
-                            'amount'           => $amount,
-                            'current_charges'  => $currentCharges,
-                            'due_date'         => $dueDate,
+                            'period_start_balance' => (float)$row->period_start_balance,
+                            'amount'               => (float)$row->amount,
+                            'current_charges'      => (float)$row->current_charges,
+                            'payment_amount'       => (float)$row->payment_amount,
+                            'initial_amount'       => (float)$row->initial_amount,
+                            'due_date'             => $row->due_date ?: null,
                         ]
                     );
+                    $totalWritten++;
                 }
             }
         }
 
-        /*$ivcDebts = InputDebtDataIvc::all();
-
-        foreach ($ivcDebts as $ivcDebt) {
-            $user = User::where('personal_account', $ivcDebt->account_number)->first();
-
-            if ($user) {
-                Debt::updateOrCreate([
-                    'user_id' => $user->id,
-                    'type' => 'IVC',
-                    'name' => $ivcDebt->service_name,
-                    'amount' => abs($ivcDebt->debt + $ivcDebt->penalty),
-                    'due_date' => now()->format('Y-m-d')
-                ]);
-            }
-        }*/
-
-        return response()->json(['message' => 'Данные импортированы']);
+        return response()->json([
+            'message'     => 'Данные импортированы из AnalyticsAlsecoData',
+            'period_used' => ['year' => $lastYear, 'month' => $lastMonth],
+            'rows'        => $totalWritten,
+        ]);
     }
 }
