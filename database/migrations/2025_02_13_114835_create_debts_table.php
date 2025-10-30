@@ -19,6 +19,9 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->decimal('current_charges', 10, 2);
             $table->date('due_date')->nullable();
+            $table->decimal('payment_amount', 10, 2)->nullable();
+            $table->decimal('initial_amount', 10, 2)->nullable();
+            $table->decimal('period_start_balance', 10, 2)->nullable();
             $table->timestamps();
         });
     }

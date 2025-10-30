@@ -100,7 +100,9 @@ Route::get('/company-report/show', [CompanyReportController::class, 'index'])->m
 Route::get('/company-report/show/{id}', [CompanyReportController::class, 'show'])->middleware('auth:sanctum');
 Route::delete('/company-report/remove/{id}', [CompanyReportController::class, 'remove'])->middleware('auth:sanctum');
 
-Route::post('analytics/upload-data-alseco', [AnalyticsController::class, 'uploadAlseco']);
+Route::post('/analytics/upload-data-alseco', [AnalyticsController::class, 'uploadAlseco']);
+Route::get('/analytics/periods-by-account', [AnalyticsController::class, 'periodsByAccount']);
+Route::get('/analytics/monthly-service-summary', [AnalyticsController::class, 'monthlyServiceSummary']);
 
 Route::prefix('test')->group(function () {
     Route::get('/complaints', [ComplaintController::class, 'indexTest'])->middleware('auth:sanctum');
