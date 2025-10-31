@@ -244,7 +244,7 @@ class AnalyticsController extends Controller
         }
 
         $rows = $q->select(['year', 'month', 'service'])
-            ->selectRaw('SUM(COALESCE(initial_accrual, 0)) as monthly_accrual_sum')
+            ->selectRaw('SUM(COALESCE(accrual_change, 0)) as monthly_accrual_sum') // заменили initial_accrual на accrual_change
             ->selectRaw('AVG(NULLIF(tariff, 0))            as avg_tariff')
             ->groupBy('year', 'month', 'service')
             ->orderBy('year')->orderBy('month')->orderBy('service')
