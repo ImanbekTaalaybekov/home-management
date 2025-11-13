@@ -24,6 +24,7 @@ class User extends Authenticatable implements CanResetPassword
         'phone_number',
         'non_residential_premises',
         'fcm_token',
+        'language',
         'role'
     ];
 

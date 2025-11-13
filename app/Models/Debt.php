@@ -22,4 +22,9 @@ class Debt extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function translation()
+    {
+        return $this->hasOne(DebtNameTranslation::class, 'original', 'name');
+    }
 }

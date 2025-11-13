@@ -25,6 +25,7 @@ class UserResource extends JsonResource
             'login' => $this->login,
             'residential_complex_name' => $this->residentialComplex?->name,
             'residential_complex_address' => $this->residentialComplex?->address,
+            'language' => $this->language,
         ];
     }
 }
