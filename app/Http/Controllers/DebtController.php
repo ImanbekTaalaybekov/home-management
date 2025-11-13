@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\DebtResource;
 use App\Models\Debt;
 use App\Models\DebtPaymentCheck;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -37,14 +38,13 @@ class DebtController extends Controller
 
     public function getSingleDebt($id)
     {
-        $user = Auth::user();
+        $debt = Debt::with('translation')->findOrFail($id);
+        $user = User::find($debt->user_id);
         $lang = strtolower($user->language ?? 'ru');
         $allowed = ['ru','kg','uz','kk','en','es','zh'];
         if (!in_array($lang, $allowed, true)) {
             $lang = 'ru';
         }
-
-        $debt = Debt::with('translation')->findOrFail($id);
 
         $t = $debt->translation;
         if ($t && !empty($t->{$lang})) {
