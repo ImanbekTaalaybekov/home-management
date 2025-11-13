@@ -13,15 +13,46 @@ class DebtController extends Controller
     public function getUserDebts()
     {
         $user = Auth::user();
+        $lang = strtolower($user->language ?? 'ru');
+        $allowed = ['ru','kg','uz','kk','en','es','zh'];
+        if (!in_array($lang, $allowed, true)) {
+            $lang = 'ru';
+        }
 
-        $debts = Debt::where('user_id', $user->id)->get();
+        $debts = Debt::where('user_id', $user->id)
+            ->with('translation')
+            ->get()
+            ->map(function ($debt) use ($lang) {
+                $t = $debt->translation;
+                if ($t && !empty($t->{$lang})) {
+                    $debt->name = $t->{$lang};
+                } elseif ($t && !empty($t->ru)) {
+                    $debt->name = $t->ru;
+                }
+                return $debt;
+            });
 
         return DebtResource::collection($debts);
     }
 
     public function getSingleDebt($id)
     {
-        $debt = Debt::findOrFail($id);
+        $user = Auth::user();
+        $lang = strtolower($user->language ?? 'ru');
+        $allowed = ['ru','kg','uz','kk','en','es','zh'];
+        if (!in_array($lang, $allowed, true)) {
+            $lang = 'ru';
+        }
+
+        $debt = Debt::with('translation')->findOrFail($id);
+
+        $t = $debt->translation;
+        if ($t && !empty($t->{$lang})) {
+            $debt->name = $t->{$lang};
+        } elseif ($t && !empty($t->ru)) {
+            $debt->name = $t->ru;
+        }
+
         return new DebtResource($debt);
     }
 

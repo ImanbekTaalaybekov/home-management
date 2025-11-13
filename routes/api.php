@@ -30,6 +30,7 @@ Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::post('/user/fcm-token', [AuthController::class, 'updateFcmToken'])->middleware('auth:sanctum');
 Route::post('/user/fcm-token-remove', [AuthController::class, 'removeFcmToken'])->middleware('auth:sanctum');
+Route::post('/user/language-update', [AuthController::class, 'languageUpdate'])->middleware('auth:sanctum');
 
 Route::get('/complaints', [ComplaintController::class, 'index'])->middleware('auth:sanctum');
 Route::post('/complaints', [ComplaintController::class, 'store'])->middleware('auth:sanctum');
@@ -103,6 +104,8 @@ Route::delete('/company-report/remove/{id}', [CompanyReportController::class, 'r
 Route::post('/analytics/upload-data-alseco', [AnalyticsController::class, 'uploadAlseco']);
 Route::get('/analytics/periods-by-account', [AnalyticsController::class, 'periodsByAccount']);
 Route::get('/analytics/monthly-service-summary', [AnalyticsController::class, 'monthlyServiceSummary']);
+Route::get('/analytics/periods-by-account-test', [AnalyticsController::class, 'periodsByAccountTest']);
+Route::get('/analytics/monthly-service-summary-test', [AnalyticsController::class, 'monthlyServiceSummaryTest']);
 
 Route::prefix('test')->group(function () {
     Route::get('/complaints', [ComplaintController::class, 'indexTest'])->middleware('auth:sanctum');

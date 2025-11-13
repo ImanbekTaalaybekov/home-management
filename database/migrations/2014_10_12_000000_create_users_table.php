@@ -24,6 +24,7 @@ return new class extends Migration
             $table->foreignId('residential_complex_id')->nullable()->constrained('residential_complexes');
             $table->string('fcm_token')->nullable();
             $table->string('role')->nullable();
+            $table->string('language')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

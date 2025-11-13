@@ -11,6 +11,7 @@ use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -313,5 +314,33 @@ class AuthController extends Controller
             ->delete();
 
         return response()->json(['message' => 'FCM-токен удалён']);
+    }
+
+    public function languageUpdate(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'language' => 'required|string|max:10',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user->language = $request->language;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Language updated successfully',
+            'language' => $user->language,
+        ], 200);
     }
 }
