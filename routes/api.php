@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\AppVersionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyReportController;
 use App\Http\Controllers\ComplaintController;
@@ -104,9 +106,21 @@ Route::delete('/company-report/remove/{id}', [CompanyReportController::class, 'r
 Route::post('/analytics/upload-data-alseco', [AnalyticsController::class, 'uploadAlseco']);
 Route::get('/analytics/periods-by-account', [AnalyticsController::class, 'periodsByAccount']);
 Route::get('/analytics/monthly-service-summary', [AnalyticsController::class, 'monthlyServiceSummary']);
-Route::get('/analytics/periods-by-account-test', [AnalyticsController::class, 'periodsByAccountTest']);
-Route::get('/analytics/monthly-service-summary-test', [AnalyticsController::class, 'monthlyServiceSummaryTest']);
+
+Route::get('/app-version/update-version', [AppVersionController::class, 'updateVersion']);
+Route::get('/app-version/last-version', [AppVersionController::class, 'showLastVersion']);
 
 Route::prefix('test')->group(function () {
+    Route::get('/analytics/periods-by-account', [AnalyticsController::class, 'periodsByAccountTest']);
+    Route::get('/analytics/monthly-service-summary', [AnalyticsController::class, 'monthlyServiceSummaryTest']);
     Route::get('/complaints', [ComplaintController::class, 'indexTest'])->middleware('auth:sanctum');
+});
+
+Route::prefix('admin')->group(function () {
+    Route::get('/auth', [AdminAuthController::class, 'auth']);
+    Route::post('/register', [AdminAuthController::class, 'register']);
+    Route::get('/me', [AdminAuthController::class, 'me'])->middleware('auth:sanctum');
+    Route::post('/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
+    Route::post('/user/fcm-token', [AdminAuthController::class, 'updateFcmToken'])->middleware('auth:sanctum');
+    Route::post('/user/fcm-token-remove', [AdminAuthController::class, 'removeFcmToken'])->middleware('auth:sanctum');
 });

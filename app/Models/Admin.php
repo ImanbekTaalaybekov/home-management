@@ -11,5 +11,15 @@ class Admin extends Model
         'role',
         'password',
         'client_id',
+        'accesses',
+        'name'
+    ];
+
+    protected $hidden = [
+        'password'
+    ];
+
+    protected $casts = [
+        'password' => 'hashed'
     ];
 }

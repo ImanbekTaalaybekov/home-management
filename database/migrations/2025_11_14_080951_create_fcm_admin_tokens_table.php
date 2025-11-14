@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admins', function (Blueprint $table) {
+        Schema::create('fcm_admin_tokens', function (Blueprint $table) {
             $table->id();
-            $table->string('role')->nullable();
-            $table->string('username');
-            $table->string('name');
-            $table->json('accesses')->nullable();
-            $table->string('password');
-            $table->integer('client_id')->nullable();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('device');
+            $table->string('fcm_token');
+            $table->unique(['user_id', 'device'], 'fut_user_device_unique');
+            $table->index('fcm_token', 'fut_fcm_token_idx');
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('admins');
+        Schema::dropIfExists('fcm_admin_tokens');
     }
 };
