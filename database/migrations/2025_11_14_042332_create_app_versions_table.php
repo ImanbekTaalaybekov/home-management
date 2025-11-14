@@ -11,14 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admins', function (Blueprint $table) {
+        Schema::create('app_versions', function (Blueprint $table) {
             $table->id();
-            $table->string('role')->nullable();
-            $table->string('username');
-            $table->string('name');
-            $table->json('accesses')->nullable();
-            $table->string('password');
-            $table->integer('client_id')->nullable();
+            $table->string('version')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('admins');
+        Schema::dropIfExists('app_versions');
     }
 };

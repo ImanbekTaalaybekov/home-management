@@ -14,7 +14,6 @@ return new class extends Migration {
             $table->string('fcm_token');
             $table->unique(['user_id', 'device'], 'fut_user_device_unique');
             $table->index('fcm_token', 'fut_fcm_token_idx');
-
             $table->timestamps();
         });
     }
