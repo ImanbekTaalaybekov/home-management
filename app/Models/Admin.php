@@ -22,4 +22,9 @@ class Admin extends Model
     protected $casts = [
         'password' => 'hashed'
     ];
+
+    public function client()
+    {
+        return $this->belongsTo(ProgramClient::class, 'client_id');
+    }
 }

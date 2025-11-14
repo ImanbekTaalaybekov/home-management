@@ -16,6 +16,7 @@ use App\Http\Controllers\PollController;
 use App\Http\Controllers\PrivacyDocumentController;
 use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\SuggestionController;
+use App\Http\Controllers\UserAdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -123,4 +124,9 @@ Route::prefix('admin')->group(function () {
     Route::post('/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::post('/user/fcm-token', [AdminAuthController::class, 'updateFcmToken'])->middleware('auth:sanctum');
     Route::post('/user/fcm-token-remove', [AdminAuthController::class, 'removeFcmToken'])->middleware('auth:sanctum');
+
+    Route::get('/residents', [UserAdminController::class, 'index']);
+    Route::put('/residents/{id}', [UserAdminController::class, 'updateUser']);
+    Route::delete('/residents/{id}', [UserAdminController::class, 'deleteUser']);
+    Route::post('/residents/{id}/attach-tenant', [UserAdminController::class, 'createTenantByOwnerId']);
 });
