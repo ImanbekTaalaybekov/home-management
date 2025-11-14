@@ -19,4 +19,14 @@ class ResidentialComplex extends Model
     {
         return $this->hasMany(Poll::class);
     }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+    
+    public function client()
+    {
+        return $this->belongsTo(ProgramClient::class, 'client_id');
+    }
 }
