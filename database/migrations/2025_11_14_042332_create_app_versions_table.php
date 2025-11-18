@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('app_versions', function (Blueprint $table) {
             $table->id();
             $table->string('version')->nullable();
+            $table->string('platform')->nullable();
             $table->timestamps();
         });
     }

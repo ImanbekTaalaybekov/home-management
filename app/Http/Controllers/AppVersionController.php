@@ -9,17 +9,14 @@ class AppVersionController extends Controller
 {
     public function updateVersion(Request $request)
     {
-        $version = $request->query('version');
-
-        if (!$version) {
-            return response()->json([
-                'error' => 'Не указана версия'
-            ], 422);
-        }
+        $validated = $request->validate([
+            'version'  => 'required|string',
+            'platform' => 'required|in:ios,android',
+        ]);
 
         $appVersion = AppVersion::updateOrCreate(
-            ['version' => $version],
-            []
+            ['platform' => $validated['platform']],
+            ['version' => $validated['version']]
         );
 
         return response()->json([
@@ -28,21 +25,24 @@ class AppVersionController extends Controller
         ]);
     }
 
-    public function showLastVersion()
+    public function showLastVersion(Request $request)
     {
-        $last = AppVersion::select('version')
-            ->orderByRaw("
-            CAST(split_part(version, '.', 1) AS INTEGER) DESC,
-            CAST(split_part(version, '.', 2) AS INTEGER) DESC,
-            CAST(
-                COALESCE(NULLIF(split_part(version, '.', 3), ''), '0')
-                AS INTEGER
-            ) DESC
-        ")
-            ->first();
+        $platform = $request->query('platform');
+        if ($platform) {
+            $version = AppVersion::where('platform', $platform)->first();
+
+            return response()->json([
+                'platform' => $platform,
+                'version'  => $version->version ?? null,
+            ]);
+        }
+
+        $ios = AppVersion::where('platform', 'ios')->first();
+        $android = AppVersion::where('platform', 'android')->first();
 
         return response()->json([
-            'version' => $last->version ?? null,
+            'ios'      => $ios->version ?? null,
+            'android'  => $android->version ?? null,
         ]);
     }
 }

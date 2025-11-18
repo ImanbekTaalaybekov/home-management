@@ -8,5 +8,6 @@ class AppVersion extends Model
 {
     protected $fillable = [
         'version',
+        'platform'
     ];
 }

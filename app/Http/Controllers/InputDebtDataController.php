@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\InputDebtDataAlseco;
-use App\Models\InputDebtDataIvc;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -75,55 +74,5 @@ class InputDebtDataController extends Controller
         } catch (\Exception $e) {
             return null;
         }
-    }
-
-    public function uploadIvc(Request $request)
-    {
-        if ($request->hasFile('file')) {
-
-            InputDebtDataIvc::truncate();
-
-            $file = $request->file('file');
-            $spreadsheet = IOFactory::load($file->getPathname());
-            $sheet = $spreadsheet->getActiveSheet();
-
-            $rows = $sheet->toArray();
-
-            foreach ($rows as $index => $row) {
-                $excelRowIndex = $index + 1;
-
-                if (!empty($row[1]) && $sheet->getStyle('B' . $excelRowIndex)->getFill()->getStartColor()->getRGB() === 'FFFFFF') {
-                    $house = $this->getHouseValue($sheet, $excelRowIndex);
-
-                    InputDebtDataIvc::create([
-                        'account_number' => $row[0],
-                        'apartment'     => $row[1],
-                        'full_name'     => empty($row[2]) ? 'ФИО не указаны' : $row[2],
-                        'phone'         => $row[3],
-                        'service_name'  => $row[4],
-                        'debt'          => $row[5],
-                        'penalty'       => $row[6],
-                        'house'         => $house,
-                    ]);
-                }
-            }
-
-            return response()->json(['message' => 'Файл успешно загружен и обработан']);
-        }
-
-        return response()->json(['message' => 'Файл не был загружен'], 400);
-    }
-
-    private function getHouseValue($sheet, $excelRowIndex)
-    {
-        $excelRowIndex = intval($excelRowIndex);
-
-        for ($i = $excelRowIndex; $i >= 1; $i--) {
-            $cell = 'A' . $i;
-            if ($sheet->getStyle($cell)->getFill()->getStartColor()->getRGB() !== 'FFFFFF') {
-                return $sheet->getCell('A' . ($i - 1))->getValue();
-            }
-        }
-        return 'Неизвестный дом';
     }
 }

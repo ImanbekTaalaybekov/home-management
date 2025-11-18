@@ -16,9 +16,10 @@ class AdminResource extends JsonResource
         return [
             'id' => $this->id,
             'username' => $this->username,
-            'role' => $this->personal_account,
-            'accesses' => $this->phone_number,
-            'client' => $this->phone_number
+            'name' => $this->name,
+            'role' => $this->role,
+            'accesses' => $this->accesses,
+            'client_id' => $this->client_id
         ];
     }
 }
