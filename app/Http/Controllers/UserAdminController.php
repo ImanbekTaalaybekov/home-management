@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ResidentialComplex;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -157,4 +158,57 @@ class UserAdminController extends Controller
         ]);
     }
 
+    public function createUser(Request $request)
+    {
+        $admin = Auth::guard('sanctum')->user();
+
+        if (!$admin) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        if (!$admin->client_id) {
+            return response()->json(['message' => 'У админа не указан client_id'], 403);
+        }
+
+        $validated = $request->validate([
+            'login'                   => 'required|string|unique:users,login',
+            'personal_account'        => 'nullable|string',
+            'phone_number'            => 'nullable|string',
+            'name'                    => 'required|string',
+            'password'                => 'required|string',
+            'block_number'            => 'nullable|string',
+            'apartment_number'        => 'nullable|string',
+            'non_residential_premises'=> 'nullable|string',
+            'residential_complex_id'  => 'required|exists:residential_complexes,id',
+            'language'                => 'nullable|string',
+            'role'                    => 'nullable|in:owner,tenant,family',
+        ]);
+
+        $residentialComplex = ResidentialComplex::where('id', $validated['residential_complex_id'])
+            ->where('client_id', $admin->client_id)
+            ->first();
+
+        if (!$residentialComplex) {
+            return response()->json(['message' => 'Forbidden: residential complex not belongs to this client'], 403);
+        }
+
+        $user = User::create([
+            'login'                   => $validated['login'],
+            'personal_account'        => $validated['personal_account'] ?? null,
+            'phone_number'            => $validated['phone_number'] ?? null,
+            'name'                    => $validated['name'],
+            'password'                => bcrypt($validated['password']),
+            'block_number'            => $validated['block_number'] ?? null,
+            'apartment_number'        => $validated['apartment_number'] ?? null,
+            'non_residential_premises'=> $validated['non_residential_premises'] ?? null,
+            'residential_complex_id'  => $validated['residential_complex_id'],
+            'language'                => $validated['language'] ?? null,
+            'role'                    => $validated['role'] ?? 'owner',
+        ]);
+
+        return response()->json([
+            'message' => 'User created successfully',
+            'user'    => $user,
+        ], 201);
+    }
 }

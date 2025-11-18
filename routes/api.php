@@ -7,6 +7,7 @@ use App\Http\Controllers\AppVersionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyReportController;
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\DebtAdminController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\DebtImportController;
 use App\Http\Controllers\InputDebtDataController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\PrivacyDocumentController;
+use App\Http\Controllers\ResidentialComplexAdminController;
 use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\SuggestionController;
 use App\Http\Controllers\UserAdminController;
@@ -86,7 +88,6 @@ Route::post('/announcements', [AnnouncementController::class, 'store'])->middlew
 Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->middleware('auth:sanctum');
 
 Route::post('/upload-debt-data-alseco', [InputDebtDataController::class, 'uploadAlseco']);
-Route::post('/upload-debt-data-ivc', [InputDebtDataController::class, 'uploadIvc']);
 
 Route::post('/debt-import', [DebtImportController::class, 'importDebt']);
 
@@ -118,15 +119,31 @@ Route::prefix('test')->group(function () {
 });
 
 Route::prefix('admin')->group(function () {
-    Route::get('/auth', [AdminAuthController::class, 'auth']);
-    Route::post('/register', [AdminAuthController::class, 'register']);
+    Route::post('/auth', [AdminAuthController::class, 'auth']);
+    Route::post('/register', [AdminAuthController::class, 'register'])->middleware('auth:sanctum');
     Route::get('/me', [AdminAuthController::class, 'me'])->middleware('auth:sanctum');
     Route::post('/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::post('/user/fcm-token', [AdminAuthController::class, 'updateFcmToken'])->middleware('auth:sanctum');
     Route::post('/user/fcm-token-remove', [AdminAuthController::class, 'removeFcmToken'])->middleware('auth:sanctum');
+    Route::get('/admins', [AdminAuthController::class, 'listByRole'])->middleware('auth:sanctum');
+    Route::put('/admins/{id}', [AdminAuthController::class, 'update'])->middleware('auth:sanctum');
+    Route::delete('/admins/{id}', [AdminAuthController::class, 'delete'])->middleware('auth:sanctum');
 
-    Route::get('/residents', [UserAdminController::class, 'index']);
-    Route::put('/residents/{id}', [UserAdminController::class, 'updateUser']);
-    Route::delete('/residents/{id}', [UserAdminController::class, 'deleteUser']);
-    Route::post('/residents/{id}/attach-tenant', [UserAdminController::class, 'createTenantByOwnerId']);
+    Route::get('/residents', [UserAdminController::class, 'index'])->middleware('auth:sanctum');
+    Route::put('/residents/{id}', [UserAdminController::class, 'updateUser'])->middleware('auth:sanctum');
+    Route::delete('/residents/{id}', [UserAdminController::class, 'deleteUser'])->middleware('auth:sanctum');
+    Route::post('/residents/{id}/attach-tenant', [UserAdminController::class, 'createTenantByOwnerId'])->middleware('auth:sanctum');
+    Route::post('/residents', [UserAdminController::class, 'createUser'])->middleware('auth:sanctum');
+
+    Route::get('/residential-complexes', [ResidentialComplexAdminController::class, 'index'])->middleware('auth:sanctum');
+    Route::put('/residential-complexes/{id}', [ResidentialComplexAdminController::class, 'update'])->middleware('auth:sanctum');
+    Route::post('/residential-complexes', [ResidentialComplexAdminController::class, 'store'])->middleware('auth:sanctum');
+    Route::delete('/residential-complexes/{id}', [ResidentialComplexAdminController::class, 'destroy'])->middleware('auth:sanctum');
+
+    Route::get('/debt-data', [DebtAdminController::class, 'adminServiceList'])->middleware('auth:sanctum');
+
+    Route::get('/notifications', [NotificationController::class, 'indexAdmin'])->middleware('auth:sanctum');
+    Route::post('/notifications', [NotificationController::class, 'store'])->middleware('auth:sanctum');
+    Route::put('/notifications/{id}', [NotificationController::class, 'update'])->middleware('auth:sanctum');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->middleware('auth:sanctum');
 });
