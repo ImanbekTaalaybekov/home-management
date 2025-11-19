@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('knowledge_base_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->integer('client_id')->nullable();
             $table->timestamps();
         });
     }

@@ -9,7 +9,7 @@ use Illuminate\Http\UploadedFile;
 
 class NotificationService
 {
-    public function sendGlobalNotification(int $clientId, string $title, string $message, array $photos = [], $document = null, string $category): void
+    public function sendGlobalNotification( $clientId, string $title, string $message, array $photos = [], $document = null, string $category): void
     {
         $notification = Notification::create([
             'client_id' => $clientId,
@@ -36,7 +36,7 @@ class NotificationService
         $this->sendPushNotification($title, $message, $tokens);
     }
 
-    public function sendComplexNotification(int    $clientId, int    $complexId, string $title, string $message, array  $photos = [],$document = null, string $category): void
+    public function sendComplexNotification($clientId, int    $complexId, string $title, string $message, array  $photos = [],$document = null, string $category): void
     {
         $notification = Notification::create([
             'client_id' => $clientId,
@@ -61,7 +61,7 @@ class NotificationService
         $this->sendPushNotification($title, $message, $tokens);
     }
 
-    public function sendPersonalNotification(int    $clientId, string $personalAccount, string $title, string $message, array  $photos = [], $document = null, string $category): ?Notification
+    public function sendPersonalNotification ($clientId, string $personalAccount, string $title, string $message, array  $photos = [], $document = null, string $category): ?Notification
     {
         $user = User::where('personal_account', $personalAccount)->first();
 
