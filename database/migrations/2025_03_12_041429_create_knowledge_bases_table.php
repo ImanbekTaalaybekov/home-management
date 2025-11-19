@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('content');
+            $table->integer('client_id');
             $table->foreignId('category_id')->constrained('knowledge_base_categories')->onDelete('cascade');
             $table->timestamps();
         });

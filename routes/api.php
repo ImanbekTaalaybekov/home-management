@@ -6,6 +6,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AppVersionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyReportController;
+use App\Http\Controllers\ComplaintAdminController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DebtAdminController;
 use App\Http\Controllers\DebtController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\PollController;
 use App\Http\Controllers\PrivacyDocumentController;
 use App\Http\Controllers\ResidentialComplexAdminController;
 use App\Http\Controllers\ServiceRequestController;
+use App\Http\Controllers\SuggestionAdminController;
 use App\Http\Controllers\SuggestionController;
 use App\Http\Controllers\UserAdminController;
 use Illuminate\Http\Request;
@@ -143,7 +145,27 @@ Route::prefix('admin')->group(function () {
     Route::get('/debt-data', [DebtAdminController::class, 'adminServiceList'])->middleware('auth:sanctum');
 
     Route::get('/notifications', [NotificationController::class, 'indexAdmin'])->middleware('auth:sanctum');
-    Route::post('/notifications', [NotificationController::class, 'store'])->middleware('auth:sanctum');
+    Route::post('/notifications', [NotificationController::class, 'storeAdmin'])->middleware('auth:sanctum');
     Route::put('/notifications/{id}', [NotificationController::class, 'update'])->middleware('auth:sanctum');
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->middleware('auth:sanctum');
+
+    Route::get('/knowledge-base/categories', [KnowledgeBaseController::class, 'indexCategories'])->middleware('auth:sanctum');
+    Route::post('/knowledge-base/categories', [KnowledgeBaseController::class, 'storeCategory'])->middleware('auth:sanctum');
+    Route::put('/knowledge-base/categories/{id}', [KnowledgeBaseController::class, 'updateCategory'])->middleware('auth:sanctum');
+    Route::delete('/knowledge-base/categories/{id}', [KnowledgeBaseController::class, 'destroyCategory'])->middleware('auth:sanctum');
+    Route::get('/knowledge-base/articles', [KnowledgeBaseController::class, 'indexArticles'])->middleware('auth:sanctum');
+    Route::post('/knowledge-base/articles', [KnowledgeBaseController::class, 'storeArticle'])->middleware('auth:sanctum');
+    Route::get('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'showArticle'])->middleware('auth:sanctum');
+    Route::post('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'updateArticle'])->middleware('auth:sanctum');
+    Route::delete('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'destroyArticle'])->middleware('auth:sanctum');
+
+    Route::get('/complaints', [ComplaintAdminController::class, 'index'])->middleware('auth:sanctum');
+    Route::get('/complaints/{id}', [ComplaintAdminController::class, 'show'])->middleware('auth:sanctum');
+    Route::post('/complaints/{id}/status', [ComplaintAdminController::class, 'updateStatus'])->middleware('auth:sanctum');
+    Route::delete('/complaints/{id}', [ComplaintAdminController::class, 'remove'])->middleware('auth:sanctum');
+
+    Route::get('/suggestions', [SuggestionAdminController::class, 'index'])->middleware('auth:sanctum');
+    Route::get('/suggestions/{id}', [SuggestionAdminController::class, 'show'])->middleware('auth:sanctum');
+    Route::patch('/suggestions/{id}/status', [SuggestionAdminController::class, 'updateStatus'])->middleware('auth:sanctum');
+    Route::delete('/suggestions/{id}', [SuggestionAdminController::class, 'remove'])->middleware('auth:sanctum');
 });

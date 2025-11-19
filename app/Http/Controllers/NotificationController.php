@@ -53,6 +53,76 @@ class NotificationController extends Controller
     {
         $admin = Auth::guard('sanctum')->user();
 
+        $request->validate([
+            'type' => 'required|in:global,complex,personal',
+            'category' => 'required|in:technical,common',
+            'title' => 'required|string',
+            'message' => 'required|string',
+            'personal_account' => 'nullable',
+            'residential_complex_id' => 'nullable|exists:residential_complexes,id',
+            'photos' => 'nullable|array',
+            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg',
+            'document' => 'nullable|file|mimes:pdf',
+        ]);
+
+        $photos = [];
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $photo) {
+                $photos[] = $photo->store('photos/notification', 'public');
+            }
+        }
+
+        $documentPath = null;
+        if ($request->hasFile('document')) {
+            $documentPath = $request->file('document')->store('documents/notification', 'public');
+        }
+
+        $clientId = null;
+
+        switch ($request->type) {
+            case 'global':
+                $notificationService->sendGlobalNotification(
+                    $clientId,
+                    $request->title,
+                    $request->message,
+                    $photos,
+                    $documentPath,
+                    $request->category
+                );
+                break;
+
+            case 'complex':
+                $notificationService->sendComplexNotification(
+                    $clientId,
+                    $request->residential_complex_id,
+                    $request->title,
+                    $request->message,
+                    $photos,
+                    $documentPath,
+                    $request->category
+                );
+                break;
+
+            case 'personal':
+                $notificationService->sendPersonalNotification(
+                    $clientId,
+                    $request->personal_account,
+                    $request->title,
+                    $request->message,
+                    $photos,
+                    $documentPath,
+                    $request->category
+                );
+                break;
+        }
+
+        return response()->json(['message' => 'Уведомление отправлено'], 201);
+    }
+
+    public function storeAdmin(Request $request, NotificationService $notificationService)
+    {
+        $admin = Auth::guard('sanctum')->user();
+
         if (!$admin) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
