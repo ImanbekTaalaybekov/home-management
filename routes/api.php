@@ -17,6 +17,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\PrivacyDocumentController;
 use App\Http\Controllers\ResidentialComplexAdminController;
+use App\Http\Controllers\ServiceRequestAdminController;
 use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\SuggestionAdminController;
 use App\Http\Controllers\SuggestionController;
@@ -99,6 +100,7 @@ Route::post('/knowledge-base/articles', [KnowledgeBaseController::class, 'storeA
 Route::get('/knowledge-base/articles', [KnowledgeBaseController::class, 'indexArticles']);
 Route::get('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'showArticle']);
 
+
 Route::get('/company-documents/user-agreement', [PrivacyDocumentController::class, 'getUserAgreement']);
 Route::get('/company-documents/privacy-policy', [PrivacyDocumentController::class, 'getPrivacyPolicy']);
 
@@ -168,4 +170,16 @@ Route::prefix('admin')->group(function () {
     Route::get('/suggestions/{id}', [SuggestionAdminController::class, 'show'])->middleware('auth:sanctum');
     Route::patch('/suggestions/{id}/status', [SuggestionAdminController::class, 'updateStatus'])->middleware('auth:sanctum');
     Route::delete('/suggestions/{id}', [SuggestionAdminController::class, 'remove'])->middleware('auth:sanctum');
+
+    Route::get('/service-requests', [ServiceRequestAdminController::class, 'indexRequests'])->middleware('auth:sanctum');
+    Route::post('/service-requests/{id}/assign-master', [ServiceRequestAdminController::class, 'assignMaster'])->middleware('auth:sanctum');
+    Route::delete('/service-requests/{id}', [ServiceRequestAdminController::class, 'destroyRequest'])->middleware('auth:sanctum');
+    Route::get('/service-requests/categories', [ServiceRequestAdminController::class, 'indexCategories'])->middleware('auth:sanctum');
+    Route::post('/service-requests/categories', [ServiceRequestAdminController::class, 'storeCategory'])->middleware('auth:sanctum');
+    Route::put('/service-requests/categories/{id}', [ServiceRequestAdminController::class, 'updateCategory'])->middleware('auth:sanctum');
+    Route::delete('/service-requests/categories/{id}', [ServiceRequestAdminController::class, 'destroyCategory'])->middleware('auth:sanctum');
+    Route::get('/service-requests/masters', [ServiceRequestAdminController::class, 'indexMasters'])->middleware('auth:sanctum');
+    Route::post('/service-requests/masters', [ServiceRequestAdminController::class, 'storeMaster'])->middleware('auth:sanctum');
+    Route::put('/service-requests/masters/{id}', [ServiceRequestAdminController::class, 'updateMaster'])->middleware('auth:sanctum');
+    Route::delete('/service-requests/masters/{id}', [ServiceRequestAdminController::class, 'destroyMaster'])->middleware('auth:sanctum');
 });
