@@ -9,5 +9,11 @@ class ServiceRequestMaster extends Model
     protected $fillable = [
         'name',
         'service_request_category_id',
+        'client_id'
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(ServiceRequestCategory::class, 'service_request_category_id');
+    }
 }
