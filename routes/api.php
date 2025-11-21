@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\AnnouncementAdminController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AppVersionController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompanyReportAdminController;
 use App\Http\Controllers\CompanyReportController;
 use App\Http\Controllers\ComplaintAdminController;
 use App\Http\Controllers\ComplaintController;
@@ -14,6 +16,7 @@ use App\Http\Controllers\DebtImportController;
 use App\Http\Controllers\InputDebtDataController;
 use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PollAdminController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\PrivacyDocumentController;
 use App\Http\Controllers\ResidentialComplexAdminController;
@@ -182,4 +185,17 @@ Route::prefix('admin')->group(function () {
     Route::post('/service-requests/masters', [ServiceRequestAdminController::class, 'storeMaster'])->middleware('auth:sanctum');
     Route::put('/service-requests/masters/{id}', [ServiceRequestAdminController::class, 'updateMaster'])->middleware('auth:sanctum');
     Route::delete('/service-requests/masters/{id}', [ServiceRequestAdminController::class, 'destroyMaster'])->middleware('auth:sanctum');
+
+    Route::post('/company-report/store', [CompanyReportAdminController::class, 'store'])->middleware('auth:sanctum');
+    Route::get('/company-report/show', [CompanyReportAdminController::class, 'index'])->middleware('auth:sanctum');
+    Route::put('/company-report/update/{id}', [CompanyReportAdminController::class, 'update'])->middleware('auth:sanctum');
+    Route::delete('/company-report/remove/{id}', [CompanyReportAdminController::class, 'remove'])->middleware('auth:sanctum');
+
+    Route::post('/polls', [PollAdminController::class, 'store'])->middleware('auth:sanctum');
+    Route::get('/polls/protocol/{poll}', [PollAdminController::class, 'generateProtocol'])->middleware('auth:sanctum');
+    Route::get('/polls', [PollAdminController::class, 'index'])->middleware('auth:sanctum');
+    Route::delete('/polls/{id}', [PollAdminController::class, 'remove'])->middleware('auth:sanctum');
+
+    Route::get('/announcements', [AnnouncementAdminController::class, 'index'])->middleware('auth:sanctum');
+    Route::delete('/announcements/{id}', [AnnouncementAdminController::class, 'remove'])->middleware('auth:sanctum');
 });
