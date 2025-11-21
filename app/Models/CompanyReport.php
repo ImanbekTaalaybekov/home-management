@@ -12,4 +12,9 @@ class CompanyReport extends Model
         'residential_complex_id',
         'document'
     ];
+
+    public function residentialComplex()
+    {
+        return $this->belongsTo(ResidentialComplex::class, 'residential_complex_id');
+    }
 }

@@ -25,4 +25,9 @@ class Announcement extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function residentialComplex()
+    {
+        return $this->belongsTo(ResidentialComplex::class, 'residential_complex_id');
+    }
 }
