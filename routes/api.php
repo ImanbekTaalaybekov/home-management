@@ -192,10 +192,13 @@ Route::prefix('admin')->group(function () {
     Route::delete('/company-report/remove/{id}', [CompanyReportAdminController::class, 'remove'])->middleware('auth:sanctum');
 
     Route::post('/polls', [PollAdminController::class, 'store'])->middleware('auth:sanctum');
-    Route::get('/polls/protocol/{poll}', [PollAdminController::class, 'generateProtocol'])->middleware('auth:sanctum');
+    Route::get('/polls/protocol/{poll}', [PollAdminController::class, 'generateProtocol']);
     Route::get('/polls', [PollAdminController::class, 'index'])->middleware('auth:sanctum');
     Route::delete('/polls/{id}', [PollAdminController::class, 'remove'])->middleware('auth:sanctum');
 
     Route::get('/announcements', [AnnouncementAdminController::class, 'index'])->middleware('auth:sanctum');
     Route::delete('/announcements/{id}', [AnnouncementAdminController::class, 'remove'])->middleware('auth:sanctum');
+
+    Route::post('/analytics/upload-data-alseco', [AnalyticsController::class, 'uploadAlseco']);
+    Route::post('/debt-import', [DebtImportController::class, 'importDebt']);
 });
