@@ -117,6 +117,41 @@ class ServiceRequestAdminController extends Controller
         return response()->json(['message' => 'Service request deleted successfully']);
     }
 
+    public function updateRequestStatus(Request $request, $id)
+    {
+        $admin = Auth::guard('sanctum')->user();
+
+        if (!$admin) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        if (!$admin->client_id) {
+            return response()->json(['message' => 'У админа не указан client_id'], 403);
+        }
+
+        $request->validate([
+            'status' => 'required|in:pending,done',
+        ]);
+
+        $serviceRequest = ServiceRequest::where('id', $id)
+            ->whereHas('user.residentialComplex', function ($q) use ($admin) {
+                $q->where('client_id', $admin->client_id);
+            })
+            ->first();
+
+        if (!$serviceRequest) {
+            return response()->json(['message' => 'Service request not found'], 404);
+        }
+
+        $serviceRequest->status = $request->status;
+        $serviceRequest->save();
+
+        return response()->json([
+            'message' => 'Статус успешно обновлён',
+            'data'    => $serviceRequest,
+        ]);
+    }
+
     public function indexCategories()
     {
         $admin = Auth::guard('sanctum')->user();

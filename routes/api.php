@@ -175,6 +175,7 @@ Route::prefix('admin')->group(function () {
     Route::delete('/suggestions/{id}', [SuggestionAdminController::class, 'remove'])->middleware('auth:sanctum');
 
     Route::get('/service-requests', [ServiceRequestAdminController::class, 'indexRequests'])->middleware('auth:sanctum');
+    Route::put('/service-requests/{id}/status', [ServiceRequestAdminController::class, 'updateRequestStatus'])->middleware('auth:sanctum');
     Route::post('/service-requests/{id}/assign-master', [ServiceRequestAdminController::class, 'assignMaster'])->middleware('auth:sanctum');
     Route::delete('/service-requests/{id}', [ServiceRequestAdminController::class, 'destroyRequest'])->middleware('auth:sanctum');
     Route::get('/service-requests/categories', [ServiceRequestAdminController::class, 'indexCategories'])->middleware('auth:sanctum');
