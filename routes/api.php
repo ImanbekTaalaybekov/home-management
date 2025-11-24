@@ -10,6 +10,7 @@ use App\Http\Controllers\CompanyReportAdminController;
 use App\Http\Controllers\CompanyReportController;
 use App\Http\Controllers\ComplaintAdminController;
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\DebtAdminController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\DebtImportController;
@@ -202,4 +203,6 @@ Route::prefix('admin')->group(function () {
 
     Route::post('/analytics/upload-data-alseco', [AnalyticsController::class, 'uploadAlseco']);
     Route::post('/debt-import', [DebtImportController::class, 'importDebt']);
+
+    Route::get('/dashboard', [DashboardAdminController::class, 'index'])->middleware('auth:sanctum');
 });
