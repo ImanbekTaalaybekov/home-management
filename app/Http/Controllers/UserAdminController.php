@@ -88,22 +88,22 @@ class UserAdminController extends Controller
         }
 
         $validated = $request->validate([
-            'login'                 => 'nullable|string',
-            'personal_account'      => 'nullable|string',
-            'phone_number'          => 'nullable|string',
-            'name'                  => 'nullable|string',
-            'block_number'          => 'nullable|string',
-            'apartment_number'      => 'nullable|string',
+            'login' => 'nullable|string',
+            'personal_account' => 'nullable|string',
+            'phone_number' => 'nullable|string',
+            'name' => 'nullable|string',
+            'block_number' => 'nullable|string',
+            'apartment_number' => 'nullable|string',
             'non_residential_premises' => 'nullable|string',
             'residential_complex_id' => 'nullable|exists:residential_complexes,id',
-            'language'              => 'nullable|string',
+            'language' => 'nullable|string',
         ]);
 
         $user->update($validated);
 
         return response()->json([
             'message' => 'User updated successfully',
-            'user'    => $user,
+            'user' => $user,
         ]);
     }
 
@@ -116,10 +116,11 @@ class UserAdminController extends Controller
         }
 
         $validated = $request->validate([
-            'new_login'   => 'required|string',
-            'name'        => 'required|string',
+            'new_login' => 'required|string',
+            'name' => 'required|string',
             'phone_number' => 'nullable|string',
-            'role'        => 'nullable|in:tenant,family'
+            'password' => 'required|string',
+            'role' => 'nullable|in:tenant,family'
         ]);
 
         $owner = User::find($id);
@@ -140,21 +141,21 @@ class UserAdminController extends Controller
 
         $role = $validated['role'] ?? 'tenant';
         $tenant = User::create([
-            'login'                  => $fullLogin,
-            'name'                   => $validated['name'],
-            'phone_number'           => $validated['phone_number'] ?? null,
-            'password'               => bcrypt('default123'),
-            'role'                   => $role,
+            'login' => $fullLogin,
+            'name' => $validated['name'],
+            'phone_number' => $validated['phone_number'] ?? null,
+            'password' => bcrypt($validated['password']),
+            'role' => $role,
             'residential_complex_id' => $owner->residential_complex_id,
-            'block_number'           => $owner->block_number,
-            'apartment_number'       => $owner->apartment_number,
+            'block_number' => $owner->block_number,
+            'apartment_number' => $owner->apartment_number,
             'non_residential_premises' => $owner->non_residential_premises,
-            'personal_account'       => null,
+            'personal_account' => null,
         ]);
 
         return response()->json([
             'message' => 'Tenant created successfully',
-            'user'    => $tenant,
+            'user' => $tenant,
         ]);
     }
 
@@ -171,17 +172,17 @@ class UserAdminController extends Controller
         }
 
         $validated = $request->validate([
-            'login'                   => 'required|string|unique:users,login',
-            'personal_account'        => 'nullable|string',
-            'phone_number'            => 'nullable|string',
-            'name'                    => 'required|string',
-            'password'                => 'required|string',
-            'block_number'            => 'nullable|string',
-            'apartment_number'        => 'nullable|string',
-            'non_residential_premises'=> 'nullable|string',
-            'residential_complex_id'  => 'required|exists:residential_complexes,id',
-            'language'                => 'nullable|string',
-            'role'                    => 'nullable|in:owner,tenant,family',
+            'login' => 'required|string|unique:users,login',
+            'personal_account' => 'nullable|string',
+            'phone_number' => 'nullable|string',
+            'name' => 'required|string',
+            'password' => 'required|string',
+            'block_number' => 'nullable|string',
+            'apartment_number' => 'nullable|string',
+            'non_residential_premises' => 'nullable|string',
+            'residential_complex_id' => 'required|exists:residential_complexes,id',
+            'language' => 'nullable|string',
+            'role' => 'nullable|in:owner,tenant,family',
         ]);
 
         $residentialComplex = ResidentialComplex::where('id', $validated['residential_complex_id'])
@@ -193,22 +194,22 @@ class UserAdminController extends Controller
         }
 
         $user = User::create([
-            'login'                   => $validated['login'],
-            'personal_account'        => $validated['personal_account'] ?? null,
-            'phone_number'            => $validated['phone_number'] ?? null,
-            'name'                    => $validated['name'],
-            'password'                => bcrypt($validated['password']),
-            'block_number'            => $validated['block_number'] ?? null,
-            'apartment_number'        => $validated['apartment_number'] ?? null,
-            'non_residential_premises'=> $validated['non_residential_premises'] ?? null,
-            'residential_complex_id'  => $validated['residential_complex_id'],
-            'language'                => $validated['language'] ?? null,
-            'role'                    => $validated['role'] ?? 'owner',
+            'login' => $validated['login'],
+            'personal_account' => $validated['personal_account'] ?? null,
+            'phone_number' => $validated['phone_number'] ?? null,
+            'name' => $validated['name'],
+            'password' => bcrypt($validated['password']),
+            'block_number' => $validated['block_number'] ?? null,
+            'apartment_number' => $validated['apartment_number'] ?? null,
+            'non_residential_premises' => $validated['non_residential_premises'] ?? null,
+            'residential_complex_id' => $validated['residential_complex_id'],
+            'language' => $validated['language'] ?? null,
+            'role' => $validated['role'] ?? 'owner',
         ]);
 
         return response()->json([
             'message' => 'User created successfully',
-            'user'    => $user,
+            'user' => $user,
         ], 201);
     }
 }
