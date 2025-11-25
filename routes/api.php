@@ -15,6 +15,7 @@ use App\Http\Controllers\DebtAdminController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\DebtImportController;
 use App\Http\Controllers\InputDebtDataController;
+use App\Http\Controllers\KnowledgeBaseAdminController;
 use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PollAdminController;
@@ -98,9 +99,7 @@ Route::post('/upload-debt-data-alseco', [InputDebtDataController::class, 'upload
 
 Route::post('/debt-import', [DebtImportController::class, 'importDebt']);
 
-Route::post('/knowledge-base/categories', [KnowledgeBaseController::class, 'storeCategory']);
 Route::get('/knowledge-base/categories', [KnowledgeBaseController::class, 'indexCategories']);
-Route::post('/knowledge-base/articles', [KnowledgeBaseController::class, 'storeArticle']);
 Route::get('/knowledge-base/articles', [KnowledgeBaseController::class, 'indexArticles']);
 Route::get('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'showArticle']);
 
@@ -155,15 +154,15 @@ Route::prefix('admin')->group(function () {
     Route::put('/notifications/{id}', [NotificationController::class, 'update'])->middleware('auth:sanctum');
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->middleware('auth:sanctum');
 
-    Route::get('/knowledge-base/categories', [KnowledgeBaseController::class, 'indexCategories'])->middleware('auth:sanctum');
-    Route::post('/knowledge-base/categories', [KnowledgeBaseController::class, 'storeCategory'])->middleware('auth:sanctum');
-    Route::put('/knowledge-base/categories/{id}', [KnowledgeBaseController::class, 'updateCategory'])->middleware('auth:sanctum');
-    Route::delete('/knowledge-base/categories/{id}', [KnowledgeBaseController::class, 'destroyCategory'])->middleware('auth:sanctum');
-    Route::get('/knowledge-base/articles', [KnowledgeBaseController::class, 'indexArticles'])->middleware('auth:sanctum');
-    Route::post('/knowledge-base/articles', [KnowledgeBaseController::class, 'storeArticle'])->middleware('auth:sanctum');
-    Route::get('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'showArticle'])->middleware('auth:sanctum');
-    Route::post('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'updateArticle'])->middleware('auth:sanctum');
-    Route::delete('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'destroyArticle'])->middleware('auth:sanctum');
+    Route::get('/knowledge-base/categories', [KnowledgeBaseAdminController::class, 'indexCategories'])->middleware('auth:sanctum');
+    Route::post('/knowledge-base/categories', [KnowledgeBaseAdminController::class, 'storeCategory'])->middleware('auth:sanctum');
+    Route::put('/knowledge-base/categories/{id}', [KnowledgeBaseAdminController::class, 'updateCategory'])->middleware('auth:sanctum');
+    Route::delete('/knowledge-base/categories/{id}', [KnowledgeBaseAdminController::class, 'destroyCategory'])->middleware('auth:sanctum');
+    Route::get('/knowledge-base/articles', [KnowledgeBaseAdminController::class, 'indexArticles'])->middleware('auth:sanctum');
+    Route::post('/knowledge-base/articles', [KnowledgeBaseAdminController::class, 'storeArticle'])->middleware('auth:sanctum');
+    Route::get('/knowledge-base/articles/{id}', [KnowledgeBaseAdminController::class, 'showArticle'])->middleware('auth:sanctum');
+    Route::post('/knowledge-base/articles/{id}', [KnowledgeBaseAdminController::class, 'updateArticle'])->middleware('auth:sanctum');
+    Route::delete('/knowledge-base/articles/{id}', [KnowledgeBaseAdminController::class, 'destroyArticle'])->middleware('auth:sanctum');
 
     Route::get('/complaints', [ComplaintAdminController::class, 'index'])->middleware('auth:sanctum');
     Route::get('/complaints/{id}', [ComplaintAdminController::class, 'show'])->middleware('auth:sanctum');
