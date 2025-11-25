@@ -194,12 +194,12 @@ if ($token) {
                                 value="true"
                                 <?= ($allParam === 'true' || $allParam === '1') ? 'checked' : '' ?>
                         >
-                        Показывать все периоды (иначе — только последний)
+                        Показать все периоды
                     </label>
 
                     <div class="utilities-view-actions">
                         <button type="submit" class="filter-button">Применить</button>
-                        <a href="/sections/utilities_view.php" class="button-secondary">Сбросить</a>
+                        <a href="/sections/utilities_view.php" class="button-secondary"><button type="submit" class="filter-button" style="background-color: red">Сбросить</button></a>
                     </div>
                 </div>
             </form>

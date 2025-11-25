@@ -17,6 +17,18 @@ $admins         = [];
 $errorMessage   = null;
 $successMessage = null;
 
+$roleLabels = [
+        'admin'      => 'Администратор',
+        'service'    => 'Сервис',
+        'accounting' => 'Бухгалтер',
+];
+
+$accessLabels = [
+        'all'        => 'Все',
+        'service'    => 'Службы',
+        'accounting' => 'Бухгалтерия',
+];
+
 if ($token && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -27,18 +39,24 @@ if ($token && $_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     if ($action === 'create_admin') {
-        $username    = trim($_POST['username'] ?? '');
-        $name        = trim($_POST['name'] ?? '');
-        $role        = trim($_POST['role'] ?? '');
-        $password    = trim($_POST['password'] ?? '');
-        $accessesRaw = trim($_POST['accesses'] ?? '');
+        $username = trim($_POST['username'] ?? '');
+        $name     = trim($_POST['name'] ?? '');
+        $role     = trim($_POST['role'] ?? '');
+        $password = trim($_POST['password'] ?? '');
 
         if ($username === '' || $name === '' || $role === '' || $password === '') {
             $errorMessage = 'Заполните логин, имя, роль и пароль';
         } else {
             $accesses = [];
-            if ($accessesRaw !== '') {
-                $accesses = array_filter(array_map('trim', explode(',', $accessesRaw)));
+            if (isset($_POST['accesses'])) {
+                if (is_array($_POST['accesses'])) {
+                    $accesses = array_values(array_unique(array_filter(array_map('trim', $_POST['accesses']))));
+                } else {
+                    $accessesRaw = trim($_POST['accesses']);
+                    if ($accessesRaw !== '') {
+                        $accesses = array_filter(array_map('trim', explode(',', $accessesRaw)));
+                    }
+                }
             }
 
             $payload = [
@@ -71,12 +89,11 @@ if ($token && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'update_admin') {
-        $id          = (int)($_POST['admin_id'] ?? 0);
-        $username    = trim($_POST['username'] ?? '');
-        $name        = trim($_POST['name'] ?? '');
-        $role        = trim($_POST['role'] ?? '');
-        $password    = trim($_POST['password'] ?? '');
-        $accessesRaw = trim($_POST['accesses'] ?? '');
+        $id       = (int)($_POST['admin_id'] ?? 0);
+        $username = trim($_POST['username'] ?? '');
+        $name     = trim($_POST['name'] ?? '');
+        $role     = trim($_POST['role'] ?? '');
+        $password = trim($_POST['password'] ?? '');
 
         if ($id <= 0) {
             $errorMessage = 'Не указан ID сотрудника для обновления';
@@ -87,8 +104,16 @@ if ($token && $_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($name !== '')     $payload['name']     = $name;
             if ($role !== '')     $payload['role']     = $role;
 
-            if ($accessesRaw !== '') {
-                $accesses = array_filter(array_map('trim', explode(',', $accessesRaw)));
+            if (isset($_POST['accesses'])) {
+                $accesses = [];
+                if (is_array($_POST['accesses'])) {
+                    $accesses = array_values(array_unique(array_filter(array_map('trim', $_POST['accesses']))));
+                } else {
+                    $accessesRaw = trim($_POST['accesses']);
+                    if ($accessesRaw !== '') {
+                        $accesses = array_filter(array_map('trim', explode(',', $accessesRaw)));
+                    }
+                }
                 $payload['accesses'] = $accesses;
             }
 
@@ -244,6 +269,18 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
             cursor: pointer;
             font-size: 14px;
         }
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            margin-top: 6px;
+        }
+        .checkbox-group label {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
     </style>
 </head>
 <body>
@@ -275,10 +312,18 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
             <form method="get" class="filter-form">
                 <label>
                     Фильтр по роли
-                    <input type="text"
-                           name="role"
-                           value="<?= htmlspecialchars($roleFilter, ENT_QUOTES, 'UTF-8') ?>"
-                           placeholder="например: superadmin">
+                    <select name="role">
+                        <option value="">Все роли</option>
+                        <option value="admin" <?= $roleFilter === 'admin' ? 'selected' : '' ?>>
+                            Администратор
+                        </option>
+                        <option value="service" <?= $roleFilter === 'service' ? 'selected' : '' ?>>
+                            Сервис
+                        </option>
+                        <option value="accounting" <?= $roleFilter === 'accounting' ? 'selected' : '' ?>>
+                            Бухгалтер
+                        </option>
+                    </select>
                 </label>
                 <button type="submit" class="filter-button">Применить</button>
                 <button type="button"
@@ -311,25 +356,38 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
                 <?php else: ?>
                     <?php foreach ($adminsPage as $admin): ?>
                         <?php
-                        $id         = $admin['id']        ?? '';
-                        $username   = $admin['username']  ?? '';
-                        $name       = $admin['name']      ?? '';
-                        $roleVal    = $admin['role']      ?? '';
-                        $clientId   = $admin['client_id'] ?? '';
-                        $accesses   = $admin['accesses']  ?? '';
+                        $id       = $admin['id']        ?? '';
+                        $username = $admin['username']  ?? '';
+                        $name     = $admin['name']      ?? '';
+                        $roleVal  = $admin['role']      ?? '';
+                        $clientId = $admin['client_id'] ?? '';
+                        $accesses = $admin['accesses']  ?? '';
 
+                        // Преобразуем accesses в человекочитаемый вид
                         if (is_array($accesses)) {
-                            $accessesStr = implode(', ', $accesses);
+                            $accessesReadable = [];
+                            foreach ($accesses as $acc) {
+                                $accessesReadable[] = $accessLabels[$acc] ?? $acc;
+                            }
+                            $accessesStr = implode(', ', $accessesReadable);
+                            $accessesRawForData = implode(',', $accesses);
                         } else {
-                            $accessesStr = (string)$accesses;
+                            $accessesStr       = $accessLabels[$accesses] ?? (string)$accesses;
+                            $accessesRawForData = (string)$accesses;
                         }
                         ?>
                         <tr>
                             <td><?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($username, ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= htmlspecialchars($roleVal, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><span class="badge-code"><?= htmlspecialchars($accessesStr, ENT_QUOTES, 'UTF-8') ?></span></td>
+                            <td>
+                                <?= htmlspecialchars($roleLabels[$roleVal] ?? $roleVal, ENT_QUOTES, 'UTF-8') ?>
+                            </td>
+                            <td>
+                                <span class="badge-code">
+                                    <?= htmlspecialchars($accessesStr, ENT_QUOTES, 'UTF-8') ?>
+                                </span>
+                            </td>
                             <td><?= htmlspecialchars($clientId, ENT_QUOTES, 'UTF-8') ?></td>
                             <td>
                                 <div class="admins-actions">
@@ -340,7 +398,7 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
                                             data-username="<?= htmlspecialchars($username, ENT_QUOTES, 'UTF-8') ?>"
                                             data-name="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>"
                                             data-role="<?= htmlspecialchars($roleVal, ENT_QUOTES, 'UTF-8') ?>"
-                                            data-accesses="<?= htmlspecialchars($accessesStr, ENT_QUOTES, 'UTF-8') ?>">
+                                            data-accesses="<?= htmlspecialchars($accessesRawForData, ENT_QUOTES, 'UTF-8') ?>">
                                         Редактировать
                                     </button>
 
@@ -366,7 +424,7 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
             <div class="pagination">
                 <?php for ($p = 1; $p <= $totalPages; $p++): ?>
                     <?php
-                    $link = '?role=' . urlencode($roleFilter) . '&page=' . $p;
+                    $link  = '?role=' . urlencode($roleFilter) . '&page=' . $p;
                     $class = $p === $page ? 'active-page' : '';
                     ?>
                     <a href="<?= $link ?>" class="<?= $class ?>"><?= $p ?></a>
@@ -400,7 +458,12 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
 
             <div class="login-group">
                 <label>Роль</label>
-                <input type="text" name="role" id="adminModalRole" required>
+                <select name="role" id="adminModalRole" required>
+                    <option value="">Выберите роль</option>
+                    <option value="admin">Администратор</option>
+                    <option value="service">Сервис</option>
+                    <option value="accounting">Бухгалтер</option>
+                </select>
             </div>
 
             <div class="login-group">
@@ -409,8 +472,21 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
             </div>
 
             <div class="login-group">
-                <label>Accesses (через запятую)</label>
-                <input type="text" name="accesses" id="adminModalAccesses" placeholder="например: notifications, admins, complexes">
+                <label>Доступы</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" name="accesses[]" value="all">
+                        Все
+                    </label>
+                    <label>
+                        <input type="checkbox" name="accesses[]" value="service">
+                        Службы
+                    </label>
+                    <label>
+                        <input type="checkbox" name="accesses[]" value="accounting">
+                        Бухгалтерия
+                    </label>
+                </div>
             </div>
 
             <div class="modal-footer">
@@ -425,6 +501,11 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
 
 <script src="/include/scripts.js"></script>
 <script>
+    function resetAccessCheckboxes() {
+        const accessCheckboxes = document.querySelectorAll('#adminModalForm input[name="accesses[]"]');
+        accessCheckboxes.forEach(cb => cb.checked = false);
+    }
+
     function openAdminModalCreate() {
         const backdrop = document.getElementById('adminModalBackdrop');
         const title    = document.getElementById('adminModalTitle');
@@ -434,7 +515,6 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
         const name     = document.getElementById('adminModalName');
         const role     = document.getElementById('adminModalRole');
         const password = document.getElementById('adminModalPassword');
-        const accesses = document.getElementById('adminModalAccesses');
         const submit   = document.getElementById('adminModalSubmit');
         const hint     = document.getElementById('adminModalPasswordHint');
 
@@ -445,9 +525,10 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
         name.value             = '';
         role.value             = '';
         password.value         = '';
-        accesses.value         = '';
         submit.textContent     = 'Создать';
         hint.textContent       = '(обязательно)';
+
+        resetAccessCheckboxes();
 
         backdrop.classList.add('modal-open');
     }
@@ -461,15 +542,14 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
         const name     = document.getElementById('adminModalName');
         const role     = document.getElementById('adminModalRole');
         const password = document.getElementById('adminModalPassword');
-        const accesses = document.getElementById('adminModalAccesses');
         const submit   = document.getElementById('adminModalSubmit');
         const hint     = document.getElementById('adminModalPasswordHint');
 
-        const idVal         = btn.getAttribute('data-id') || '';
-        const usernameVal   = btn.getAttribute('data-username') || '';
-        const nameVal       = btn.getAttribute('data-name') || '';
-        const roleVal       = btn.getAttribute('data-role') || '';
-        const accessesVal   = btn.getAttribute('data-accesses') || '';
+        const idVal       = btn.getAttribute('data-id') || '';
+        const usernameVal = btn.getAttribute('data-username') || '';
+        const nameVal     = btn.getAttribute('data-name') || '';
+        const roleVal     = btn.getAttribute('data-role') || '';
+        const accessesVal = btn.getAttribute('data-accesses') || '';
 
         title.textContent      = 'Редактировать сотрудника';
         action.value           = 'update_admin';
@@ -478,9 +558,20 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
         name.value             = nameVal;
         role.value             = roleVal;
         password.value         = '';
-        accesses.value         = accessesVal;
         submit.textContent     = 'Сохранить';
         hint.textContent       = '(оставьте пустым, если без изменений)';
+
+        resetAccessCheckboxes();
+
+        if (accessesVal) {
+            const selected = accessesVal.split(',').map(v => v.trim()).filter(v => v.length > 0);
+            const accessCheckboxes = document.querySelectorAll('#adminModalForm input[name="accesses[]"]');
+            accessCheckboxes.forEach(cb => {
+                if (selected.includes(cb.value)) {
+                    cb.checked = true;
+                }
+            });
+        }
 
         backdrop.classList.add('modal-open');
     }

@@ -77,7 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
             $fields['residential_complex_id'] = $_POST['residential_complex_id'];
         }
 
-        // файл
         if (!empty($_FILES['document']['tmp_name'])) {
             $fields['document'] = new CURLFile(
                 $_FILES['document']['tmp_name'],
@@ -229,7 +228,7 @@ if ($token) {
             </form>
 
             <button type="button"
-                    class="button-primary button-xs"
+                    class="button-primary button-xs uk_reports_button"
                     onclick="openCreateReportModal()">
                 + Новый отчёт
             </button>

@@ -104,11 +104,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
         $ownerId = (int)($_POST['owner_id'] ?? 0);
 
         $payload = [
-                'new_login'    => $_POST['new_login']    ?? '',
-                'name'         => $_POST['name']         ?? '',
+                'new_login'    => $_POST['new_login'] ?? '',
+                'password'     => $_POST['password'] ?? '',
+                'name'         => $_POST['name'] ?? '',
                 'phone_number' => $_POST['phone_number'] ?? null,
-                'role'         => $_POST['role']         ?? 'tenant',
+                'role'         => $_POST['role'] ?? 'tenant',
         ];
+
 
         [$status, $data] = apiRequest('POST', $apiBaseUrl . '/residents/' . $ownerId . '/attach-tenant', $token, $payload);
         if ($status === 200) {
@@ -399,6 +401,12 @@ function roleLabel(?string $code): string
             </div>
 
             <div class="login-group">
+                <label>Пароль арендатора</label>
+                <input type="password" name="password" id="tenantPassword" required>
+            </div>
+
+
+            <div class="login-group">
                 <label>Имя арендатора</label>
                 <input type="text" name="name" id="tenantName" required>
             </div>
@@ -471,6 +479,7 @@ function roleLabel(?string $code): string
         document.getElementById('tenantOwnerId').value = btn.dataset.ownerId || '';
         document.getElementById('tenantOwnerLogin').value = btn.dataset.ownerLogin || '';
         document.getElementById('tenantNewLogin').value = '';
+        document.getElementById('tenantPassword').value = '';
         document.getElementById('tenantName').value = '';
         document.getElementById('tenantPhone').value = '';
         document.getElementById('tenantRole').value = 'tenant';
