@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('device');
             $table->string('fcm_token');
-            $table->unique(['user_id', 'device'], 'fut_user_device_unique');
-            $table->index('fcm_token', 'fut_fcm_token_idx');
+            $table->unique(['user_id', 'device'], 'fut_admin_unique_user_device');
+            $table->index('fcm_token', 'fut_admin_fcm_token_index');
             $table->timestamps();
         });
     }

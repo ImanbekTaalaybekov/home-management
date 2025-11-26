@@ -253,6 +253,10 @@ class NotificationController extends Controller
             $query->where('category', $request->category);
         }
 
+        if ($request->filled('residential_complex_id')) {
+            $query->where('residential_complex_id', $request->residential_complex_id);
+        }
+
         if ($search = trim((string)$request->query('search', ''))) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")

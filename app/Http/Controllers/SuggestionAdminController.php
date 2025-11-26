@@ -21,8 +21,11 @@ class SuggestionAdminController extends Controller
         }
 
         $query = Suggestion::with(['user.residentialComplex'])
-            ->whereHas('user.residentialComplex', function ($q) use ($admin) {
+            ->whereHas('user.residentialComplex', function ($q) use ($admin, $request) {
                 $q->where('client_id', $admin->client_id);
+                if ($residentialComplexId = $request->query('residential_complex_id')) {
+                    $q->where('id', $residentialComplexId);
+                }
             });
 
         if ($status = $request->query('status')) {

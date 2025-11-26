@@ -107,10 +107,8 @@ Route::get('/knowledge-base/articles/{id}', [KnowledgeBaseController::class, 'sh
 Route::get('/company-documents/user-agreement', [PrivacyDocumentController::class, 'getUserAgreement']);
 Route::get('/company-documents/privacy-policy', [PrivacyDocumentController::class, 'getPrivacyPolicy']);
 
-Route::post('/company-report/store', [CompanyReportController::class, 'store']);
 Route::get('/company-report/show', [CompanyReportController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/company-report/show/{id}', [CompanyReportController::class, 'show'])->middleware('auth:sanctum');
-Route::delete('/company-report/remove/{id}', [CompanyReportController::class, 'remove'])->middleware('auth:sanctum');
 
 Route::post('/analytics/upload-data-alseco', [AnalyticsController::class, 'uploadAlseco']);
 Route::get('/analytics/periods-by-account', [AnalyticsController::class, 'periodsByAccount']);
