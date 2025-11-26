@@ -69,6 +69,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
         [$status, $data] = apiRequest('DELETE', $apiBaseUrl . '/residential-complexes/' . $id, $token);
         $successMessage = $status === 200 ? 'Жилой комплекс удалён' : ($data['message'] ?? 'Ошибка');
     }
+
+    $qs = $_SERVER['QUERY_STRING'] ? ('?' . $_SERVER['QUERY_STRING']) : '';
+    header('Location: ' . $_SERVER['PHP_SELF'] . $qs);
+    exit;
 }
 
 $query = $apiBaseUrl . '/residential-complexes?page=' . $page;

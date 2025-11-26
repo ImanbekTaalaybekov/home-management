@@ -5,23 +5,25 @@ require __DIR__ . '/../include/config.php';
 $apiBaseUrl = API_BASE_URL;
 $token      = $_SESSION['auth_token'] ?? null;
 
-$search   = $_GET['search']   ?? '';
-$type     = $_GET['type']     ?? '';
-$category = $_GET['category'] ?? '';
-$page     = max(1, (int)($_GET['page'] ?? 1));
+$search          = $_GET['search']   ?? '';
+$type            = $_GET['type']     ?? '';
+$category        = $_GET['category'] ?? '';
+$complexFilter   = $_GET['residential_complex_id'] ?? '';
+$page            = max(1, (int)($_GET['page'] ?? 1));
 
 $notifications  = [];
 $errorMessage   = null;
 $successMessage = null;
 $totalPages     = 1;
+$complexes      = [];
 
 function apiRequest(string $method, string $url, string $token, ?array $data = null, bool $isMultipart = false): array
 {
     $ch = curl_init($url);
 
     $headers = [
-        'Accept: application/json',
-        'Authorization: ' . 'Bearer ' . $token,
+            'Accept: application/json',
+            'Authorization: ' . 'Bearer ' . $token,
     ];
 
     if ($data !== null) {
@@ -34,9 +36,9 @@ function apiRequest(string $method, string $url, string $token, ?array $data = n
     }
 
     curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_CUSTOMREQUEST  => $method,
-        CURLOPT_HTTPHEADER     => $headers,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST  => $method,
+            CURLOPT_HTTPHEADER     => $headers,
     ]);
 
     $response = curl_exec($ch);
@@ -51,12 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
 
     if ($action === 'create_notification') {
         $payload = [
-            'type'                  => $_POST['type'] ?? '',
-            'category'              => $_POST['category'] ?? '',
-            'title'                 => $_POST['title'] ?? '',
-            'message'               => $_POST['message'] ?? '',
-            'personal_account'      => $_POST['personal_account'] ?? null,
-            'residential_complex_id'=> $_POST['residential_complex_id'] ?? null,
+                'type'                  => $_POST['type'] ?? '',
+                'category'              => $_POST['category'] ?? '',
+                'title'                 => $_POST['title'] ?? '',
+                'message'               => $_POST['message'] ?? '',
+                'personal_account'      => $_POST['personal_account'] ?? null,
+                'residential_complex_id'=> $_POST['residential_complex_id'] ?? null,
         ];
 
         $multipart = $payload;
@@ -65,18 +67,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
             foreach ($_FILES['photos']['tmp_name'] as $i => $tmp) {
                 if (!$tmp) continue;
                 $multipart["photos[$i]"] = new CURLFile(
-                    $tmp,
-                    $_FILES['photos']['type'][$i] ?? 'image/jpeg',
-                    $_FILES['photos']['name'][$i] ?? ('photo_' . $i)
+                        $tmp,
+                        $_FILES['photos']['type'][$i] ?? 'image/jpeg',
+                        $_FILES['photos']['name'][$i] ?? ('photo_' . $i)
                 );
             }
         }
 
         if (!empty($_FILES['document']['tmp_name'])) {
             $multipart['document'] = new CURLFile(
-                $_FILES['document']['tmp_name'],
-                $_FILES['document']['type'] ?? 'application/pdf',
-                $_FILES['document']['name'] ?? 'document.pdf'
+                    $_FILES['document']['tmp_name'],
+                    $_FILES['document']['type'] ?? 'application/pdf',
+                    $_FILES['document']['name'] ?? 'document.pdf'
             );
         }
 
@@ -92,12 +94,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
         $id = (int)($_POST['notification_id'] ?? 0);
 
         $payload = [
-            'type'                  => $_POST['type'] ?? null,
-            'category'              => $_POST['category'] ?? null,
-            'title'                 => $_POST['title'] ?? null,
-            'message'               => $_POST['message'] ?? null,
-            'personal_account'      => $_POST['personal_account'] ?? null,
-            'residential_complex_id'=> $_POST['residential_complex_id'] ?? null,
+                'type'                  => $_POST['type'] ?? null,
+                'category'              => $_POST['category'] ?? null,
+                'title'                 => $_POST['title'] ?? null,
+                'message'               => $_POST['message'] ?? null,
+                'personal_account'      => $_POST['personal_account'] ?? null,
+                'residential_complex_id'=> $_POST['residential_complex_id'] ?? null,
         ];
 
         foreach ($payload as $k => $v) {
@@ -112,18 +114,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
             foreach ($_FILES['photos']['tmp_name'] as $i => $tmp) {
                 if (!$tmp) continue;
                 $multipart["photos[$i]"] = new CURLFile(
-                    $tmp,
-                    $_FILES['photos']['type'][$i] ?? 'image/jpeg',
-                    $_FILES['photos']['name'][$i] ?? ('photo_' . $i)
+                        $tmp,
+                        $_FILES['photos']['type'][$i] ?? 'image/jpeg',
+                        $_FILES['photos']['name'][$i] ?? ('photo_' . $i)
                 );
             }
         }
 
         if (!empty($_FILES['document']['tmp_name'])) {
             $multipart['document'] = new CURLFile(
-                $_FILES['document']['tmp_name'],
-                $_FILES['document']['type'] ?? 'application/pdf',
-                $_FILES['document']['name'] ?? 'document.pdf'
+                    $_FILES['document']['tmp_name'],
+                    $_FILES['document']['type'] ?? 'application/pdf',
+                    $_FILES['document']['name'] ?? 'document.pdf'
             );
         }
 
@@ -145,12 +147,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
             $errorMessage = $data['message'] ?? 'Ошибка при удалении уведомления';
         }
     }
+
+    $qs = $_SERVER['QUERY_STRING'] ? ('?' . $_SERVER['QUERY_STRING']) : '';
+    header('Location: ' . $_SERVER['PHP_SELF'] . $qs);
+    exit;
 }
 
 $query = $apiBaseUrl . '/notifications?page=' . $page;
 if ($search !== '')   $query .= '&search=' . urlencode($search);
 if ($type !== '')     $query .= '&type=' . urlencode($type);
 if ($category !== '') $query .= '&category=' . urlencode($category);
+if ($complexFilter !== '') $query .= '&residential_complex_id=' . urlencode($complexFilter);
 
 [$status, $result] = apiRequest('GET', $query, $token);
 
@@ -160,6 +167,22 @@ if ($status === 200) {
 } else {
     $errorMessage = $result['message'] ?? ('Ошибка загрузки уведомлений (' . $status . ')');
 }
+
+[$cStatus, $cResult] = apiRequest('GET', $apiBaseUrl . '/residential-complexes', $token);
+if ($cStatus === 200 && is_array($cResult)) {
+    $complexes = $cResult['data'] ?? $cResult;
+}
+
+$typeLabels = [
+        'personal' => 'Личное',
+        'global'   => 'Глобальное',
+        'complex'  => 'ЖК',
+];
+
+$categoryLabels = [
+        'common'    => 'Общее',
+        'technical' => 'Техническое',
+];
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -191,23 +214,37 @@ if ($status === 200) {
 
         <form method="get" class="filter-form">
             <input
-                type="text"
-                name="search"
-                placeholder="Поиск по заголовку, тексту, ЛС"
-                value="<?= htmlspecialchars($search ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                    type="text"
+                    name="search"
+                    placeholder="Поиск по заголовку, тексту, ЛС"
+                    value="<?= htmlspecialchars($search ?? '', ENT_QUOTES, 'UTF-8') ?>"
             >
 
             <select name="type">
                 <option value="">Тип</option>
-                <option value="global"  <?= $type === 'global'  ? 'selected' : '' ?>>Общее</option>
+                <option value="global"  <?= $type === 'global'  ? 'selected' : '' ?>>Глобальное</option>
                 <option value="complex" <?= $type === 'complex' ? 'selected' : '' ?>>ЖК</option>
-                <option value="personal"<?= $type === 'personal'? 'selected' : '' ?>>Персональное</option>
+                <option value="personal"<?= $type === 'personal'? 'selected' : '' ?>>Личное</option>
             </select>
 
             <select name="category">
                 <option value="">Категория</option>
                 <option value="technical" <?= $category === 'technical' ? 'selected' : '' ?>>Техническое</option>
                 <option value="common"    <?= $category === 'common'    ? 'selected' : '' ?>>Общее</option>
+            </select>
+
+            <select name="residential_complex_id">
+                <option value="">Все ЖК</option>
+                <?php foreach ($complexes as $complex): ?>
+                    <?php
+                    $cxId   = $complex['id']   ?? '';
+                    $cxName = $complex['name'] ?? ('ЖК ID: ' . $cxId);
+                    ?>
+                    <option value="<?= htmlspecialchars((string)$cxId, ENT_QUOTES, 'UTF-8') ?>"
+                            <?= (string)$complexFilter === (string)$cxId ? 'selected' : '' ?>>
+                        <?= htmlspecialchars((string)$cxName, ENT_QUOTES, 'UTF-8') ?>
+                    </option>
+                <?php endforeach; ?>
             </select>
 
             <button class="filter-button">Фильтр</button>
@@ -226,6 +263,7 @@ if ($status === 200) {
                     <th>Тип</th>
                     <th>Категория</th>
                     <th>Цель</th>
+                    <th>Документ</th>
                     <th>Дата</th>
                     <th>Действия</th>
                 </tr>
@@ -233,7 +271,7 @@ if ($status === 200) {
                 <tbody>
                 <?php if (empty($notifications)): ?>
                     <tr>
-                        <td colspan="7">Уведомления не найдены</td>
+                        <td colspan="8">Уведомления не найдены</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($notifications as $n): ?>
@@ -244,19 +282,38 @@ if ($status === 200) {
                         $nCategory   = $n['category'] ?? '';
                         $createdAt   = $n['created_at'] ?? '';
                         $personalAcc = $n['personal_account'] ?? '';
+                        $userId      = $n['user_id'] ?? '';
                         $rcId        = $n['residential_complex_id'] ?? '';
                         $message     = $n['message'] ?? '';
+                        $documentUrl = $n['document'] ?? '';
+
+                        $rcData  = $n['residential_complex'] ?? $n['residentialComplex'] ?? [];
+                        $rcName  = $rcData['name'] ?? '';
+
+                        $typeLabel     = $typeLabels[$nType] ?? $nType;
+                        $categoryLabel = $categoryLabels[$nCategory] ?? $nCategory;
                         ?>
                         <tr>
                             <td><?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= htmlspecialchars($nType, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= htmlspecialchars($nCategory, ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars($typeLabel, ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars($categoryLabel, ENT_QUOTES, 'UTF-8') ?></td>
                             <td>
-                                <?php if ($nType === 'complex' && $rcId): ?>
-                                    ЖК ID: <?= htmlspecialchars($rcId, ENT_QUOTES, 'UTF-8') ?>
+                                <?php if ($nType === 'complex' && ($rcName || $rcId)): ?>
+                                    <?= $rcName
+                                            ? 'ЖК: ' . htmlspecialchars($rcName, ENT_QUOTES, 'UTF-8')
+                                            : 'ЖК ID: ' . htmlspecialchars($rcId, ENT_QUOTES, 'UTF-8') ?>
                                 <?php elseif ($nType === 'personal' && $personalAcc): ?>
                                     ЛС: <?= htmlspecialchars($personalAcc, ENT_QUOTES, 'UTF-8') ?>
+                                <?php elseif ($nType === 'personal' && $userId): ?>
+                                    ID пользователя: <?= htmlspecialchars($userId, ENT_QUOTES, 'UTF-8') ?>
+                                <?php else: ?>
+                                    —
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if ($documentUrl): ?>
+                                    <a href="<?= htmlspecialchars($documentUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" class="link-primary">PDF</a>
                                 <?php else: ?>
                                     —
                                 <?php endif; ?>
@@ -265,16 +322,16 @@ if ($status === 200) {
                             <td>
                                 <div class="admins-actions">
                                     <button
-                                        type="button"
-                                        class="btn-small btn-edit"
-                                        onclick="openNotificationModalEdit(this)"
-                                        data-id="<?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8') ?>"
-                                        data-title="<?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>"
-                                        data-type="<?= htmlspecialchars($nType, ENT_QUOTES, 'UTF-8') ?>"
-                                        data-category="<?= htmlspecialchars($nCategory, ENT_QUOTES, 'UTF-8') ?>"
-                                        data-message="<?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?>"
-                                        data-personal-account="<?= htmlspecialchars($personalAcc, ENT_QUOTES, 'UTF-8') ?>"
-                                        data-residential-complex-id="<?= htmlspecialchars($rcId, ENT_QUOTES, 'UTF-8') ?>"
+                                            type="button"
+                                            class="btn-small btn-edit"
+                                            onclick="openNotificationModalEdit(this)"
+                                            data-id="<?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-title="<?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-type="<?= htmlspecialchars($nType, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-category="<?= htmlspecialchars($nCategory, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-message="<?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-personal-account="<?= htmlspecialchars($personalAcc, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-residential-complex-id="<?= htmlspecialchars($rcId, ENT_QUOTES, 'UTF-8') ?>"
                                     >
                                         Редактировать
                                     </button>
@@ -300,9 +357,10 @@ if ($status === 200) {
                 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                     <?php
                     $link = '?page=' . $i;
-                    if ($search !== '')   $link .= '&search=' . urlencode($search);
-                    if ($type !== '')     $link .= '&type=' . urlencode($type);
-                    if ($category !== '') $link .= '&category=' . urlencode($category);
+                    if ($search !== '')         $link .= '&search=' . urlencode($search);
+                    if ($type !== '')           $link .= '&type=' . urlencode($type);
+                    if ($category !== '')       $link .= '&category=' . urlencode($category);
+                    if ($complexFilter !== '')  $link .= '&residential_complex_id=' . urlencode($complexFilter);
                     ?>
                     <a href="<?= $link ?>" class="<?= $i === $page ? 'active-page' : '' ?>">
                         <?= $i ?>
@@ -316,7 +374,6 @@ if ($status === 200) {
 
 <?php include __DIR__ . '/../include/footer.php'; ?>
 
-<script src="/include/scripts.js"></script>
 <script>
     function getNotifElements() {
         return {
@@ -397,7 +454,6 @@ if ($status === 200) {
         updateTypeVisibility();
     });
 </script>
-<script src="/include/scripts.js"></script>
 
 <div class="modal-backdrop" id="notificationModal">
     <div class="modal">
@@ -413,9 +469,9 @@ if ($status === 200) {
             <div class="login-group">
                 <label>Тип</label>
                 <select name="type" id="notifType" required>
-                    <option value="global">Общее</option>
+                    <option value="global">Глобальное</option>
                     <option value="complex">ЖК</option>
-                    <option value="personal">Персональное</option>
+                    <option value="personal">Личное</option>
                 </select>
             </div>
 
@@ -428,8 +484,19 @@ if ($status === 200) {
             </div>
 
             <div class="login-group" id="fieldRcId" style="display:none">
-                <label>ID жилого комплекса</label>
-                <input type="number" name="residential_complex_id" id="notifRcId" placeholder="ID ЖК">
+                <label>Жилой комплекс</label>
+                <select name="residential_complex_id" id="notifRcId">
+                    <option value="">Выберите ЖК</option>
+                    <?php foreach ($complexes as $complex): ?>
+                        <?php
+                        $cxId   = $complex['id']   ?? '';
+                        $cxName = $complex['name'] ?? ('ЖК ID: ' . $cxId);
+                        ?>
+                        <option value="<?= htmlspecialchars((string)$cxId, ENT_QUOTES, 'UTF-8') ?>">
+                            <?= htmlspecialchars((string)$cxName, ENT_QUOTES, 'UTF-8') ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
 
             <div class="login-group" id="fieldPersonalAccount" style="display:none">

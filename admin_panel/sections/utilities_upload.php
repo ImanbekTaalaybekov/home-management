@@ -76,6 +76,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
 
         curl_close($ch);
     }
+
+    $qs = $_SERVER['QUERY_STRING'] ? ('?' . $_SERVER['QUERY_STRING']) : '';
+    header('Location: ' . $_SERVER['PHP_SELF'] . $qs);
+    exit;
 }
 ?>
 <!DOCTYPE html>

@@ -20,7 +20,7 @@
             <span class="sidebar__group-arrow">▾</span>
         </button>
         <div class="sidebar__group-body">
-            <a href="/sections/residents.php" class="sidebar__item">Пользователи</a>
+            <a href="/sections/residents.php" class="sidebar__item">Жители</a>
             <a href="/sections/admins.php" class="sidebar__item">Сотрудники</a>
             <a href="/sections/complexes.php" class="sidebar__item">Жилые комплексы</a>
             <a href="/sections/master_call_categories.php" class="sidebar__item">Мастера и категории</a>

@@ -153,6 +153,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
             }
         }
     }
+
+    $qs = $_SERVER['QUERY_STRING'] ? ('?' . $_SERVER['QUERY_STRING']) : '';
+    header('Location: ' . $_SERVER['PHP_SELF'] . $qs);
+    exit;
 }
 
 if ($token) {

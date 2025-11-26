@@ -87,6 +87,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
             }
         }
     }
+
+    $qs = $_SERVER['QUERY_STRING'] ? ('?' . $_SERVER['QUERY_STRING']) : '';
+    header('Location: ' . $_SERVER['PHP_SELF'] . $qs);
+    exit;
 }
 
 if ($token) {
@@ -184,13 +188,13 @@ function pollStatusLabel(?string $start, ?string $end): string
                     <?php endforeach; ?>
                 </select>
                 <button class="filter-button">Фильтр</button>
-            </form>
 
-            <button type="button"
-                    class="button-primary button-xs"
-                    onclick="openCreatePollModal()">
-                + Новый опрос
-            </button>
+                <button type="button"
+                        class="button-primary button-xs add-vote-button"
+                        onclick="openCreatePollModal()">
+                    + Новый опрос
+                </button>
+            </form>
         </div>
 
         <div class="table-wrapper">
