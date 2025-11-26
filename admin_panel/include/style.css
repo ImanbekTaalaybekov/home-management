@@ -859,3 +859,23 @@ body {
     background-color: green;
 }
 
+.badge-green {
+    color: green;
+}
+
+.badge-yellow {
+    color: #87872d;
+}
+
+.badge-blue {
+    color: blue;
+}
+
+.btn-success {
+    background-color: green;
+}
+
+.add-vote-button {
+    background-color: green;
+}
+

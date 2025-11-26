@@ -5,14 +5,23 @@ require __DIR__ . '/../include/config.php';
 $apiBaseUrl = API_BASE_URL;
 $token      = $_SESSION['auth_token'] ?? null;
 
-$statusFilter = $_GET['status'] ?? '';
-$search       = trim($_GET['search'] ?? '');
-$page         = max(1, (int)($_GET['page'] ?? 1));
+$statusFilter  = $_GET['status'] ?? '';
+$search        = trim($_GET['search'] ?? '');
+$complexFilter = $_GET['residential_complex_id'] ?? '';
+$page          = max(1, (int)($_GET['page'] ?? 1));
 
 $requests       = [];
 $totalPages     = 1;
 $errorMessage   = null;
 $successMessage = null;
+
+$masters        = [];
+$complexes      = [];
+$categories     = [];
+
+$categoryMap    = [];
+$categoryIdMap  = [];
+$masterMap      = [];
 
 function apiRequestService(string $method, string $url, string $token, ?array $data = null): array
 {
@@ -20,7 +29,7 @@ function apiRequestService(string $method, string $url, string $token, ?array $d
 
     $headers = [
             'Accept: application/json',
-            'Authorization: Bearer ' . $token,
+            'Authorization: ' . 'Bearer ' . $token,
     ];
 
     if ($data !== null) {
@@ -107,6 +116,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
             }
         }
     }
+
+    $qs = $_SERVER['QUERY_STRING'] ? ('?' . $_SERVER['QUERY_STRING']) : '';
+    header('Location: ' . $_SERVER['PHP_SELF'] . $qs);
+    exit;
 }
 
 $query = $apiBaseUrl . '/service-requests?page=' . $page;
@@ -115,6 +128,9 @@ if ($statusFilter !== '') {
 }
 if ($search !== '') {
     $query .= '&search=' . urlencode($search);
+}
+if ($complexFilter !== '') {
+    $query .= '&residential_complex_id=' . urlencode($complexFilter);
 }
 
 if ($token) {
@@ -125,6 +141,39 @@ if ($token) {
         $totalPages = $data['last_page'] ?? 1;
     } else {
         $errorMessage = $data['message'] ?? ('Ошибка загрузки заявок (' . $code . ')');
+    }
+
+    [$mCode, $mData] = apiRequestService('GET', $apiBaseUrl . '/service-requests/masters', $token);
+    if ($mCode === 200 && is_array($mData)) {
+        $masters = $mData;
+        foreach ($masters as $m) {
+            $id   = $m['id']   ?? null;
+            $name = $m['name'] ?? null;
+            if ($id !== null && $name !== null) {
+                $masterMap[$id] = $name;
+            }
+        }
+    }
+
+    [$cCode, $cData] = apiRequestService('GET', $apiBaseUrl . '/residential-complexes', $token);
+    if ($cCode === 200 && is_array($cData)) {
+        $complexes = $cData['data'] ?? $cData;
+    }
+
+    [$catCode, $catData] = apiRequestService('GET', $apiBaseUrl . '/service-requests/categories', $token);
+    if ($catCode === 200 && is_array($catData)) {
+        $categories = $catData;
+        foreach ($categories as $cat) {
+            $key = $cat['name'] ?? null;
+            $rus = $cat['name_rus'] ?? null;
+            $id  = $cat['id'] ?? null;
+            if ($key !== null && $rus !== null) {
+                $categoryMap[$key] = $rus;
+            }
+            if ($key !== null && $id !== null) {
+                $categoryIdMap[$key] = $id;
+            }
+        }
     }
 } else {
     $errorMessage = 'Нет токена авторизации';
@@ -179,6 +228,20 @@ function mc_short(string $text, int $limit = 80): string
                 <option value="done" <?= $statusFilter === 'done' ? 'selected' : '' ?>>Выполнено</option>
             </select>
 
+            <select name="residential_complex_id">
+                <option value="">Все ЖК</option>
+                <?php foreach ($complexes as $complex): ?>
+                    <?php
+                    $cxId   = $complex['id']   ?? '';
+                    $cxName = $complex['name'] ?? '';
+                    ?>
+                    <option value="<?= htmlspecialchars((string)$cxId, ENT_QUOTES, 'UTF-8') ?>"
+                            <?= (string)$complexFilter === (string)$cxId ? 'selected' : '' ?>>
+                        <?= htmlspecialchars((string)$cxName, ENT_QUOTES, 'UTF-8') ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
             <button class="filter-button">Применить</button>
         </form>
 
@@ -195,13 +258,14 @@ function mc_short(string $text, int $limit = 80): string
                     <th>Телефон</th>
                     <th>Описание</th>
                     <th>Мастер</th>
+                    <th>Оценка</th>
                     <th>Действия</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php if (empty($requests)): ?>
                     <tr>
-                        <td colspan="10">Заявок не найдено</td>
+                        <td colspan="11">Заявок не найдено</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($requests as $r): ?>
@@ -210,7 +274,9 @@ function mc_short(string $text, int $limit = 80): string
                         $createdAt = $r['created_at'] ?? '';
                         $statusVal = $r['status'] ?? '';
 
-                        $type        = $r['type'] ?? '';
+                        $typeKey   = $r['type'] ?? '';
+                        $typeName  = $categoryMap[$typeKey] ?? $typeKey;
+
                         $description = $r['description'] ?? '';
                         $shortDesc   = mc_short($description ?: '', 60);
 
@@ -219,7 +285,16 @@ function mc_short(string $text, int $limit = 80): string
                         $phone     = $user['phone_number'] ?? '';
                         $rc        = $user['residential_complex'] ?? $user['residentialComplex'] ?? [];
                         $rcName    = $rc['name'] ?? '';
-                        $masterId  = $r['master_id'] ?? null;
+
+                        $masterId   = $r['master_id'] ?? null;
+                        $masterName = ($masterId !== null && isset($masterMap[$masterId]))
+                                ? $masterMap[$masterId]
+                                : '';
+
+                        $rate       = $r['rate'] ?? null;
+
+                        $categoryId = $r['service_request_category_id']
+                                ?? ($r['category_id'] ?? ($categoryIdMap[$typeKey] ?? null));
 
                         $statusClass = 'badge-gray';
                         $statusLabel = '—';
@@ -247,12 +322,13 @@ function mc_short(string $text, int $limit = 80): string
                                     <?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8') ?>
                                 </span>
                             </td>
-                            <td><?= htmlspecialchars((string)$type, ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars((string)$typeName, ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars((string)$rcName, ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars((string)$userName, ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars((string)$phone, ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($shortDesc, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= $masterId ? htmlspecialchars((string)$masterId, ENT_QUOTES, 'UTF-8') : '—' ?></td>
+                            <td><?= $masterName ? htmlspecialchars((string)$masterName, ENT_QUOTES, 'UTF-8') : '—' ?></td>
+                            <td><?= $rate !== null ? htmlspecialchars((string)$rate, ENT_QUOTES, 'UTF-8') : '—' ?></td>
                             <td>
                                 <div class="admins-actions">
                                     <button
@@ -263,12 +339,13 @@ function mc_short(string $text, int $limit = 80): string
                                             data-created="<?= htmlspecialchars((string)$createdAt, ENT_QUOTES, 'UTF-8') ?>"
                                             data-status="<?= htmlspecialchars((string)$statusVal, ENT_QUOTES, 'UTF-8') ?>"
                                             data-status-label="<?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8') ?>"
-                                            data-type="<?= htmlspecialchars((string)$type, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-type="<?= htmlspecialchars((string)$typeName, ENT_QUOTES, 'UTF-8') ?>"
                                             data-rc="<?= htmlspecialchars((string)$rcName, ENT_QUOTES, 'UTF-8') ?>"
                                             data-name="<?= htmlspecialchars((string)$userName, ENT_QUOTES, 'UTF-8') ?>"
                                             data-phone="<?= htmlspecialchars((string)$phone, ENT_QUOTES, 'UTF-8') ?>"
                                             data-desc="<?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8') ?>"
-                                            data-master="<?= htmlspecialchars((string)($masterId ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                                            data-master-id="<?= htmlspecialchars((string)($masterId ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                                            data-master-name="<?= htmlspecialchars((string)($masterName ?? ''), ENT_QUOTES, 'UTF-8') ?>"
                                     >Подробнее</button>
 
                                     <button
@@ -276,7 +353,8 @@ function mc_short(string $text, int $limit = 80): string
                                             class="btn-small btn-secondary"
                                             onclick="openAssignMasterModal(this)"
                                             data-id="<?= htmlspecialchars((string)$id, ENT_QUOTES, 'UTF-8') ?>"
-                                            data-master="<?= htmlspecialchars((string)($masterId ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                                            data-master-id="<?= htmlspecialchars((string)($masterId ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                                            data-category-id="<?= htmlspecialchars((string)($categoryId ?? ''), ENT_QUOTES, 'UTF-8') ?>"
                                     >Назначить мастера</button>
 
                                     <?php if ($statusVal !== 'done'): ?>
@@ -314,8 +392,9 @@ function mc_short(string $text, int $limit = 80): string
                 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                     <?php
                     $link = '?page=' . $i;
-                    if ($statusFilter !== '') $link .= '&status=' . urlencode($statusFilter);
-                    if ($search !== '')       $link .= '&search=' . urlencode($search);
+                    if ($statusFilter !== '')  $link .= '&status=' . urlencode($statusFilter);
+                    if ($search !== '')        $link .= '&search=' . urlencode($search);
+                    if ($complexFilter !== '') $link .= '&residential_complex_id=' . urlencode($complexFilter);
                     ?>
                     <a href="<?= $link ?>" class="<?= $i === $page ? 'active-page' : '' ?>"><?= $i ?></a>
                 <?php endfor; ?>
@@ -353,7 +432,7 @@ function mc_short(string $text, int $limit = 80): string
         e.rc.textContent      = btn.dataset.rc || '';
         e.user.textContent    = btn.dataset.name || '';
         e.phone.textContent   = btn.dataset.phone || '';
-        e.master.textContent  = btn.dataset.master || '—';
+        e.master.textContent  = btn.dataset.masterName || btn.dataset.masterId || '—';
         e.desc.textContent    = btn.dataset.desc || '';
     }
 
@@ -371,9 +450,35 @@ function mc_short(string $text, int $limit = 80): string
 
     function openAssignMasterModal(btn) {
         const e = assignEls();
+        const select = e.master;
+        const requestCategoryId = btn.dataset.categoryId || '';
+        const currentMasterId   = btn.dataset.masterId || '';
+
         e.modal.classList.add('modal-open');
         e.idField.value = btn.dataset.id || '';
-        e.master.value  = btn.dataset.master || '';
+
+        select.value = '';
+
+        for (let i = 0; i < select.options.length; i++) {
+            const opt = select.options[i];
+            if (!opt.value) {
+                opt.hidden = false;
+                continue;
+            }
+            const optCat = opt.getAttribute('data-category-id') || '';
+            if (requestCategoryId && optCat !== requestCategoryId) {
+                opt.hidden = true;
+            } else {
+                opt.hidden = false;
+            }
+        }
+
+        if (currentMasterId) {
+            const selectedOption = select.querySelector('option[value="' + currentMasterId + '"]');
+            if (selectedOption && !selectedOption.hidden) {
+                select.value = currentMasterId;
+            }
+        }
     }
 
     function closeAssignMasterModal() {
@@ -395,7 +500,7 @@ function mc_short(string $text, int $limit = 80): string
                 <div><strong>ЖК:</strong> <span id="reqViewRc"></span></div>
                 <div><strong>Пользователь:</strong> <span id="reqViewUser"></span></div>
                 <div><strong>Телефон:</strong> <span id="reqViewPhone"></span></div>
-                <div><strong>ID мастера:</strong> <span id="reqViewMaster"></span></div>
+                <div><strong>Мастер:</strong> <span id="reqViewMaster"></span></div>
             </div>
             <div class="kb-view-text">
                 <strong>Описание:</strong>
@@ -419,8 +524,21 @@ function mc_short(string $text, int $limit = 80): string
             <input type="hidden" name="request_id" id="assignRequestId">
 
             <div class="login-group">
-                <label>ID мастера</label>
-                <input type="number" name="master_id" id="assignMasterId" required>
+                <label>Мастер</label>
+                <select name="master_id" id="assignMasterId" required>
+                    <option value="">Выберите мастера</option>
+                    <?php foreach ($masters as $m): ?>
+                        <?php
+                        $mId   = $m['id']   ?? '';
+                        $mName = $m['name'] ?? '';
+                        $mCat  = $m['service_request_category_id'] ?? '';
+                        ?>
+                        <option value="<?= htmlspecialchars((string)$mId, ENT_QUOTES, 'UTF-8') ?>"
+                                data-category-id="<?= htmlspecialchars((string)$mCat, ENT_QUOTES, 'UTF-8') ?>">
+                            <?= htmlspecialchars((string)$mName, ENT_QUOTES, 'UTF-8') ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
 
             <div class="login-group">

@@ -6,9 +6,11 @@ $apiBaseUrl = API_BASE_URL;
 $token      = $_SESSION['auth_token'] ?? null;
 
 $statusFilter   = $_GET['status'] ?? '';
+$complexFilter  = $_GET['residential_complex_id'] ?? '';
 $page           = max(1, (int)($_GET['page'] ?? 1));
 
 $suggestions    = [];
+$complexes      = [];
 $totalPages     = 1;
 $errorMessage   = null;
 $successMessage = null;
@@ -19,7 +21,7 @@ function apiRequestSuggestions(string $method, string $url, string $token, ?arra
 
     $headers = [
             'Accept: application/json',
-            'Authorization: Bearer ' . $token,
+            'Authorization: ' . 'Bearer ' . $token,
     ];
 
     if ($data !== null) {
@@ -76,11 +78,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
             }
         }
     }
+
+    $qs = $_SERVER['QUERY_STRING'] ? ('?' . $_SERVER['QUERY_STRING']) : '';
+    header('Location: ' . $_SERVER['PHP_SELF'] . $qs);
+    exit;
 }
 
 $query = $apiBaseUrl . '/suggestions?page=' . $page;
+
 if ($statusFilter !== '') {
     $query .= '&status=' . urlencode($statusFilter);
+}
+if ($complexFilter !== '') {
+    $query .= '&residential_complex_id=' . urlencode($complexFilter);
 }
 
 if ($token) {
@@ -91,6 +101,16 @@ if ($token) {
         $totalPages  = $data['last_page'] ?? 1;
     } else {
         $errorMessage = $data['message'] ?? ('Ошибка загрузки предложений (' . $status . ')');
+    }
+
+    [$cStatus, $cData] = apiRequestSuggestions(
+            'GET',
+            $apiBaseUrl . '/residential-complexes',
+            $token
+    );
+
+    if ($cStatus === 200) {
+        $complexes = $cData['data'] ?? [];
     }
 } else {
     $errorMessage = 'Нет токена авторизации';
@@ -138,6 +158,21 @@ function shortText(string $text, int $limit = 80): string
                 <option value="pending" <?= $statusFilter === 'pending' ? 'selected' : '' ?>>В процессе</option>
                 <option value="done" <?= $statusFilter === 'done' ? 'selected' : '' ?>>Готово</option>
             </select>
+
+            <select name="residential_complex_id">
+                <option value="">Все ЖК</option>
+                <?php foreach ($complexes as $complex): ?>
+                    <?php
+                    $cxId   = $complex['id']   ?? '';
+                    $cxName = $complex['name'] ?? '';
+                    ?>
+                    <option value="<?= htmlspecialchars((string)$cxId, ENT_QUOTES, 'UTF-8') ?>"
+                            <?= (string)$complexFilter === (string)$cxId ? 'selected' : '' ?>>
+                        <?= htmlspecialchars((string)$cxName, ENT_QUOTES, 'UTF-8') ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
             <button class="filter-button">Применить</button>
         </form>
 
@@ -184,8 +219,11 @@ function shortText(string $text, int $limit = 80): string
 
                         if ($statusVal === 'done') {
                             $statusLabel = 'Готово';
-                            $statusClass = 'badge-green';
+                            $statusClass = 'badge-green'; // зелёный для "Готово"
                         }
+
+                        // Для JS alert лучше подготовить текст отдельно (без addslashes в HTML)
+                        $textFullForJs = str_replace(["\r", "\n"], ["\\r", "\\n"], $textFull);
                         ?>
                         <tr>
                             <td><?= htmlspecialchars((string)$id, ENT_QUOTES, 'UTF-8') ?></td>
@@ -203,7 +241,7 @@ function shortText(string $text, int $limit = 80): string
                                 <button
                                         type="button"
                                         class="btn-small"
-                                        onclick="alert('Полный текст:\n\n<?= htmlspecialchars(addslashes($textFull), ENT_QUOTES, 'UTF-8') ?>')"
+                                        onclick="alert('Полный текст:\\n\\n<?= htmlspecialchars($textFullForJs, ENT_QUOTES, 'UTF-8') ?>')"
                                 >
                                     Подробнее
                                 </button>
@@ -236,6 +274,9 @@ function shortText(string $text, int $limit = 80): string
                     $link = '?page=' . $i;
                     if ($statusFilter !== '') {
                         $link .= '&status=' . urlencode($statusFilter);
+                    }
+                    if ($complexFilter !== '') {
+                        $link .= '&residential_complex_id=' . urlencode($complexFilter);
                     }
                     ?>
                     <a href="<?= $link ?>" class="<?= $i === $page ? 'active-page' : '' ?>"><?= $i ?></a>

@@ -5,13 +5,15 @@ require __DIR__ . '/../include/config.php';
 $apiBaseUrl = API_BASE_URL;
 $token      = $_SESSION['auth_token'] ?? null;
 
-$statusFilter   = $_GET['status'] ?? '';
-$page           = max(1, (int)($_GET['page'] ?? 1));
+$statusFilter          = $_GET['status'] ?? '';
+$complexFilter         = $_GET['residential_complex_id'] ?? '';
+$page                  = max(1, (int)($_GET['page'] ?? 1));
 
-$complaints     = [];
-$totalPages     = 1;
-$errorMessage   = null;
-$successMessage = null;
+$complaints            = [];
+$totalPages            = 1;
+$errorMessage          = null;
+$successMessage        = null;
+$complexes             = [];
 
 function apiRequestComplaints(string $method, string $url, string $token, ?array $data = null): array
 {
@@ -19,7 +21,7 @@ function apiRequestComplaints(string $method, string $url, string $token, ?array
 
     $headers = [
             'Accept: application/json',
-            'Authorization: Bearer ' . $token,
+            'Authorization: ' . 'Bearer ' . $token,
     ];
 
     if ($data !== null) {
@@ -76,11 +78,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
             }
         }
     }
+
+    $qs = $_SERVER['QUERY_STRING'] ? ('?' . $_SERVER['QUERY_STRING']) : '';
+    header('Location: ' . $_SERVER['PHP_SELF'] . $qs);
+    exit;
 }
 
 $query = $apiBaseUrl . '/complaints?page=' . $page;
+
 if ($statusFilter !== '') {
     $query .= '&status=' . urlencode($statusFilter);
+}
+if ($complexFilter !== '') {
+    $query .= '&residential_complex_id=' . urlencode($complexFilter);
 }
 
 if ($token) {
@@ -91,6 +101,16 @@ if ($token) {
         $totalPages = $data['last_page'] ?? 1;
     } else {
         $errorMessage = $data['message'] ?? ('Ошибка загрузки жалоб (' . $status . ')');
+    }
+
+    [$cStatus, $cData] = apiRequestComplaints(
+            'GET',
+            $apiBaseUrl . '/residential-complexes',
+            $token
+    );
+
+    if ($cStatus === 200) {
+        $complexes = $cData['data'] ?? [];
     }
 } else {
     $errorMessage = 'Нет токена авторизации';
@@ -138,6 +158,21 @@ function kb_short(string $text, int $limit = 80): string
                 <option value="pending" <?= $statusFilter === 'pending' ? 'selected' : '' ?>>В процессе</option>
                 <option value="done" <?= $statusFilter === 'done' ? 'selected' : '' ?>>Готово</option>
             </select>
+
+            <select name="residential_complex_id">
+                <option value="">Все ЖК</option>
+                <?php foreach ($complexes as $complex): ?>
+                    <?php
+                    $cxId   = $complex['id']   ?? '';
+                    $cxName = $complex['name'] ?? '';
+                    ?>
+                    <option value="<?= htmlspecialchars((string)$cxId, ENT_QUOTES, 'UTF-8') ?>"
+                            <?= (string)$complexFilter === (string)$cxId ? 'selected' : '' ?>>
+                        <?= htmlspecialchars((string)$cxName, ENT_QUOTES, 'UTF-8') ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
             <button class="filter-button">Применить</button>
         </form>
 
@@ -256,6 +291,9 @@ function kb_short(string $text, int $limit = 80): string
                     if ($statusFilter !== '') {
                         $link .= '&status=' . urlencode($statusFilter);
                     }
+                    if ($complexFilter !== '') {
+                        $link .= '&residential_complex_id=' . urlencode($complexFilter);
+                    }
                     ?>
                     <a href="<?= $link ?>" class="<?= $i === $page ? 'active-page' : '' ?>">
                         <?= $i ?>
@@ -289,12 +327,23 @@ function kb_short(string $text, int $limit = 80): string
         e.modal.classList.add('modal-open');
         e.id.textContent       = btn.dataset.id || '';
         e.created.textContent  = btn.dataset.created || '';
-        e.status.textContent   = btn.dataset.status || '';
         e.rc.textContent       = btn.dataset.rc || '';
         e.user.textContent     = btn.dataset.name || '';
         e.phone.textContent    = btn.dataset.phone || '';
         e.account.textContent  = btn.dataset.account || '';
         e.text.textContent     = btn.dataset.text || '';
+
+        const statusText = btn.dataset.status || '';
+        e.status.textContent = statusText;
+
+        e.status.className = '';
+        if (statusText === 'Готово') {
+            e.status.classList.add('badge', 'badge-green');
+        } else if (statusText === 'В процессе') {
+            e.status.classList.add('badge', 'badge-yellow');
+        } else {
+            e.status.classList.add('badge', 'badge-gray');
+        }
     }
 
     function closeComplaintModal() {

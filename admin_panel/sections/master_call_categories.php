@@ -84,6 +84,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
         [$code, $data] = apiReq('DELETE', $apiBaseUrl . '/service-requests/masters/'.$id, $token);
         $successMessage = $code === 200 ? 'Мастер удалён' : ($data['message'] ?? 'Ошибка');
     }
+
+    $qs = $_SERVER['QUERY_STRING'] ? ('?' . $_SERVER['QUERY_STRING']) : '';
+    header('Location: ' . $_SERVER['PHP_SELF'] . $qs);
+    exit;
 }
 
 if ($token) {
