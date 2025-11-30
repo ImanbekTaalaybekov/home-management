@@ -12,4 +12,9 @@ class ResidentialCamera extends Model
         'name',
         'link'
     ];
+
+    public function residentialComplex()
+    {
+        return $this->belongsTo(ResidentialComplex::class, 'residential_complex_id');
+    }
 }

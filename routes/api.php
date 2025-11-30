@@ -6,12 +6,14 @@ use App\Http\Controllers\AnnouncementAdminController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AppVersionController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CameraAdminController;
 use App\Http\Controllers\CompanyReportAdminController;
 use App\Http\Controllers\CompanyReportController;
 use App\Http\Controllers\ComplaintAdminController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\DebtAdminController;
+use App\Http\Controllers\DebtAnalyticsAdminController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\DebtImportController;
 use App\Http\Controllers\InputDebtDataController;
@@ -202,4 +204,17 @@ Route::prefix('admin')->group(function () {
     Route::post('/debt-import', [DebtImportController::class, 'importDebt']);
 
     Route::get('/dashboard', [DashboardAdminController::class, 'index'])->middleware('auth:sanctum');
+
+    Route::get('/analytics/services', [DebtAnalyticsAdminController::class, 'servicesList'])->middleware('auth:sanctum');
+    Route::get('/analytics/accrual-summary', [DebtAnalyticsAdminController::class, 'accrualSummary'])->middleware('auth:sanctum');
+    Route::get('/analytics/balance-summary', [DebtAnalyticsAdminController::class, 'balanceSummary'])->middleware('auth:sanctum');
+    Route::get('/analytics/periods-map', [DebtAnalyticsAdminController::class, 'periodsMap'])->middleware('auth:sanctum');
+    Route::get('/analytics/accrual-dynamics', [DebtAnalyticsAdminController::class, 'accrualDynamics'])->middleware('auth:sanctum');
+    Route::get('/analytics/balance-dynamics', [DebtAnalyticsAdminController::class, 'balanceDynamics'])->middleware('auth:sanctum');
+
+    Route::get('/cameras', [CameraAdminController::class, 'index'])->middleware('auth:sanctum');
+    Route::post('/cameras', [CameraAdminController::class, 'store'])->middleware('auth:sanctum');
+    Route::get('/cameras/{id}', [CameraAdminController::class, 'show'])->middleware('auth:sanctum');
+    Route::post('/cameras/{id}', [CameraAdminController::class, 'update'])->middleware('auth:sanctum');
+    Route::delete('/cameras/{id}', [CameraAdminController::class, 'remove'])->middleware('auth:sanctum');
 });
