@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('residential_cameras', function (Blueprint $table) {
             $table->id();
-            $table->string('residential_complex_id')->nullable();
+            $table->integer('residential_complex_id')->nullable();
             $table->enum('type', ['hikvision', 'dahua'])->nullable();
             $table->string('name')->nullable();
             $table->string('link')->nullable();
