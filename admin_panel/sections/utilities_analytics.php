@@ -5,21 +5,19 @@ require __DIR__ . '/../include/config.php';
 $apiBaseUrl = API_BASE_URL;
 $token      = $_SESSION['auth_token'] ?? null;
 
-$search               = $_GET['search'] ?? '';
 $residentialComplexId = $_GET['residential_complex_id'] ?? '';
-$allParam             = $_GET['all'] ?? 'false';
-$page                 = max(1, (int)($_GET['page'] ?? 1));
+$serviceFilter        = $_GET['service'] ?? '';
 
-$rows           = [];
-$complexes      = [];
-$errorMessage   = null;
-$successMessage = null;
-$totalPages     = 1;
+$complexes        = [];
+$services         = [];
+$accrualSummary   = [];
+$balanceSummary   = [];
+$accrualDynamics  = [];
+$errorMessage     = null;
 
 function apiGet(string $url, string $token): array
 {
     $ch = curl_init($url);
-
     curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER     => [
@@ -27,111 +25,125 @@ function apiGet(string $url, string $token): array
                     'Authorization: Bearer ' . $token,
             ],
     ]);
-
     $response = curl_exec($ch);
     $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-
     return [$status, json_decode($response, true)];
 }
 
 if ($token) {
-    $query = $apiBaseUrl . '/debt-data?page=' . $page;
-
-    if ($search !== '') {
-        $query .= '&search=' . urlencode($search);
-    }
-    if ($residentialComplexId !== '') {
-        $query .= '&residential_complex_id=' . urlencode($residentialComplexId);
-    }
-    if ($allParam !== '') {
-        $query .= '&all=' . urlencode($allParam);
-    }
-
-    [$status, $result] = apiGet($query, $token);
-
-    if ($status === 200) {
-        $rows       = $result['data']      ?? [];
-        $totalPages = $result['last_page'] ?? 1;
-    } else {
-        $errorMessage = $result['message'] ?? ('Ошибка загрузки данных (' . $status . ')');
-    }
-
     [$cStatus, $cResult] = apiGet($apiBaseUrl . '/residential-complexes', $token);
     if ($cStatus === 200) {
         $complexes = $cResult['data'] ?? [];
+    } else {
+        $errorMessage = $cResult['message'] ?? ('Ошибка загрузки ЖК (' . $cStatus . ')');
+    }
+
+    $svcUrl = $apiBaseUrl . '/analytics/services';
+    $svcParams = [];
+    if ($residentialComplexId !== '') {
+        $svcParams[] = 'residential_complex_id=' . urlencode($residentialComplexId);
+    }
+    if (!empty($svcParams)) {
+        $svcUrl .= '?' . implode('&', $svcParams);
+    }
+
+    [$sStatus, $sResult] = apiGet($svcUrl, $token);
+    if ($sStatus === 200) {
+        $services = $sResult['data'] ?? [];
+    } elseif (!$errorMessage) {
+        $errorMessage = $sResult['message'] ?? ('Ошибка загрузки услуг (' . $sStatus . ')');
+    }
+
+    $params = [];
+    if ($residentialComplexId !== '') {
+        $params[] = 'residential_complex_id=' . urlencode($residentialComplexId);
+    }
+    if ($serviceFilter !== '') {
+        $params[] = 'service=' . urlencode($serviceFilter);
+    }
+    $qs = '';
+    if (!empty($params)) {
+        $qs = '?' . implode('&', $params);
+    }
+
+    [$aStatus, $aResult] = apiGet($apiBaseUrl . '/analytics/accrual-summary' . $qs, $token);
+    if ($aStatus === 200) {
+        $accrualSummary = $aResult['data'] ?? [];
+    } elseif (!$errorMessage) {
+        $errorMessage = $aResult['message'] ?? ('Ошибка аналитики начислений (' . $aStatus . ')');
+    }
+
+    [$bStatus, $bResult] = apiGet($apiBaseUrl . '/analytics/balance-summary' . $qs, $token);
+    if ($bStatus === 200) {
+        $balanceSummary = $bResult['data'] ?? [];
+    } elseif (!$errorMessage) {
+        $errorMessage = $bResult['message'] ?? ('Ошибка аналитики сальдо (' . $bStatus . ')');
+    }
+
+    [$adStatus, $adResult] = apiGet($apiBaseUrl . '/analytics/accrual-dynamics' . $qs, $token);
+    if ($adStatus === 200) {
+        $accrualDynamics = $adResult['data'] ?? [];
+    } elseif (!$errorMessage) {
+        $errorMessage = $adResult['message'] ?? ('Ошибка динамики начислений (' . $adStatus . ')');
     }
 } else {
     $errorMessage = 'Нет токена авторизации';
 }
+
+function fmtMoney($value): string
+{
+    return number_format((float)($value ?? 0), 2, ',', ' ');
+}
+
+function fmtInt($value): int
+{
+    return (int)($value ?? 0);
+}
+
+$currentServiceLabel = $serviceFilter !== '' ? $serviceFilter : 'Все услуги';
+$currentRcLabel = 'Все ЖК';
+if ($residentialComplexId !== '') {
+    foreach ($complexes as $complex) {
+        if ((string)($complex['id'] ?? '') === (string)$residentialComplexId) {
+            $currentRcLabel = $complex['name'] ?? $currentRcLabel;
+            break;
+        }
+    }
+}
+
+$accrualDynamicsJson = json_encode($accrualDynamics, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 ?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Просмотр коммунальных данных</title>
+    <title>Аналитика коммунальных данных</title>
     <link rel="stylesheet" href="/include/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        .utilities-view-filters {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .utilities-view-row {
-            display: grid;
-            grid-template-columns: minmax(220px, 1.6fr) minmax(200px, 1.1fr);
-            gap: 12px;
-            align-items: center;
-        }
-        .utilities-view-row--bottom {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .utilities-view-field {
-            width: 100%;
-        }
-        .utilities-view-field input,
-        .utilities-view-field select {
-            width: 100%;
-        }
-        .utilities-view-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
-        .utilities-view-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .utilities-view-subtitle {
-            margin-bottom: 16px;
-            color: #6b7280;
-            font-size: 14px;
-        }
-        @media (max-width: 720px) {
-            .utilities-view-row {
-                grid-template-columns: 1fr;
-            }
-            .utilities-view-row--bottom {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-            .utilities-view-actions {
-                width: 100%;
-            }
-            .utilities-view-actions .filter-button,
-            .utilities-view-actions .button-secondary {
-                width: 100%;
-                text-align: center;
-            }
+        .utilities-view-filters { display: flex; flex-direction: column; gap: 16px; }
+        .utilities-view-row { display: grid; grid-template-columns: minmax(220px, 1.4fr) minmax(200px, 1.2fr); gap: 12px; align-items: center; }
+        .utilities-view-row--bottom { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+        .utilities-view-field select { width: 100%; }
+        .utilities-view-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+        .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 20px; }
+        .analytics-card { padding: 16px 18px; border-radius: 12px; background: #ffffff; border: 1px solid #e5e7eb; }
+        .analytics-card__title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+        .analytics-card__subtitle { font-size: 13px; color: #6b7280; margin-bottom: 14px; }
+        .analytics-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; font-size: 13px; }
+        .analytics-metric__label { color: #6b7280; }
+        .analytics-metric__value { font-weight: 600; }
+        .analytics-metric__value--danger { color: #b91c1c; }
+        .chart-container { margin-top: 24px; padding: 16px 18px; border-radius: 12px; background: #ffffff; border: 1px solid #e5e7eb; }
+        .chart-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+        .chart-subtitle { font-size: 13px; color: #6b7280; margin-bottom: 10px; }
+        .chart-wrapper { position: relative; width: 100%; height: 340px; }
+        @media (max-width: 900px) {
+            .utilities-view-row { grid-template-columns: 1fr; }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="layout">
@@ -139,44 +151,23 @@ if ($token) {
     <aside class="sidebar"><?php include __DIR__ . '/../include/sidebar.php'; ?></aside>
 
     <main class="content">
-        <h1 class="content__title">Просмотр коммунальных данных (Alseco)</h1>
-        <p class="utilities-view-subtitle">
-            Здесь можно посмотреть загруженные данные Alseco и отфильтровать их по ЖК, лицевому счёту, ФИО и услуге.
-        </p>
-
-        <?php if ($successMessage): ?>
-            <div class="alert alert-success">
-                <?= htmlspecialchars($successMessage, ENT_QUOTES, 'UTF-8') ?>
-            </div>
-        <?php endif; ?>
+        <h1 class="content__title">Аналитика коммунальных данных (Alseco)</h1>
 
         <?php if ($errorMessage): ?>
-            <div class="alert alert-error">
-                <?= htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') ?>
-            </div>
+            <div class="alert alert-error"><?= htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') ?></div>
         <?php endif; ?>
 
         <div class="card">
-            <form method="get" class="filter-form utilities-view-filters">
+            <form method="get" class="utilities-view-filters">
                 <div class="utilities-view-row">
-                    <div class="utilities-view-field">
-                        <input
-                                type="text"
-                                name="search"
-                                placeholder="Поиск по ЛС, ФИО, услуге"
-                                value="<?= htmlspecialchars($search ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                        >
-                    </div>
                     <div class="utilities-view-field">
                         <select name="residential_complex_id">
                             <option value="">Все ЖК</option>
                             <?php foreach ($complexes as $complex): ?>
                                 <?php
-                                $cid   = $complex['id']   ?? '';
-                                $cname = $complex['name'] ?? ('ЖК #' . $cid);
-                                $selected = ($residentialComplexId !== '' && (string)$residentialComplexId === (string)$cid)
-                                        ? 'selected'
-                                        : '';
+                                $cid      = $complex['id'] ?? '';
+                                $cname    = $complex['name'] ?? ('ЖК #' . $cid);
+                                $selected = ($residentialComplexId !== '' && (string)$residentialComplexId === (string)$cid) ? 'selected' : '';
                                 ?>
                                 <option value="<?= htmlspecialchars($cid, ENT_QUOTES, 'UTF-8') ?>" <?= $selected ?>>
                                     <?= htmlspecialchars($cname, ENT_QUOTES, 'UTF-8') ?>
@@ -184,121 +175,103 @@ if ($token) {
                             <?php endforeach; ?>
                         </select>
                     </div>
+
+                    <div class="utilities-view-field">
+                        <select name="service">
+                            <option value="">Все услуги</option>
+                            <?php foreach ($services as $svc): ?>
+                                <?php $selected = ($serviceFilter === $svc) ? 'selected' : ''; ?>
+                                <option value="<?= htmlspecialchars($svc, ENT_QUOTES, 'UTF-8') ?>" <?= $selected ?>>
+                                    <?= htmlspecialchars($svc, ENT_QUOTES, 'UTF-8') ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="utilities-view-row--bottom">
-                    <label class="utilities-view-checkbox">
-                        <input
-                                type="checkbox"
-                                name="all"
-                                value="true"
-                                <?= ($allParam === 'true' || $allParam === '1') ? 'checked' : '' ?>
-                        >
-                        Показать все периоды
-                    </label>
-
                     <div class="utilities-view-actions">
                         <button type="submit" class="filter-button">Применить</button>
-                        <a href="/sections/utilities_view.php" class="button-secondary"><button type="submit" class="filter-button" style="background-color: red">Сбросить</button></a>
+                        <a href="<?= htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') ?>" class="button-secondary">
+                            <button type="button" class="filter-button" style="background-color:red">Сбросить</button>
+                        </a>
+                    </div>
+                    <div style="font-size: 12px; color: #6b7280;">
+                        <div>ЖК: <strong><?= htmlspecialchars($currentRcLabel, ENT_QUOTES, 'UTF-8') ?></strong></div>
+                        <div>Услуга: <strong><?= htmlspecialchars($currentServiceLabel, ENT_QUOTES, 'UTF-8') ?></strong></div>
                     </div>
                 </div>
             </form>
         </div>
 
-        <div class="table-wrapper" style="margin-top: 20px;">
-            <table class="admins-table">
-                <thead>
-                <tr>
-                    <th>Период</th>
-                    <th>Лицевой счёт</th>
-                    <th>Житель</th>
-                    <th>ЖК</th>
-                    <th>Услуга</th>
-                    <th>Нач. сальдо</th>
-                    <th>Начислено</th>
-                    <th>Оплата</th>
-                    <th>Кон. сальдо</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php if (empty($rows)): ?>
-                    <tr>
-                        <td colspan="9">Данные не найдены</td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($rows as $row): ?>
-                        <?php
-                        $year   = $row['year']   ?? null;
-                        $month  = $row['month']  ?? null;
-                        $period = ($year && $month)
-                                ? sprintf('%02d.%d', (int)$month, (int)$year)
-                                : '';
+        <div class="analytics-grid">
+            <div class="analytics-card">
+                <div class="analytics-card__title">Начисления и платежи (последний период)</div>
+                <div class="analytics-card__subtitle">Сравнение начислений и оплат.</div>
+                <div class="analytics-metrics">
+                    <div>
+                        <div class="analytics-metric__label">Итого начислено</div>
+                        <div class="analytics-metric__value"><?= fmtMoney($accrualSummary['accrual_total_sum'] ?? 0) ?></div>
+                    </div>
+                    <div>
+                        <div class="analytics-metric__label">Оплачено</div>
+                        <div class="analytics-metric__value"><?= fmtMoney($accrualSummary['payment_sum'] ?? 0) ?></div>
+                    </div>
+                    <div>
+                        <div class="analytics-metric__label">Разница (начислено - оплачено)</div>
+                        <div class="analytics-metric__value"><?= fmtMoney($accrualSummary['diff_sum'] ?? 0) ?></div>
+                    </div>
+                    <div>
+                        <div class="analytics-metric__label">Просроченные начисления</div>
+                        <div class="analytics-metric__value analytics-metric__value--danger">
+                            <?= fmtMoney($accrualSummary['overdue_accrual_sum'] ?? 0) ?>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="analytics-metric__label">Количество выставленных счетов на оплату</div>
+                        <div class="analytics-metric__value"><?= fmtInt($accrualSummary['rows_count'] ?? 0) ?></div>
+                    </div>
+                    <div>
+                        <div class="analytics-metric__label">Количество просроченных платежей</div>
+                        <div class="analytics-metric__value analytics-metric__value--danger">
+                            <?= fmtInt($accrualSummary['overdue_count'] ?? 0) ?></div>
+                    </div>
+                </div>
+            </div>
 
-                        $accountNumber = $row['account_number'] ?? '';
-                        $fullName      = $row['full_name']      ?? '';
-                        $residentName  = $row['resident_name']  ?? '';
-
-                        $rcName        = $row['residential_complex_name'] ?? '';
-                        $service       = $row['service']        ?? '';
-
-                        $balanceStart  = $row['balance_start']   ?? null;
-                        $initialAccr   = $row['initial_accrual'] ?? null;
-                        $accrChange    = $row['accrual_change']  ?? null;
-                        $payment       = $row['payment']         ?? null;
-                        $balanceEnd    = $row['balance_end']     ?? null;
-
-                        $accrTotal     = ($initialAccr ?? 0) + ($accrChange ?? 0);
-                        ?>
-                        <tr>
-                            <td><?= htmlspecialchars($period, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= htmlspecialchars($accountNumber, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td>
-                                <?php if ($residentName): ?>
-                                    <?= htmlspecialchars($residentName, ENT_QUOTES, 'UTF-8') ?>
-                                    <?php if ($fullName && $fullName !== $residentName): ?>
-                                        <div class="table-subtext">
-                                            Alseco: <?= htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8') ?>
-                                        </div>
-                                    <?php endif; ?>
-                                <?php else: ?>
-                                    <?= htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8') ?>
-                                <?php endif; ?>
-                            </td>
-                            <td><?= htmlspecialchars($rcName, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= htmlspecialchars($service, ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= $balanceStart !== null ? number_format((float)$balanceStart, 2, ',', ' ') : '' ?></td>
-                            <td><?= number_format((float)$accrTotal, 2, ',', ' ') ?></td>
-                            <td><?= $payment !== null ? number_format((float)$payment, 2, ',', ' ') : '' ?></td>
-                            <td><?= $balanceEnd !== null ? number_format((float)$balanceEnd, 2, ',', ' ') : '' ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-                </tbody>
-            </table>
+            <div class="analytics-card">
+                <div class="analytics-card__title">Конечное сальдо (последний период)</div>
+                <div class="analytics-card__subtitle">Итоговая задолженность/переплата.</div>
+                <div class="analytics-metrics">
+                    <div>
+                        <div class="analytics-metric__label">Суммарное сальдо</div>
+                        <div class="analytics-metric__value"><?= fmtMoney($balanceSummary['balance_total_sum'] ?? 0) ?></div>
+                    </div>
+                    <div>
+                        <div class="analytics-metric__label">Просроченное сальдо</div>
+                        <div class="analytics-metric__value analytics-metric__value--danger">
+                            <?= fmtMoney($balanceSummary['overdue_balance_sum'] ?? 0) ?></div>
+                    </div>
+                    <div>
+                        <div class="analytics-metric__label">Количество выставленных счетов на оплату</div>
+                        <div class="analytics-metric__value"><?= fmtInt($balanceSummary['rows_count'] ?? 0) ?></div>
+                    </div>
+                    <div>
+                        <div class="analytics-metric__label">Количество просроченных платежей</div>
+                        <div class="analytics-metric__value analytics-metric__value--danger">
+                            <?= fmtInt($balanceSummary['overdue_count'] ?? 0) ?></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <?php if ($totalPages > 1): ?>
-            <div class="pagination">
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <?php
-                    $link = '?page=' . $i;
-
-                    if ($search !== '') {
-                        $link .= '&search=' . urlencode($search);
-                    }
-                    if ($residentialComplexId !== '') {
-                        $link .= '&residential_complex_id=' . urlencode($residentialComplexId);
-                    }
-                    if ($allParam !== '') {
-                        $link .= '&all=' . urlencode($allParam);
-                    }
-                    ?>
-                    <a href="<?= $link ?>" class="<?= $i === $page ? 'active-page' : '' ?>">
-                        <?= $i ?>
-                    </a>
-                <?php endfor; ?>
+        <div class="chart-container">
+            <div class="chart-title">Динамика начислений и платежей по месяцам</div>
+            <div class="chart-subtitle">Итого начислено, оплачено и разница по месяцам.</div>
+            <div class="chart-wrapper">
+                <canvas id="accrualChart"></canvas>
             </div>
-        <?php endif; ?>
+        </div>
 
     </main>
 </div>
@@ -306,19 +279,75 @@ if ($token) {
 <?php include __DIR__ . '/../include/footer.php'; ?>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const sidebar = document.getElementById('sidebar-finance');
+        var sidebar = document.getElementById('sidebar-finance');
+        if (sidebar) sidebar.classList.add('sidebar__group--open');
+        var item = document.getElementById('menu_utilities_view');
+        if (item) item.classList.add('menu-selected-point');
 
-        if (sidebar) {
-            sidebar.classList.add('sidebar__group--open');
+        var accrualData = <?= $accrualDynamicsJson ?: '[]' ?>;
+
+        function buildLabelsAndValues(rows) {
+            var labels = [];
+            var total = [];
+            var paid = [];
+            var diff = [];
+
+            rows.forEach(function (row) {
+                var year = (row.year || row.year === 0) ? row.year : null;
+                var month = (row.month || row.month === 0) ? row.month : null;
+                if (year === null || month === null) return;
+
+                var label = (month < 10 ? '0' + month : month) + '.' + year;
+                labels.push(label);
+
+                var balanceStart  = parseFloat(row.balance_start || 0);
+                var accrualSum    = parseFloat(row.accrual_total_sum || 0);
+                var paymentRaw    = parseFloat(row.payment_sum || 0);
+
+                var totalVal = Math.abs(balanceStart + accrualSum);
+                var paidVal  = Math.abs(paymentRaw);
+                var diffVal  = totalVal - paidVal;
+
+                total.push(totalVal);
+                paid.push(paidVal);
+                diff.push(diffVal);
+            });
+
+            return { labels: labels, total: total, paid: paid, diff: diff };
         }
-    });
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const sidebar = document.getElementById('menu_utilities_view');
+        var prepared = buildLabelsAndValues(accrualData);
 
-        if (sidebar) {
-            sidebar.classList.add('menu-selected-point');
-        }
+        var accrualCtx = document.getElementById('accrualChart').getContext('2d');
+        new Chart(accrualCtx, {
+            type: 'bar',
+            data: {
+                labels: prepared.labels,
+                datasets: [
+                    {
+                        label: 'Итого начислено',
+                        data: prepared.total
+                    },
+                    {
+                        label: 'Оплачено',
+                        data: prepared.paid
+                    },
+                    {
+                        label: 'Разница',
+                        data: prepared.diff
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: { stacked: false },
+                    y: { stacked: false, beginAtZero: true }
+                }
+            }
+        });
     });
 </script>
 </body>
