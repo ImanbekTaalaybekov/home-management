@@ -415,6 +415,24 @@ if ($currentCategoryId && $token) {
 
 <?php include __DIR__ . '/../include/footer.php'; ?>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar-information');
+
+        if (sidebar) {
+            sidebar.classList.add('sidebar__group--open');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('menu_knowledge_base');
+
+        if (sidebar) {
+            sidebar.classList.add('menu-selected-point');
+        }
+    });
+</script>
+
 <script src="/include/scripts.js"></script>
 <script>
     function catEls() {

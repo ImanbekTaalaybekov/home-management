@@ -187,5 +187,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
 </div>
 
 <?php include __DIR__ . '/../include/footer.php'; ?>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar-finance');
+
+        if (sidebar) {
+            sidebar.classList.add('sidebar__group--open');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('menu_utilities_upload');
+
+        if (sidebar) {
+            sidebar.classList.add('menu-selected-point');
+        }
+    });
+</script>
 </body>
 </html>

@@ -2,8 +2,9 @@
 require __DIR__ . '/../include/auth.php';
 require __DIR__ . '/../include/config.php';
 
-$apiBaseUrl = API_BASE_URL;
-$token      = $_SESSION['auth_token'] ?? null;
+$apiBaseUrl     = API_BASE_URL;
+$token          = $_SESSION['auth_token'] ?? null;
+$storageBaseUrl = 'https://home-folder.wires.kz/storage/';
 
 $statusFilter   = $_GET['status'] ?? '';
 $complexFilter  = $_GET['residential_complex_id'] ?? '';
@@ -187,12 +188,13 @@ function shortText(string $text, int $limit = 80): string
                     <th>Пользователь</th>
                     <th>Лицевой счёт</th>
                     <th>Текст</th>
+                    <th>Фото</th>
                     <th>Действия</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php if (empty($suggestions)): ?>
-                    <tr><td colspan="8">Предложений не найдено</td></tr>
+                    <tr><td colspan="9">Предложений не найдено</td></tr>
                 <?php else: ?>
                     <?php foreach ($suggestions as $s): ?>
                         <?php
@@ -209,6 +211,15 @@ function shortText(string $text, int $limit = 80): string
                         $textFull  = $s['message'] ?? $s['text'] ?? '';
                         $textShort = shortText($textFull ?: '', 70);
 
+                        $photos    = $s['photos'] ?? [];
+                        $photoPath = '';
+                        $photoUrl  = '';
+
+                        if (!empty($photos) && isset($photos[0]['path'])) {
+                            $photoPath = (string)$photos[0]['path'];
+                            $photoUrl  = $storageBaseUrl . ltrim($photoPath, '/');
+                        }
+
                         $statusLabel = '—';
                         $statusClass = 'badge-gray';
 
@@ -219,10 +230,9 @@ function shortText(string $text, int $limit = 80): string
 
                         if ($statusVal === 'done') {
                             $statusLabel = 'Готово';
-                            $statusClass = 'badge-green'; // зелёный для "Готово"
+                            $statusClass = 'badge-green';
                         }
 
-                        // Для JS alert лучше подготовить текст отдельно (без addslashes в HTML)
                         $textFullForJs = str_replace(["\r", "\n"], ["\\r", "\\n"], $textFull);
                         ?>
                         <tr>
@@ -237,6 +247,17 @@ function shortText(string $text, int $limit = 80): string
                             <td><?= htmlspecialchars((string)$userName, ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars((string)$personalAcc, ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($textShort, ENT_QUOTES, 'UTF-8') ?></td>
+                            <td>
+                                <?php if ($photoUrl): ?>
+                                    <a href="<?= htmlspecialchars($photoUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank">
+                                        <img src="<?= htmlspecialchars($photoUrl, ENT_QUOTES, 'UTF-8') ?>"
+                                             alt="Фото"
+                                             class="complaint-thumb">
+                                    </a>
+                                <?php else: ?>
+                                    —
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 <button
                                         type="button"
@@ -287,5 +308,22 @@ function shortText(string $text, int $limit = 80): string
     </main>
 </div>
 <?php include __DIR__ . '/../include/footer.php'; ?>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar-utilites');
+        if (sidebar) {
+            sidebar.classList.add('sidebar__group--open');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('menu_suggestions');
+        if (sidebar) {
+            sidebar.classList.add('menu-selected-point');
+        }
+    });
+</script>
+
 </body>
 </html>

@@ -195,6 +195,23 @@ $totalPages = $result['last_page'] ?? 1;
         document.getElementById('complexModal').classList.remove('modal-open');
     }
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar-admin');
+
+        if (sidebar) {
+            sidebar.classList.add('sidebar__group--open');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('menu_complexes');
+
+        if (sidebar) {
+            sidebar.classList.add('menu-selected-point');
+        }
+    });
+</script>
 <?php include __DIR__ . '/../include/footer.php'; ?>
 </body>
 </html>

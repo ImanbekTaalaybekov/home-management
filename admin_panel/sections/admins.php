@@ -505,6 +505,23 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
 
 <script src="/include/scripts.js"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar-admin');
+
+        if (sidebar) {
+            sidebar.classList.add('sidebar__group--open');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('menu_admins');
+
+        if (sidebar) {
+            sidebar.classList.add('menu-selected-point');
+        }
+    });
+</script>
+<script>
     function resetAccessCheckboxes() {
         const accessCheckboxes = document.querySelectorAll('#adminModalForm input[name="accesses[]"]');
         accessCheckboxes.forEach(cb => cb.checked = false);

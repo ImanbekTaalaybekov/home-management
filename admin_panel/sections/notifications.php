@@ -455,6 +455,24 @@ $categoryLabels = [
     });
 </script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar-utilites');
+
+        if (sidebar) {
+            sidebar.classList.add('sidebar__group--open');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('menu_notifications');
+
+        if (sidebar) {
+            sidebar.classList.add('menu-selected-point');
+        }
+    });
+</script>
+
 <div class="modal-backdrop" id="notificationModal">
     <div class="modal">
         <div class="modal-header">

@@ -64,8 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
 
     if ($action === 'create_master') {
         [$code, $data] = apiReq('POST', $apiBaseUrl . '/service-requests/masters', $token, [
-            'name' => $_POST['name'] ?? '',
-            'service_request_category_id' => $_POST['category_id'] ?? null
+                'name'                       => $_POST['name'] ?? '',
+                'phone_number'               => $_POST['phone_number'] ?? '',
+                'service_request_category_id'=> $_POST['category_id'] ?? null,
         ]);
         $successMessage = $code === 201 ? 'Мастер добавлен' : ($data['message'] ?? 'Ошибка');
     }
@@ -73,8 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
     if ($action === 'update_master') {
         $id = $_POST['id'];
         [$code, $data] = apiReq('PUT', $apiBaseUrl . '/service-requests/masters/'.$id, $token, [
-            'name' => $_POST['name'] ?? '',
-            'service_request_category_id' => $_POST['category_id'] ?? null
+                'name'                       => $_POST['name'] ?? '',
+                'phone_number'               => $_POST['phone_number'] ?? '',
+                'service_request_category_id'=> $_POST['category_id'] ?? null,
         ]);
         $successMessage = $code === 200 ? 'Мастер обновлён' : ($data['message'] ?? 'Ошибка');
     }
@@ -134,24 +136,36 @@ if ($token) {
         <button class="button-primary" onclick="openMasterModal()">+ Мастер</button>
 
         <table class="admins-table">
-            <thead><tr><th>ID</th><th>Имя</th><th>Категория</th><th>Действия</th></tr></thead>
-            <tbody>
-            <?php foreach($masters as $m): ?>
+            <table class="admins-table">
+                <thead>
                 <tr>
-                    <td><?=$m['id']?></td>
-                    <td><?=htmlspecialchars($m['name'])?></td>
-                    <td><?=htmlspecialchars($m['category']['name_rus'] ?? '-')?></td>
-                    <td>
-                        <button onclick='editMaster(<?=json_encode($m)?>)'>Редактировать</button>
-                        <form method="post" style="display:inline">
-                            <input type="hidden" name="action" value="delete_master">
-                            <input type="hidden" name="id" value="<?=$m['id']?>">
-                            <button>Удалить</button>
-                        </form>
-                    </td>
+                    <th>ID</th>
+                    <th>Имя</th>
+                    <th>Телефон</th>
+                    <th>Категория</th>
+                    <th>Действия</th>
                 </tr>
-            <?php endforeach; ?>
-            </tbody>
+                </thead>
+                <tbody>
+                <?php foreach($masters as $m): ?>
+                    <tr>
+                        <td><?=$m['id']?></td>
+                        <td><?=htmlspecialchars($m['name'])?></td>
+                        <td><?=htmlspecialchars($m['phone_number'] ?? '')?></td>
+                        <td><?=htmlspecialchars($m['category']['name_rus'] ?? '-')?></td>
+                        <td>
+                            <button onclick='editMaster(<?=json_encode($m, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)?>)'>
+                                Редактировать
+                            </button>
+                            <form method="post" style="display:inline">
+                                <input type="hidden" name="action" value="delete_master">
+                                <input type="hidden" name="id" value="<?=$m['id']?>">
+                                <button>Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
         </table>
 
     </main>
@@ -174,8 +188,12 @@ if ($token) {
         <form method="post">
             <input type="hidden" name="action" id="masterAction">
             <input type="hidden" name="id" id="masterId">
+
             <input type="text" name="name" id="masterName" placeholder="Имя мастера">
-            <select name="category_id">
+
+            <input type="text" name="phone_number" id="masterPhone" placeholder="Телефон мастера">
+
+            <select name="category_id" id="masterCategory">
                 <option value="">Без категории</option>
                 <?php foreach($categories as $c): ?>
                     <option value="<?=$c['id']?>"><?=$c['name_rus']?></option>
@@ -187,7 +205,23 @@ if ($token) {
 </div>
 
 <?php include __DIR__ . '/../include/footer.php'; ?>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar-admin');
 
+        if (sidebar) {
+            sidebar.classList.add('sidebar__group--open');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('menu_master_call_categories');
+
+        if (sidebar) {
+            sidebar.classList.add('menu-selected-point');
+        }
+    });
+</script>
 <script>
     function openCategoryModal(){
         document.getElementById('categoryModal').classList.add('modal-open');
@@ -199,11 +233,31 @@ if ($token) {
     }
     function openMasterModal(){
         document.getElementById('masterModal').classList.add('modal-open');
-        document.getElementById('masterAction').value='create_master';
+        document.getElementById('masterAction').value = 'create_master';
+        document.getElementById('masterId').value = '';
+        document.getElementById('masterName').value = '';
+        document.getElementById('masterPhone').value = '';
+        const catSelect = document.getElementById('masterCategory');
+        if (catSelect) catSelect.value = '';
     }
     function editMaster(m){
         document.getElementById('masterModal').classList.add('modal-open');
-        masterAction.value='update_master';masterId.value=m.id;masterName.value=m.name;
+
+        document.getElementById('masterAction').value = 'update_master';
+        document.getElementById('masterId').value     = m.id;
+        document.getElementById('masterName').value   = m.name || '';
+        document.getElementById('masterPhone').value  = m.phone_number || '';
+
+        const catSelect = document.getElementById('masterCategory');
+        if (catSelect) {
+            if (m.category && m.category.id) {
+                catSelect.value = m.category.id;
+            } else if (m.service_request_category_id) {
+                catSelect.value = m.service_request_category_id;
+            } else {
+                catSelect.value = '';
+            }
+        }
     }
 </script>
 </body>

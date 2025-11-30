@@ -2,8 +2,9 @@
 require __DIR__ . '/../include/auth.php';
 require __DIR__ . '/../include/config.php';
 
-$apiBaseUrl = API_BASE_URL;
-$token      = $_SESSION['auth_token'] ?? null;
+$apiBaseUrl      = API_BASE_URL;
+$token           = $_SESSION['auth_token'] ?? null;
+$storageBaseUrl  = 'https://home-folder.wires.kz/storage/';
 
 $statusFilter          = $_GET['status'] ?? '';
 $complexFilter         = $_GET['residential_complex_id'] ?? '';
@@ -187,13 +188,14 @@ function kb_short(string $text, int $limit = 80): string
                     <th>Пользователь</th>
                     <th>Лицевой счёт</th>
                     <th>Текст</th>
+                    <th>Фото</th>
                     <th>Действия</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php if (empty($complaints)): ?>
                     <tr>
-                        <td colspan="8">Жалоб не найдено</td>
+                        <td colspan="9">Жалоб не найдено</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($complaints as $c): ?>
@@ -211,6 +213,15 @@ function kb_short(string $text, int $limit = 80): string
 
                         $textFull  = $c['message'] ?? $c['text'] ?? '';
                         $textShort = kb_short($textFull ?: '', 70);
+
+                        $photos    = $c['photos'] ?? [];
+                        $photoPath = '';
+                        $photoUrl  = '';
+
+                        if (!empty($photos) && isset($photos[0]['path'])) {
+                            $photoPath = (string)$photos[0]['path'];
+                            $photoUrl  = $storageBaseUrl . ltrim($photoPath, '/');
+                        }
 
                         $statusLabel = '—';
                         $statusClass = 'badge-gray';
@@ -237,6 +248,17 @@ function kb_short(string $text, int $limit = 80): string
                             <td><?= htmlspecialchars((string)$userName, ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars((string)$personalAcc, ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($textShort, ENT_QUOTES, 'UTF-8') ?></td>
+                            <td>
+                                <?php if ($photoUrl): ?>
+                                    <a href="<?= htmlspecialchars($photoUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank">
+                                        <img src="<?= htmlspecialchars($photoUrl, ENT_QUOTES, 'UTF-8') ?>"
+                                             alt="Фото"
+                                             class="complaint-thumb">
+                                    </a>
+                                <?php else: ?>
+                                    —
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 <div class="admins-actions">
                                     <button
@@ -349,6 +371,22 @@ function kb_short(string $text, int $limit = 80): string
     function closeComplaintModal() {
         complaintEls().modal.classList.remove('modal-open');
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar-utilites');
+
+        if (sidebar) {
+            sidebar.classList.add('sidebar__group--open');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('menu_complaints');
+
+        if (sidebar) {
+            sidebar.classList.add('menu-selected-point');
+        }
+    });
 </script>
 
 <div class="modal-backdrop" id="complaintModal">

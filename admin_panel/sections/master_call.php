@@ -2,8 +2,9 @@
 require __DIR__ . '/../include/auth.php';
 require __DIR__ . '/../include/config.php';
 
-$apiBaseUrl = API_BASE_URL;
-$token      = $_SESSION['auth_token'] ?? null;
+$apiBaseUrl     = API_BASE_URL;
+$token          = $_SESSION['auth_token'] ?? null;
+$storageBaseUrl = 'https://home-folder.wires.kz/storage/';
 
 $statusFilter  = $_GET['status'] ?? '';
 $search        = trim($_GET['search'] ?? '');
@@ -259,13 +260,14 @@ function mc_short(string $text, int $limit = 80): string
                     <th>Описание</th>
                     <th>Мастер</th>
                     <th>Оценка</th>
+                    <th>Фото</th>
                     <th>Действия</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php if (empty($requests)): ?>
                     <tr>
-                        <td colspan="11">Заявок не найдено</td>
+                        <td colspan="12">Заявок не найдено</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($requests as $r): ?>
@@ -295,6 +297,15 @@ function mc_short(string $text, int $limit = 80): string
 
                         $categoryId = $r['service_request_category_id']
                                 ?? ($r['category_id'] ?? ($categoryIdMap[$typeKey] ?? null));
+
+                        $photos    = $r['photos'] ?? [];
+                        $photoPath = '';
+                        $photoUrl  = '';
+
+                        if (!empty($photos) && isset($photos[0]['path'])) {
+                            $photoPath = (string)$photos[0]['path'];
+                            $photoUrl  = $storageBaseUrl . ltrim($photoPath, '/');
+                        }
 
                         $statusClass = 'badge-gray';
                         $statusLabel = '—';
@@ -329,6 +340,17 @@ function mc_short(string $text, int $limit = 80): string
                             <td><?= htmlspecialchars($shortDesc, ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= $masterName ? htmlspecialchars((string)$masterName, ENT_QUOTES, 'UTF-8') : '—' ?></td>
                             <td><?= $rate !== null ? htmlspecialchars((string)$rate, ENT_QUOTES, 'UTF-8') : '—' ?></td>
+                            <td>
+                                <?php if ($photoUrl): ?>
+                                    <a href="<?= htmlspecialchars($photoUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank">
+                                        <img src="<?= htmlspecialchars($photoUrl, ENT_QUOTES, 'UTF-8') ?>"
+                                             alt="Фото"
+                                             class="complaint-thumb">
+                                    </a>
+                                <?php else: ?>
+                                    —
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 <div class="admins-actions">
                                     <button
@@ -558,6 +580,22 @@ function mc_short(string $text, int $limit = 80): string
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar-utilites');
+        if (sidebar) {
+            sidebar.classList.add('sidebar__group--open');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('menu_master_call');
+        if (sidebar) {
+            sidebar.classList.add('menu-selected-point');
+        }
+    });
+</script>
 
 </body>
 </html>
