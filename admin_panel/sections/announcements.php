@@ -169,6 +169,24 @@ if ($status === 200) {
 <?php include __DIR__ . '/../include/footer.php'; ?>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar-utilites');
+
+        if (sidebar) {
+            sidebar.classList.add('sidebar__group--open');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('menu_announcements');
+
+        if (sidebar) {
+            sidebar.classList.add('menu-selected-point');
+        }
+    });
+</script>
+
+<script>
     function showAnnouncement(data) {
         document.getElementById('viewModal').classList.add('modal-open');
         document.getElementById('viewTitle').innerText = data.title || '';

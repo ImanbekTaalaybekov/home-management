@@ -388,6 +388,23 @@ if ($token) {
         reportEls().modal.classList.remove('modal-open');
     }
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar-finance');
+
+        if (sidebar) {
+            sidebar.classList.add('sidebar__group--open');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('menu_uk_reports');
+
+        if (sidebar) {
+            sidebar.classList.add('menu-selected-point');
+        }
+    });
+</script>
 
 <div class="modal-backdrop" id="reportModal">
     <div class="modal modal--lg">
