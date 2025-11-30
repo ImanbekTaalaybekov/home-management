@@ -9,6 +9,7 @@ class ServiceRequestMaster extends Model
     protected $fillable = [
         'name',
         'service_request_category_id',
+        'phone_number',
         'client_id'
     ];
 

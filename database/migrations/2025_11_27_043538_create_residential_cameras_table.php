@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('service_request_masters', function (Blueprint $table) {
+        Schema::create('residential_cameras', function (Blueprint $table) {
             $table->id();
+            $table->string('residential_complex_id')->nullable();
+            $table->enum('type', ['hikvision', 'dahua'])->nullable();
             $table->string('name')->nullable();
-            $table->integer('service_request_category_id')->nullable();
-            $table->string('phone_number')->nullable();
-            $table->integer('client_id')->nullable();
+            $table->string('link')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('service_request_masters');
+        Schema::dropIfExists('residential_cameras');
     }
 };

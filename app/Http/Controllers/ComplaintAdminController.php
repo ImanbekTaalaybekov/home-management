@@ -20,9 +20,13 @@ class ComplaintAdminController extends Controller
             return response()->json(['message' => 'У админа не указан client_id'], 403);
         }
 
-        $query = Complaint::with(['user.residentialComplex'])
+        $query = Complaint::with([
+            'user.residentialComplex',
+            'photos',
+        ])
             ->whereHas('user.residentialComplex', function ($q) use ($admin, $request) {
                 $q->where('client_id', $admin->client_id);
+
                 if ($residentialComplexId = $request->query('residential_complex_id')) {
                     $q->where('id', $residentialComplexId);
                 }
@@ -47,7 +51,10 @@ class ComplaintAdminController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        $complaint = Complaint::with(['user.residentialComplex'])
+        $complaint = Complaint::with([
+            'user.residentialComplex',
+            'photos',
+        ])
             ->where('id', $id)
             ->whereHas('user.residentialComplex', function ($q) use ($admin) {
                 $q->where('client_id', $admin->client_id);
