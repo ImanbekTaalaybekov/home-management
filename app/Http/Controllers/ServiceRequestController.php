@@ -94,7 +94,8 @@ class ServiceRequestController extends Controller
             'updated_at'  => $serviceRequest->updated_at,
             'photos'      => $serviceRequest->photos,
             'type'        => $serviceRequest->category?->name_rus ?? null,
-            'master'      => $serviceRequest->master?->name ?? null,
+            'master_name'      => $serviceRequest->master?->name ?? null,
+            'master_phone_number'      => $serviceRequest->master?->phone_number ?? null,
         ];
 
         return response()->json($result);

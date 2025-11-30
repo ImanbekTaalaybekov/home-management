@@ -20,9 +20,13 @@ class SuggestionAdminController extends Controller
             return response()->json(['message' => 'У админа не указан client_id'], 403);
         }
 
-        $query = Suggestion::with(['user.residentialComplex'])
+        $query = Suggestion::with([
+            'user.residentialComplex',
+            'photos',
+        ])
             ->whereHas('user.residentialComplex', function ($q) use ($admin, $request) {
                 $q->where('client_id', $admin->client_id);
+
                 if ($residentialComplexId = $request->query('residential_complex_id')) {
                     $q->where('id', $residentialComplexId);
                 }
@@ -47,7 +51,10 @@ class SuggestionAdminController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        $suggestion = Suggestion::with(['user.residentialComplex'])
+        $suggestion = Suggestion::with([
+            'user.residentialComplex',
+            'photos',
+        ])
             ->where('id', $id)
             ->whereHas('user.residentialComplex', function ($q) use ($admin) {
                 $q->where('client_id', $admin->client_id);

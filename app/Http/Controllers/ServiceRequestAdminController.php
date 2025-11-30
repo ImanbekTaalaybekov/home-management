@@ -20,9 +20,13 @@ class ServiceRequestAdminController extends Controller
             return response()->json(['message' => 'У админа не указан client_id'], 403);
         }
 
-        $query = ServiceRequest::with(['user.residentialComplex'])
+        $query = ServiceRequest::with([
+            'user.residentialComplex',
+            'photos',
+        ])
             ->whereHas('user.residentialComplex', function ($q) use ($admin, $request) {
                 $q->where('client_id', $admin->client_id);
+
                 if ($residentialComplexId = $request->query('residential_complex_id')) {
                     $q->where('id', $residentialComplexId);
                 }
@@ -287,6 +291,7 @@ class ServiceRequestAdminController extends Controller
 
         $request->validate([
             'name'                        => 'required|string|max:255',
+            'phone_number'                => 'nullable|string|max:255',
             'service_request_category_id' => 'nullable|exists:service_request_categories,id',
         ]);
 
@@ -302,6 +307,7 @@ class ServiceRequestAdminController extends Controller
 
         $master = ServiceRequestMaster::create([
             'name'                        => $request->name,
+            'phone_number'                => $request->phone_number,
             'service_request_category_id' => $request->service_request_category_id,
             'client_id'                   => $admin->client_id,
         ]);
@@ -321,6 +327,7 @@ class ServiceRequestAdminController extends Controller
 
         $request->validate([
             'name'                        => 'nullable|string|max:255',
+            'phone_number'                => 'nullable|string|max:255',
             'service_request_category_id' => 'nullable|exists:service_request_categories,id',
         ]);
 
@@ -336,6 +343,9 @@ class ServiceRequestAdminController extends Controller
         if ($request->filled('name')) {
             $data['name'] = $request->name;
         }
+
+        $data['phone_number'] = $request->phone_number;
+
         if ($request->has('service_request_category_id')) {
             if ($request->service_request_category_id) {
                 $category = ServiceRequestCategory::where('id', $request->service_request_category_id)
