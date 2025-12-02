@@ -11,17 +11,11 @@ class DebtAnalyticsAdminController extends Controller
     protected function buildBaseQuery(Request $request)
     {
         $admin = Auth::guard('sanctum')->user();
-
-        if (!$admin) {
-            abort(response()->json(['message' => 'Unauthenticated'], 401));
-        }
-
-        if (!$admin->client_id) {
-            abort(response()->json(['message' => 'У админа не указан client_id'], 403));
-        }
+        if (!$admin) abort(response()->json(['message' => 'Unauthenticated'], 401));
+        if (!$admin->client_id) abort(response()->json(['message' => 'У админа не указан client_id'], 403));
 
         $residentialComplexId = $request->query('residential_complex_id');
-        $serviceFilter        = trim((string)$request->query('service', ''));
+        $serviceFilter = trim((string)$request->query('service', ''));
 
         $query = AnalyticsAlsecoData::query()
             ->leftJoin('users', 'analytics_alseco_data.account_number', '=', 'users.personal_account')
@@ -66,14 +60,13 @@ class DebtAnalyticsAdminController extends Controller
             ->value('max_ym');
 
         if ($maxYm) {
-            $year  = intdiv($maxYm, 100);
+            $year = intdiv($maxYm, 100);
             $month = $maxYm % 100;
-
             $baseQuery->where('analytics_alseco_data.year', $year)
                 ->where('analytics_alseco_data.month', $month);
         }
 
-        $twoMonthsAgo     = now()->subMonthsNoOverflow(2)->startOfDay()->toDateString();
+        $twoMonthsAgo = now()->subMonthsNoOverflow(2)->startOfDay()->toDateString();
         $overdueCondition = "
             (
                 analytics_alseco_data.payment_date IS NOT NULL
@@ -106,14 +99,14 @@ class DebtAnalyticsAdminController extends Controller
 
         return response()->json([
             'data' => [
-                'initial_accrual_sum' => (float)($totals->initial_accrual_sum ?? 0),
-                'accrual_change_sum'  => (float)($totals->accrual_change_sum ?? 0),
-                'accrual_total_sum'   => (float)($totals->accrual_total_sum ?? 0),
-                'payment_sum'         => (float)($totals->payment_sum ?? 0),
-                'diff_sum'            => (float)($totals->diff_sum ?? 0),
-                'overdue_accrual_sum' => (float)($totals->overdue_accrual_sum ?? 0),
-                'rows_count'          => (int)($totals->rows_count ?? 0),
-                'overdue_count'       => (int)($totals->overdue_count ?? 0),
+                'initial_accrual_sum' => (float)abs($totals->initial_accrual_sum ?? 0),
+                'accrual_change_sum' => (float)abs($totals->accrual_change_sum ?? 0),
+                'accrual_total_sum' => (float)abs($totals->accrual_total_sum ?? 0),
+                'payment_sum' => (float)abs($totals->payment_sum ?? 0),
+                'diff_sum' => (float)abs($totals->diff_sum ?? 0),
+                'overdue_accrual_sum' => (float)abs($totals->overdue_accrual_sum ?? 0),
+                'rows_count' => (int)($totals->rows_count ?? 0),
+                'overdue_count' => (int)($totals->overdue_count ?? 0),
             ]
         ]);
     }
@@ -122,49 +115,70 @@ class DebtAnalyticsAdminController extends Controller
     {
         $baseQuery = $this->buildBaseQuery($request);
 
+        $yearQuery   = clone $baseQuery;
         $periodQuery = clone $baseQuery;
+
         $maxYm = $periodQuery
             ->selectRaw('MAX(analytics_alseco_data.year * 100 + analytics_alseco_data.month) as max_ym')
             ->value('max_ym');
 
-        if ($maxYm) {
-            $year  = intdiv($maxYm, 100);
-            $month = $maxYm % 100;
-
-            $baseQuery->where('analytics_alseco_data.year', $year)
-                ->where('analytics_alseco_data.month', $month);
+        if (!$maxYm) {
+            return response()->json([
+                'data' => [
+                    'balance_total_sum'   => 0.0,
+                    'overdue_balance_sum' => 0.0,
+                    'rows_count'          => 0,
+                    'overdue_count'       => 0,
+                    'last_year'           => null,
+                    'last_month'          => null,
+                ]
+            ]);
         }
 
-        $twoMonthsAgo     = now()->subMonthsNoOverflow(2)->startOfDay()->toDateString();
+        $year  = intdiv($maxYm, 100);
+        $month = $maxYm % 100;
+
+        $baseQuery
+            ->where('analytics_alseco_data.year', $year)
+            ->where('analytics_alseco_data.month', $month);
+
+        $yearQuery->where('analytics_alseco_data.year', $year);
+
+        $twoMonthsAgo = now()->subMonthsNoOverflow(2)->startOfDay()->toDateString();
+
         $overdueCondition = "
-            (
-                analytics_alseco_data.payment_date IS NOT NULL
-                AND analytics_alseco_data.payment_date <> ''
-                AND to_date(analytics_alseco_data.payment_date, 'DD.MM.YYYY') < '{$twoMonthsAgo}'
-            )
-            OR ABS(analytics_alseco_data.balance_end) > 45000
-        ";
+        (
+            analytics_alseco_data.payment_date IS NOT NULL
+            AND analytics_alseco_data.payment_date <> ''
+            AND to_date(analytics_alseco_data.payment_date, 'DD.MM.YYYY') < '{$twoMonthsAgo}'
+            AND analytics_alseco_data.balance_end < 0
+        )
+        OR analytics_alseco_data.balance_end < -250000
+    ";
 
         $totals = $baseQuery
             ->selectRaw("
-                SUM(analytics_alseco_data.balance_end) as balance_total_sum,
-                SUM(
-                    CASE WHEN {$overdueCondition}
-                        THEN analytics_alseco_data.balance_end
-                        ELSE 0
-                    END
-                ) as overdue_balance_sum,
-                COUNT(*) as rows_count,
-                SUM(CASE WHEN {$overdueCondition} THEN 1 ELSE 0 END) as overdue_count
-            ")
+            SUM(analytics_alseco_data.balance_end) as balance_total_sum,
+            SUM(
+                CASE WHEN {$overdueCondition}
+                    THEN analytics_alseco_data.balance_end
+                    ELSE 0
+                END
+            ) as overdue_balance_sum,
+            SUM(CASE WHEN {$overdueCondition} THEN 1 ELSE 0 END) as overdue_count
+        ")
             ->first();
+
+        $rowsCount = $yearQuery->count();
 
         return response()->json([
             'data' => [
-                'balance_total_sum'   => (float)($totals->balance_total_sum ?? 0),
-                'overdue_balance_sum' => (float)($totals->overdue_balance_sum ?? 0),
-                'rows_count'          => (int)($totals->rows_count ?? 0),
-                'overdue_count'       => (int)($totals->overdue_count ?? 0),
+                'balance_total_sum'   => (float) ($totals->balance_total_sum ?? 0),
+                'overdue_balance_sum' => (float) ($totals->overdue_balance_sum ?? 0),
+                'rows_count'          => (int) $rowsCount,
+                'overdue_count'       => (int) ($totals->overdue_count ?? 0),
+                'last_year'           => $year,
+                'last_month'          => $month,
             ]
         ]);
     }
@@ -175,7 +189,7 @@ class DebtAnalyticsAdminController extends Controller
 
         $rows = $baseQuery
             ->selectRaw('
-                residential_complexes.id   as residential_complex_id,
+                residential_complexes.id as residential_complex_id,
                 residential_complexes.name as residential_complex_name,
                 analytics_alseco_data.year,
                 analytics_alseco_data.month,
@@ -216,6 +230,17 @@ class DebtAnalyticsAdminController extends Controller
             ->orderBy('analytics_alseco_data.month')
             ->get();
 
-        return response()->json(['data' => $rows]);
+        return response()->json([
+            'data' => $rows->map(function ($row) {
+                return [
+                    'year' => $row->year,
+                    'month' => $row->month,
+                    'accrual_total_sum' => (float)abs($row->accrual_total_sum ?? 0),
+                    'payment_sum' => (float)abs($row->payment_sum ?? 0),
+                    'diff_sum' => (float)abs($row->diff_sum ?? 0),
+                    'rows_count' => (int)($row->rows_count ?? 0),
+                ];
+            })
+        ]);
     }
 }

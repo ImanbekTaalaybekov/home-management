@@ -33,6 +33,7 @@ class DebtAdminController extends Controller
 
         $residentialComplexId = $request->query('residential_complex_id');
         $search               = trim((string)$request->query('search', ''));
+        $serviceFilter        = trim((string)$request->query('service', ''));
 
         $baseQuery = AnalyticsAlsecoData::query()
             ->leftJoin('users', 'analytics_alseco_data.account_number', '=', 'users.personal_account')
@@ -45,12 +46,15 @@ class DebtAdminController extends Controller
             $baseQuery->where('users.residential_complex_id', $residentialComplexId);
         }
 
+        if ($serviceFilter !== '') {
+            $baseQuery->where('analytics_alseco_data.service', $serviceFilter);
+        }
+
         if ($search !== '') {
             $baseQuery->where(function ($q) use ($search) {
                 $q->where('analytics_alseco_data.account_number', 'like', "%{$search}%")
                     ->orWhere('analytics_alseco_data.full_name', 'like', "%{$search}%")
-                    ->orWhere('users.name', 'like', "%{$search}%")
-                    ->orWhere('analytics_alseco_data.service', 'like', "%{$search}%");
+                    ->orWhere('users.name', 'like', "%{$search}%");
             });
         }
 
