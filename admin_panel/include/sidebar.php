@@ -10,7 +10,7 @@
         <div class="sidebar__group-body">
             <a href="/sections/utilities_upload.php" class="sidebar__item" id="menu_utilities_upload">Загрузка коммунальных услуг</a>
             <a href="/sections/utilities_view.php" class="sidebar__item" id="menu_utilities_view">Просмотр коммунальных услуг</a>
-            <a href="/sections/utilities_analytics.php" class="sidebar__item" id="menu_utilities_view">Аналитика коммунальных услуг</a>
+            <a href="/sections/utilities_analytics.php" class="sidebar__item" id="menu_utilities_analytics">Аналитика коммунальных услуг</a>
             <a href="/sections/uk_reports.php" class="sidebar__item" id="menu_uk_reports">Отчёты УК</a>
         </div>
     </div>
