@@ -7,12 +7,14 @@ $token      = $_SESSION['auth_token'] ?? null;
 
 $search               = $_GET['search'] ?? '';
 $residentialComplexId = $_GET['residential_complex_id'] ?? '';
+$serviceFilter        = $_GET['service'] ?? '';
 $allParam             = $_GET['all'] ?? 'false';
 $onlyDebtorsParam     = $_GET['only_debtors'] ?? '';
 $page                 = max(1, (int)($_GET['page'] ?? 1));
 
 $rows           = [];
 $complexes      = [];
+$services       = [];
 $errorMessage   = null;
 $successMessage = null;
 $totalPages     = 1;
@@ -42,6 +44,9 @@ if ($token) {
     if ($residentialComplexId !== '') {
         $query .= '&residential_complex_id=' . urlencode($residentialComplexId);
     }
+    if ($serviceFilter !== '') {
+        $query .= '&service=' . urlencode($serviceFilter);
+    }
     if ($allParam !== '') {
         $query .= '&all=' . urlencode($allParam);
     }
@@ -62,6 +67,19 @@ if ($token) {
     if ($cStatus === 200) {
         $complexes = $cResult['data'] ?? [];
     }
+
+    $svcUrl    = $apiBaseUrl . '/analytics/services';
+    $svcParams = [];
+    if ($residentialComplexId !== '') {
+        $svcParams[] = 'residential_complex_id=' . urlencode($residentialComplexId);
+    }
+    if (!empty($svcParams)) {
+        $svcUrl .= '?' . implode('&', $svcParams);
+    }
+    [$svcStatus, $svcResult] = apiGet($svcUrl, $token);
+    if ($svcStatus === 200) {
+        $services = $svcResult['data'] ?? [];
+    }
 } else {
     $errorMessage = 'Нет токена авторизации';
 }
@@ -75,16 +93,14 @@ if ($token) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         .utilities-view-filters { display: flex; flex-direction: column; gap: 16px; }
-        .utilities-view-row { display: grid; grid-template-columns: minmax(220px, 1.6fr) minmax(200px, 1.1fr); gap: 12px; align-items: center; }
+        .utilities-view-row { display: grid; grid-template-columns: minmax(220px, 1.4fr) minmax(200px, 1.1fr) minmax(200px, 1.1fr); gap: 12px; align-items: center; }
         .utilities-view-row--bottom { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
         .utilities-view-field { width: 100%; }
         .utilities-view-field input, .utilities-view-field select { width: 100%; }
         .utilities-view-checkbox { display: flex; align-items: center; gap: 8px; font-size: 14px; }
         .utilities-view-actions { display: flex; flex-wrap: wrap; gap: 10px; }
         .utilities-view-subtitle { margin-bottom: 16px; color: #6b7280; font-size: 14px; }
-
         .debt-row { background-color: #fee2e2; }
-
         @media (max-width: 720px) {
             .utilities-view-row { grid-template-columns: 1fr; }
             .utilities-view-row--bottom { align-items: flex-start; flex-direction: column; }
@@ -114,7 +130,7 @@ if ($token) {
             <form method="get" class="filter-form utilities-view-filters">
                 <div class="utilities-view-row">
                     <div class="utilities-view-field">
-                        <input type="text" name="search" placeholder="Поиск по ЛС, ФИО, услуге"
+                        <input type="text" name="search" placeholder="Поиск по ЛС, ФИО"
                                value="<?= htmlspecialchars($search ?? '', ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                     <div class="utilities-view-field">
@@ -128,6 +144,17 @@ if ($token) {
                                 ?>
                                 <option value="<?= htmlspecialchars($cid, ENT_QUOTES, 'UTF-8') ?>" <?= $selected ?>>
                                     <?= htmlspecialchars($cname, ENT_QUOTES, 'UTF-8') ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="utilities-view-field">
+                        <select name="service">
+                            <option value="">Все услуги</option>
+                            <?php foreach ($services as $svc): ?>
+                                <?php $selected = ($serviceFilter === $svc) ? 'selected' : ''; ?>
+                                <option value="<?= htmlspecialchars($svc, ENT_QUOTES, 'UTF-8') ?>" <?= $selected ?>>
+                                    <?= htmlspecialchars($svc, ENT_QUOTES, 'UTF-8') ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -231,6 +258,7 @@ if ($token) {
                     $link = '?page=' . $i;
                     if ($search !== '') $link .= '&search=' . urlencode($search);
                     if ($residentialComplexId !== '') $link .= '&residential_complex_id=' . urlencode($residentialComplexId);
+                    if ($serviceFilter !== '') $link .= '&service=' . urlencode($serviceFilter);
                     if ($allParam !== '') $link .= '&all=' . urlencode($allParam);
                     if ($onlyDebtorsParam !== '') $link .= '&only_debtors=' . urlencode($onlyDebtorsParam);
                     ?>

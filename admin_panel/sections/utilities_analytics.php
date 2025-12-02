@@ -206,11 +206,11 @@ $accrualDynamicsJson = json_encode($accrualDynamics, JSON_UNESCAPED_UNICODE | JS
 
         <div class="analytics-grid">
             <div class="analytics-card">
-                <div class="analytics-card__title">Начисления и платежи (последний период)</div>
+                <div class="analytics-card__title">Начисления и платежи за последний период</div>
                 <div class="analytics-card__subtitle">Сравнение начислений и оплат.</div>
                 <div class="analytics-metrics">
                     <div>
-                        <div class="analytics-metric__label">Итого начислено</div>
+                        <div class="analytics-metric__label">Начислено</div>
                         <div class="analytics-metric__value"><?= fmtMoney($accrualSummary['accrual_total_sum'] ?? 0) ?></div>
                     </div>
                     <div>
@@ -218,8 +218,15 @@ $accrualDynamicsJson = json_encode($accrualDynamics, JSON_UNESCAPED_UNICODE | JS
                         <div class="analytics-metric__value"><?= fmtMoney($accrualSummary['payment_sum'] ?? 0) ?></div>
                     </div>
                     <div>
-                        <div class="analytics-metric__label">Разница (начислено - оплачено)</div>
-                        <div class="analytics-metric__value"><?= fmtMoney($accrualSummary['diff_sum'] ?? 0) ?></div>
+                        <div class="analytics-metric__label">Разница</div>
+                        <div class="analytics-metric__value">
+                            <?php
+                            $accrual = (float)($accrualSummary['accrual_total_sum'] ?? 0);
+                            $paid    = (float)($accrualSummary['payment_sum'] ?? 0);
+                            $diff    = abs($accrual) - abs($paid);
+                            ?>
+                            <?= fmtMoney($diff) ?>
+                        </div>
                     </div>
                     <div>
                         <div class="analytics-metric__label">Просроченные начисления</div>
@@ -240,26 +247,21 @@ $accrualDynamicsJson = json_encode($accrualDynamics, JSON_UNESCAPED_UNICODE | JS
             </div>
 
             <div class="analytics-card">
-                <div class="analytics-card__title">Конечное сальдо (последний период)</div>
-                <div class="analytics-card__subtitle">Итоговая задолженность/переплата.</div>
+                <div class="analytics-card__title">Конечное сальдо за весь период</div>
+                <div class="analytics-card__subtitle">Итоговые данные на <?= ($balanceSummary['last_month'] ?? 0) ?>.<?= ($balanceSummary['last_year'] ?? 0) ?></div>
                 <div class="analytics-metrics">
                     <div>
-                        <div class="analytics-metric__label">Суммарное сальдо</div>
+                        <div class="analytics-metric__label">Конечное сальдо</div>
                         <div class="analytics-metric__value"><?= fmtMoney($balanceSummary['balance_total_sum'] ?? 0) ?></div>
                     </div>
                     <div>
-                        <div class="analytics-metric__label">Просроченное сальдо</div>
+                        <div class="analytics-metric__label">Из них с учетом просрочки</div>
                         <div class="analytics-metric__value analytics-metric__value--danger">
                             <?= fmtMoney($balanceSummary['overdue_balance_sum'] ?? 0) ?></div>
                     </div>
                     <div>
                         <div class="analytics-metric__label">Количество выставленных счетов на оплату</div>
                         <div class="analytics-metric__value"><?= fmtInt($balanceSummary['rows_count'] ?? 0) ?></div>
-                    </div>
-                    <div>
-                        <div class="analytics-metric__label">Количество просроченных платежей</div>
-                        <div class="analytics-metric__value analytics-metric__value--danger">
-                            <?= fmtInt($balanceSummary['overdue_count'] ?? 0) ?></div>
                     </div>
                 </div>
             </div>
@@ -268,6 +270,16 @@ $accrualDynamicsJson = json_encode($accrualDynamics, JSON_UNESCAPED_UNICODE | JS
         <div class="chart-container">
             <div class="chart-title">Динамика начислений и платежей по месяцам</div>
             <div class="chart-subtitle">Итого начислено, оплачено и разница по месяцам.</div>
+
+            <div class="chart-controls" style="margin-bottom: 10px; font-size: 13px;">
+                <label>
+                    Год:
+                    <select id="yearFilter" style="margin-left: 6px; padding: 4px 6px;">
+                        <option value="">Все годы</option>
+                    </select>
+                </label>
+            </div>
+
             <div class="chart-wrapper">
                 <canvas id="accrualChart"></canvas>
             </div>
@@ -281,28 +293,32 @@ $accrualDynamicsJson = json_encode($accrualDynamics, JSON_UNESCAPED_UNICODE | JS
     document.addEventListener('DOMContentLoaded', function () {
         var sidebar = document.getElementById('sidebar-finance');
         if (sidebar) sidebar.classList.add('sidebar__group--open');
-        var item = document.getElementById('menu_utilities_view');
+        var item = document.getElementById('menu_utilities_analytics');
         if (item) item.classList.add('menu-selected-point');
 
         var accrualData = <?= $accrualDynamicsJson ?: '[]' ?>;
 
-        function buildLabelsAndValues(rows) {
+        function buildLabelsAndValues(rows, yearFilter) {
             var labels = [];
             var total = [];
             var paid = [];
             var diff = [];
 
             rows.forEach(function (row) {
-                var year = (row.year || row.year === 0) ? row.year : null;
+                var year  = (row.year || row.year === 0) ? row.year : null;
                 var month = (row.month || row.month === 0) ? row.month : null;
                 if (year === null || month === null) return;
+
+                if (yearFilter && String(year) !== String(yearFilter)) {
+                    return;
+                }
 
                 var label = (month < 10 ? '0' + month : month) + '.' + year;
                 labels.push(label);
 
-                var balanceStart  = parseFloat(row.balance_start || 0);
-                var accrualSum    = parseFloat(row.accrual_total_sum || 0);
-                var paymentRaw    = parseFloat(row.payment_sum || 0);
+                var balanceStart = parseFloat(row.balance_start || 0);
+                var accrualSum   = parseFloat(row.accrual_total_sum || 0);
+                var paymentRaw   = parseFloat(row.payment_sum || 0);
 
                 var totalVal = Math.abs(balanceStart + accrualSum);
                 var paidVal  = Math.abs(paymentRaw);
@@ -316,10 +332,27 @@ $accrualDynamicsJson = json_encode($accrualDynamics, JSON_UNESCAPED_UNICODE | JS
             return { labels: labels, total: total, paid: paid, diff: diff };
         }
 
-        var prepared = buildLabelsAndValues(accrualData);
+        var yearsSet = new Set();
+        accrualData.forEach(function (row) {
+            if (row.year !== undefined && row.year !== null) {
+                yearsSet.add(row.year);
+            }
+        });
+        var years = Array.from(yearsSet).sort();
+        var yearSelect = document.getElementById('yearFilter');
+        if (yearSelect) {
+            years.forEach(function (y) {
+                var opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                yearSelect.appendChild(opt);
+            });
+        }
+
+        var prepared = buildLabelsAndValues(accrualData, '');
 
         var accrualCtx = document.getElementById('accrualChart').getContext('2d');
-        new Chart(accrualCtx, {
+        var accrualChart = new Chart(accrualCtx, {
             type: 'bar',
             data: {
                 labels: prepared.labels,
@@ -348,6 +381,19 @@ $accrualDynamicsJson = json_encode($accrualDynamics, JSON_UNESCAPED_UNICODE | JS
                 }
             }
         });
+
+        if (yearSelect) {
+            yearSelect.addEventListener('change', function () {
+                var yearFilter = this.value;
+                var prepared = buildLabelsAndValues(accrualData, yearFilter);
+
+                accrualChart.data.labels = prepared.labels;
+                accrualChart.data.datasets[0].data = prepared.total;
+                accrualChart.data.datasets[1].data = prepared.paid;
+                accrualChart.data.datasets[2].data = prepared.diff;
+                accrualChart.update();
+            });
+        }
     });
 </script>
 </body>
