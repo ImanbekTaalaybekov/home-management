@@ -163,6 +163,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/knowledge-base/articles/{id}', [KnowledgeBaseAdminController::class, 'showArticle'])->middleware('auth:sanctum');
     Route::post('/knowledge-base/articles/{id}', [KnowledgeBaseAdminController::class, 'updateArticle'])->middleware('auth:sanctum');
     Route::delete('/knowledge-base/articles/{id}', [KnowledgeBaseAdminController::class, 'destroyArticle'])->middleware('auth:sanctum');
+    Route::get('/knowledge-base/icons', [KnowledgeBaseAdminController::class, 'listIcons'])->middleware('auth:sanctum');
 
     Route::get('/complaints', [ComplaintAdminController::class, 'index'])->middleware('auth:sanctum');
     Route::get('/complaints/{id}', [ComplaintAdminController::class, 'show'])->middleware('auth:sanctum');

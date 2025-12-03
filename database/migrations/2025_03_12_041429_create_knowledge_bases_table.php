@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('content');
             $table->integer('client_id');
             $table->foreignId('category_id')->constrained('knowledge_base_categories')->onDelete('cascade');
+            $table->string('icon')->nullable();
             $table->timestamps();
         });
     }

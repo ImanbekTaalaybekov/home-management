@@ -28,6 +28,17 @@ class AnalyticsController extends Controller
                 continue;
             }
 
+            $localityPart = self::str($row['H']);
+
+            $exists = AnalyticsAlsecoData::where('month', $month)
+                ->where('year', $year)
+                ->where('locality_part', $localityPart)
+                ->exists();
+
+            if ($exists) {
+                continue;
+            }
+
             AnalyticsAlsecoData::create([
                 'account_number'         => self::str($row['A']),
                 'management_code'        => self::str($row['B']),
@@ -36,7 +47,7 @@ class AnalyticsController extends Controller
                 'supplier_name'          => self::str($row['E']),
                 'region'                 => self::str($row['F']),
                 'locality'               => self::str($row['G']),
-                'locality_part'          => self::str($row['H']),
+                'locality_part'          => $localityPart,
                 'house'                  => self::str($row['I']),
                 'apartment'              => self::str($row['J']),
                 'full_name'              => self::str($row['K']),
