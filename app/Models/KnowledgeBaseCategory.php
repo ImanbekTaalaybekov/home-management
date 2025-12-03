@@ -9,7 +9,7 @@ class KnowledgeBaseCategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'client_id'];
+    protected $fillable = ['name', 'client_id', 'icon'];
 
     public function knowledgeBases()
     {

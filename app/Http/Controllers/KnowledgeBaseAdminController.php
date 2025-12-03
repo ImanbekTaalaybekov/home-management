@@ -10,6 +10,25 @@ use Illuminate\Support\Facades\Storage;
 
 class KnowledgeBaseAdminController extends Controller
 {
+    public function listIcons()
+    {
+        $admin = Auth::guard('sanctum')->user();
+        if (!$admin) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $files = Storage::disk('public')->files('icons');
+
+        $icons = collect($files)->map(function ($path) {
+            return [
+                'name' => basename($path),
+                'url'  => asset('storage/' . $path),
+            ];
+        });
+
+        return response()->json($icons);
+    }
+
     public function storeCategory(Request $request)
     {
         $admin = Auth::guard('sanctum')->user();
@@ -23,11 +42,13 @@ class KnowledgeBaseAdminController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'icon' => 'nullable|string',
         ]);
 
         $category = KnowledgeBaseCategory::create([
             'name'      => $request->name,
             'client_id' => $admin->client_id,
+            'icon'      => $request->icon,
         ]);
 
         return response()->json($category, 201);
@@ -55,7 +76,8 @@ class KnowledgeBaseAdminController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
+            'icon' => 'nullable|string',
         ]);
 
         $category = KnowledgeBaseCategory::where('id', $id)
@@ -66,9 +88,7 @@ class KnowledgeBaseAdminController extends Controller
             return response()->json(['message' => 'Category not found'], 404);
         }
 
-        $category->update([
-            'name' => $request->name,
-        ]);
+        $category->update($request->only(['name', 'icon']));
 
         return response()->json($category);
     }
@@ -108,6 +128,7 @@ class KnowledgeBaseAdminController extends Controller
             'title'       => 'required|string|max:255',
             'content'     => 'required',
             'category_id' => 'required|exists:knowledge_base_categories,id',
+            'icon'        => 'nullable|string',
             'photos'      => 'nullable|array',
             'photos.*'    => 'image|mimes:jpeg,png,jpg,gif'
         ]);
@@ -125,6 +146,7 @@ class KnowledgeBaseAdminController extends Controller
             'content'     => $request->input('content'),
             'category_id' => $category->id,
             'client_id'   => $admin->client_id,
+            'icon'        => $request->icon,
         ]);
 
         if ($request->hasFile('photos')) {
@@ -203,18 +225,13 @@ class KnowledgeBaseAdminController extends Controller
             'title'       => 'nullable|string|max:255',
             'content'     => 'nullable|string',
             'category_id' => 'nullable|exists:knowledge_base_categories,id',
+            'icon'        => 'nullable|string',
             'photos'      => 'nullable|array',
             'photos.*'    => 'image|mimes:jpeg,png,jpg,gif'
         ]);
 
-        $data = [];
+        $data = $request->only(['title', 'content', 'icon']);
 
-        if ($request->filled('title')) {
-            $data['title'] = $request->title;
-        }
-        if ($request->filled('content')) {
-            $data['content'] = $request->input('content');
-        }
         if ($request->filled('category_id')) {
             $category = KnowledgeBaseCategory::where('id', $request->category_id)
                 ->where('client_id', $admin->client_id)
@@ -229,9 +246,7 @@ class KnowledgeBaseAdminController extends Controller
 
         if ($request->hasFile('photos')) {
             foreach ($article->photos as $photo) {
-                if ($photo->path) {
-                    Storage::disk('public')->delete($photo->path);
-                }
+                Storage::disk('public')->delete($photo->path);
                 $photo->delete();
             }
 
@@ -241,9 +256,7 @@ class KnowledgeBaseAdminController extends Controller
             }
         }
 
-        if (!empty($data)) {
-            $article->update($data);
-        }
+        $article->update($data);
 
         return response()->json($article->load('category', 'photos'));
     }
@@ -264,9 +277,7 @@ class KnowledgeBaseAdminController extends Controller
         }
 
         foreach ($article->photos as $photo) {
-            if ($photo->path) {
-                Storage::disk('public')->delete($photo->path);
-            }
+            Storage::disk('public')->delete($photo->path);
             $photo->delete();
         }
 
