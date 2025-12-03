@@ -5,20 +5,22 @@ require __DIR__ . '/../include/config.php';
 $apiBaseUrl = API_BASE_URL;
 $token      = $_SESSION['auth_token'] ?? null;
 
-$currentCategoryId   = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
+$currentCategoryId = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
 
-$categories      = [];
-$articles        = [];
-$errorMessage    = null;
-$successMessage  = null;
+$categories     = [];
+$articles       = [];
+$icons          = [];
+$iconMap        = [];
+$errorMessage   = null;
+$successMessage = null;
 
 function apiRequestKB(string $method, string $url, string $token, ?array $data = null, bool $isMultipart = false): array
 {
     $ch = curl_init($url);
 
     $headers = [
-        'Accept: application/json',
-        'Authorization: Bearer ' . $token,
+            'Accept: application/json',
+            'Authorization: Bearer ' . $token,
     ];
 
     if ($data !== null) {
@@ -31,9 +33,9 @@ function apiRequestKB(string $method, string $url, string $token, ?array $data =
     }
 
     curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_CUSTOMREQUEST  => $method,
-        CURLOPT_HTTPHEADER     => $headers,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST  => $method,
+            CURLOPT_HTTPHEADER     => $headers,
     ]);
 
     $response = curl_exec($ch);
@@ -48,9 +50,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
 
     if ($action === 'create_category') {
         $name = trim($_POST['name'] ?? '');
+        $icon = $_POST['icon'] ?? '';
         if ($name !== '') {
             [$status, $data] = apiRequestKB('POST', $apiBaseUrl . '/knowledge-base/categories', $token, [
-                'name' => $name,
+                    'name' => $name,
+                    'icon' => $icon,
             ]);
             if ($status === 201) {
                 $successMessage = 'Категория создана';
@@ -63,9 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
     if ($action === 'update_category') {
         $id   = (int)($_POST['category_id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
+        $icon = $_POST['icon'] ?? '';
         if ($id && $name !== '') {
             [$status, $data] = apiRequestKB('PUT', $apiBaseUrl . '/knowledge-base/categories/' . $id, $token, [
-                'name' => $name,
+                    'name' => $name,
+                    'icon' => $icon,
             ]);
             if ($status === 200) {
                 $successMessage = 'Категория обновлена';
@@ -92,30 +98,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
 
     if ($action === 'create_article') {
         $payload = [
-            'title'       => $_POST['title'] ?? '',
-            'content'     => $_POST['content'] ?? '',
-            'category_id' => $_POST['category_id'] ?? '',
+                'title'       => $_POST['title'] ?? '',
+                'content'     => $_POST['content'] ?? '',
+                'category_id' => $_POST['category_id'] ?? '',
+                'icon'        => $_POST['icon'] ?? '',
         ];
 
         $multipart = $payload;
 
         if (!empty($_FILES['photos']['name'][0])) {
             foreach ($_FILES['photos']['tmp_name'] as $i => $tmp) {
-                if (!$tmp) continue;
+                if (!$tmp) {
+                    continue;
+                }
                 $multipart["photos[$i]"] = new CURLFile(
-                    $tmp,
-                    $_FILES['photos']['type'][$i] ?? 'image/jpeg',
-                    $_FILES['photos']['name'][$i] ?? ('photo_' . $i)
+                        $tmp,
+                        $_FILES['photos']['type'][$i] ?? 'image/jpeg',
+                        $_FILES['photos']['name'][$i] ?? ('photo_' . $i)
                 );
             }
         }
 
         [$status, $data] = apiRequestKB(
-            'POST',
-            $apiBaseUrl . '/knowledge-base/articles',
-            $token,
-            $multipart,
-            true
+                'POST',
+                $apiBaseUrl . '/knowledge-base/articles',
+                $token,
+                $multipart,
+                true
         );
 
         if ($status === 201) {
@@ -132,30 +141,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
         $id = (int)($_POST['article_id'] ?? 0);
         if ($id) {
             $payload = [
-                'title'       => $_POST['title'] ?? '',
-                'content'     => $_POST['content'] ?? '',
-                'category_id' => $_POST['category_id'] ?? '',
+                    'title'       => $_POST['title'] ?? '',
+                    'content'     => $_POST['content'] ?? '',
+                    'category_id' => $_POST['category_id'] ?? '',
+                    'icon'        => $_POST['icon'] ?? '',
             ];
 
             $multipart = $payload;
 
             if (!empty($_FILES['photos']['name'][0])) {
                 foreach ($_FILES['photos']['tmp_name'] as $i => $tmp) {
-                    if (!$tmp) continue;
+                    if (!$tmp) {
+                        continue;
+                    }
                     $multipart["photos[$i]"] = new CURLFile(
-                        $tmp,
-                        $_FILES['photos']['type'][$i] ?? 'image/jpeg',
-                        $_FILES['photos']['name'][$i] ?? ('photo_' . $i)
+                            $tmp,
+                            $_FILES['photos']['type'][$i] ?? 'image/jpeg',
+                            $_FILES['photos']['name'][$i] ?? ('photo_' . $i)
                     );
                 }
             }
 
             [$status, $data] = apiRequestKB(
-                'POST',
-                $apiBaseUrl . '/knowledge-base/articles/' . $id,
-                $token,
-                $multipart,
-                true
+                    'POST',
+                    $apiBaseUrl . '/knowledge-base/articles/' . $id,
+                    $token,
+                    $multipart,
+                    true
             );
 
             if ($status === 200) {
@@ -192,6 +204,20 @@ if ($token) {
         $categories = $dataCat ?? [];
     } else {
         $errorMessage = $dataCat['message'] ?? 'Ошибка получения категорий';
+    }
+
+    [$statusIcons, $dataIcons] = apiRequestKB('GET', $apiBaseUrl . '/knowledge-base/icons', $token);
+    if ($statusIcons === 200) {
+        $icons = $dataIcons ?? [];
+        foreach ($icons as $icon) {
+            if (isset($icon['name'], $icon['url'])) {
+                $iconMap[$icon['name']] = $icon['url'];
+            }
+        }
+    } else {
+        if (!$errorMessage) {
+            $errorMessage = $dataIcons['message'] ?? 'Ошибка получения иконок';
+        }
     }
 } else {
     $errorMessage = 'Нет токена авторизации';
@@ -265,14 +291,17 @@ if ($currentCategoryId && $token) {
                             <tr>
                                 <th>ID</th>
                                 <th>Название</th>
+                                <th>Иконка</th>
                                 <th style="width:140px;">Действия</th>
                             </tr>
                             </thead>
                             <tbody>
                             <?php foreach ($categories as $cat): ?>
                                 <?php
-                                $catId   = (int)($cat['id'] ?? 0);
-                                $catName = $cat['name'] ?? '';
+                                $catId        = (int)($cat['id'] ?? 0);
+                                $catName      = $cat['name'] ?? '';
+                                $catIconName  = $cat['icon'] ?? '';
+                                $catIconUrl   = ($catIconName && isset($iconMap[$catIconName])) ? $iconMap[$catIconName] : '';
                                 ?>
                                 <tr class="<?= $catId === $currentCategoryId ? 'kb-category-item--active' : '' ?>">
                                     <td><?= htmlspecialchars($catId, ENT_QUOTES, 'UTF-8') ?></td>
@@ -282,6 +311,13 @@ if ($currentCategoryId && $token) {
                                         </a>
                                     </td>
                                     <td>
+                                        <?php if ($catIconUrl): ?>
+                                            <img src="<?= htmlspecialchars($catIconUrl, ENT_QUOTES, 'UTF-8') ?>" alt="" style="width:24px;height:24px;">
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
                                         <div class="admins-actions">
                                             <button
                                                     type="button"
@@ -289,6 +325,7 @@ if ($currentCategoryId && $token) {
                                                     onclick="openCategoryEditModal(this)"
                                                     data-id="<?= $catId ?>"
                                                     data-name="<?= htmlspecialchars($catName, ENT_QUOTES, 'UTF-8') ?>"
+                                                    data-icon="<?= htmlspecialchars($catIconName, ENT_QUOTES, 'UTF-8') ?>"
                                             >Редактировать</button>
 
                                             <form method="post" style="display:inline"
@@ -352,6 +389,7 @@ if ($currentCategoryId && $token) {
                                 <tr>
                                     <th>ID</th>
                                     <th>Заголовок</th>
+                                    <th>Иконка</th>
                                     <th>Дата</th>
                                     <th>Фото</th>
                                     <th>Действия</th>
@@ -360,36 +398,46 @@ if ($currentCategoryId && $token) {
                                 <tbody>
                                 <?php foreach ($articles as $article): ?>
                                     <?php
-                                    $aId     = $article['id'] ?? '';
-                                    $aTitle  = $article['title'] ?? '';
-                                    $aDate   = $article['created_at'] ?? '';
-                                    $aPhotos = $article['photos'] ?? [];
-                                    $aContent = $article['content'] ?? '';
-                                    $aCatId   = $article['category_id'] ?? $currentCategoryId;
+                                    $aId       = $article['id'] ?? '';
+                                    $aTitle    = $article['title'] ?? '';
+                                    $aDate     = $article['created_at'] ?? '';
+                                    $aPhotos   = $article['photos'] ?? [];
+                                    $aContent  = $article['content'] ?? '';
+                                    $aCatId    = $article['category_id'] ?? $currentCategoryId;
+                                    $aIconName = $article['icon'] ?? '';
+                                    $aIconUrl  = ($aIconName && isset($iconMap[$aIconName])) ? $iconMap[$aIconName] : '';
                                     ?>
                                     <tr>
                                         <td><?= htmlspecialchars((string)$aId, ENT_QUOTES, 'UTF-8') ?></td>
                                         <td><?= htmlspecialchars($aTitle, ENT_QUOTES, 'UTF-8') ?></td>
+                                        <td>
+                                            <?php if ($aIconUrl): ?>
+                                                <img src="<?= htmlspecialchars($aIconUrl, ENT_QUOTES, 'UTF-8') ?>" alt="" style="width:24px;height:24px;">
+                                            <?php else: ?>
+                                                -
+                                            <?php endif; ?>
+                                        </td>
                                         <td><?= htmlspecialchars($aDate, ENT_QUOTES, 'UTF-8') ?></td>
                                         <td><?= is_array($aPhotos) ? count($aPhotos) : 0 ?></td>
                                         <td>
                                             <div class="admins-actions">
                                                 <button
-                                                    type="button"
-                                                    class="btn-small btn-edit"
-                                                    onclick="openArticleEditModal(this)"
-                                                    data-id="<?= htmlspecialchars((string)$aId, ENT_QUOTES, 'UTF-8') ?>"
-                                                    data-title="<?= htmlspecialchars($aTitle, ENT_QUOTES, 'UTF-8') ?>"
-                                                    data-content="<?= htmlspecialchars($aContent, ENT_QUOTES, 'UTF-8') ?>"
-                                                    data-category-id="<?= htmlspecialchars((string)$aCatId, ENT_QUOTES, 'UTF-8') ?>"
+                                                        type="button"
+                                                        class="btn-small btn-edit"
+                                                        onclick="openArticleEditModal(this)"
+                                                        data-id="<?= htmlspecialchars((string)$aId, ENT_QUOTES, 'UTF-8') ?>"
+                                                        data-title="<?= htmlspecialchars($aTitle, ENT_QUOTES, 'UTF-8') ?>"
+                                                        data-content="<?= htmlspecialchars($aContent, ENT_QUOTES, 'UTF-8') ?>"
+                                                        data-category-id="<?= htmlspecialchars((string)$aCatId, ENT_QUOTES, 'UTF-8') ?>"
+                                                        data-icon="<?= htmlspecialchars($aIconName, ENT_QUOTES, 'UTF-8') ?>"
                                                 >Редактировать</button>
 
                                                 <button
-                                                    type="button"
-                                                    class="btn-small"
-                                                    onclick="openArticleViewModal(this)"
-                                                    data-title="<?= htmlspecialchars($aTitle, ENT_QUOTES, 'UTF-8') ?>"
-                                                    data-content="<?= htmlspecialchars($aContent, ENT_QUOTES, 'UTF-8') ?>"
+                                                        type="button"
+                                                        class="btn-small"
+                                                        onclick="openArticleViewModal(this)"
+                                                        data-title="<?= htmlspecialchars($aTitle, ENT_QUOTES, 'UTF-8') ?>"
+                                                        data-content="<?= htmlspecialchars($aContent, ENT_QUOTES, 'UTF-8') ?>"
                                                 >Просмотр</button>
 
                                                 <form method="post" style="display:inline"
@@ -415,59 +463,61 @@ if ($currentCategoryId && $token) {
 
 <?php include __DIR__ . '/../include/footer.php'; ?>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const sidebar = document.getElementById('sidebar-information');
-
-        if (sidebar) {
-            sidebar.classList.add('sidebar__group--open');
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const sidebar = document.getElementById('menu_knowledge_base');
-
-        if (sidebar) {
-            sidebar.classList.add('menu-selected-point');
-        }
-    });
-</script>
-
 <script src="/include/scripts.js"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var sidebarInfo = document.getElementById('sidebar-information');
+        if (sidebarInfo) {
+            sidebarInfo.classList.add('sidebar__group--open');
+        }
+        var menuKb = document.getElementById('menu_knowledge_base');
+        if (menuKb) {
+            menuKb.classList.add('menu-selected-point');
+        }
+    });
+
     function catEls() {
         return {
             modal: document.getElementById('categoryModal'),
             action: document.getElementById('categoryFormAction'),
             id: document.getElementById('categoryId'),
             name: document.getElementById('categoryName'),
-            title: document.getElementById('categoryModalTitle')
+            title: document.getElementById('categoryModalTitle'),
+            iconHidden: document.getElementById('categoryIcon')
         };
     }
 
     function openCategoryCreateModal() {
-        const e = catEls();
+        var e = catEls();
         e.modal.classList.add('modal-open');
         e.title.textContent = 'Новая категория';
         e.action.value = 'create_category';
         e.id.value = '';
         e.name.value = '';
+        if (e.iconHidden) {
+            e.iconHidden.value = '';
+            selectIconInPicker('categoryIconPicker', 'categoryIcon', '');
+        }
     }
 
     function openCategoryEditModal(btn) {
-        const e = catEls();
+        var e = catEls();
         e.modal.classList.add('modal-open');
         e.title.textContent = 'Редактировать категорию';
         e.action.value = 'update_category';
         e.id.value = btn.dataset.id || '';
         e.name.value = btn.dataset.name || '';
+        if (e.iconHidden) {
+            var iconName = btn.dataset.icon || '';
+            e.iconHidden.value = iconName;
+            selectIconInPicker('categoryIconPicker', 'categoryIcon', iconName);
+        }
     }
 
     function closeCategoryModal() {
         catEls().modal.classList.remove('modal-open');
     }
 
-    /* ===== Article modal (create/edit) ===== */
     function artEls() {
         return {
             modal: document.getElementById('articleModal'),
@@ -476,12 +526,13 @@ if ($currentCategoryId && $token) {
             categorySelect: document.getElementById('articleCategoryId'),
             title: document.getElementById('articleTitle'),
             content: document.getElementById('articleContent'),
-            headerTitle: document.getElementById('articleModalHeaderTitle')
+            headerTitle: document.getElementById('articleModalHeaderTitle'),
+            iconHidden: document.getElementById('articleIcon')
         };
     }
 
     function openArticleCreateModal(categoryId) {
-        const e = artEls();
+        var e = artEls();
         e.modal.classList.add('modal-open');
         e.headerTitle.textContent = 'Новая статья';
         e.action.value = 'create_article';
@@ -495,10 +546,15 @@ if ($currentCategoryId && $token) {
         if (!e.categorySelect.value && e.categorySelect.options.length > 0) {
             e.categorySelect.selectedIndex = 0;
         }
+
+        if (e.iconHidden) {
+            e.iconHidden.value = '';
+            selectIconInPicker('articleIconPicker', 'articleIcon', '');
+        }
     }
 
     function openArticleEditModal(btn) {
-        const e = artEls();
+        var e = artEls();
         e.modal.classList.add('modal-open');
         e.headerTitle.textContent = 'Редактировать статью';
         e.action.value = 'update_article';
@@ -506,9 +562,15 @@ if ($currentCategoryId && $token) {
         e.title.value = btn.dataset.title || '';
         e.content.value = btn.dataset.content || '';
 
-        const catId = btn.dataset.categoryId || '';
+        var catId = btn.dataset.categoryId || '';
         if (catId) {
             e.categorySelect.value = catId;
+        }
+
+        if (e.iconHidden) {
+            var iconName = btn.dataset.icon || '';
+            e.iconHidden.value = iconName;
+            selectIconInPicker('articleIconPicker', 'articleIcon', iconName);
         }
     }
 
@@ -516,7 +578,6 @@ if ($currentCategoryId && $token) {
         artEls().modal.classList.remove('modal-open');
     }
 
-    /* ===== Article view modal ===== */
     function viewEls() {
         return {
             modal: document.getElementById('articleViewModal'),
@@ -526,7 +587,7 @@ if ($currentCategoryId && $token) {
     }
 
     function openArticleViewModal(btn) {
-        const e = viewEls();
+        var e = viewEls();
         e.modal.classList.add('modal-open');
         e.title.textContent = btn.dataset.title || '';
         e.content.textContent = btn.dataset.content || '';
@@ -535,8 +596,7 @@ if ($currentCategoryId && $token) {
     function closeArticleViewModal() {
         viewEls().modal.classList.remove('modal-open');
     }
-</script>
-<script>
+
     document.addEventListener('DOMContentLoaded', function () {
         var select = document.getElementById('kbCategorySelect');
         if (select) {
@@ -550,9 +610,63 @@ if ($currentCategoryId && $token) {
             });
         }
     });
-</script>
-<script src="/include/scripts.js"></script>
 
+    function initIconPicker(pickerId, hiddenInputId) {
+        var picker = document.getElementById(pickerId);
+        var hidden = document.getElementById(hiddenInputId);
+        if (!picker || !hidden) return;
+
+        picker.addEventListener('click', function (e) {
+            var btn = e.target.closest('.icon-picker__item');
+            if (!btn) return;
+
+            var active = picker.querySelector('.icon-picker__item--active');
+            if (active) active.classList.remove('icon-picker__item--active');
+
+            btn.classList.add('icon-picker__item--active');
+            hidden.value = btn.getAttribute('data-icon') || '';
+        });
+    }
+
+    function selectIconInPicker(pickerId, hiddenInputId, iconName) {
+        var picker = document.getElementById(pickerId);
+        var hidden = document.getElementById(hiddenInputId);
+        if (!picker || !hidden) return;
+
+        var active = picker.querySelector('.icon-picker__item--active');
+        if (active) active.classList.remove('icon-picker__item--active');
+
+        if (!iconName) {
+            hidden.value = '';
+            return;
+        }
+
+        var btns = picker.querySelectorAll('.icon-picker__item');
+        for (var i = 0; i < btns.length; i++) {
+            if (btns[i].getAttribute('data-icon') === iconName) {
+                btns[i].classList.add('icon-picker__item--active');
+                hidden.value = iconName;
+                break;
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initIconPicker('categoryIconPicker', 'categoryIcon');
+        initIconPicker('articleIconPicker', 'articleIcon');
+    });
+
+    picker.addEventListener('click', function (e) {
+        var btn = e.target.closest('.icon-picker__item');
+        if (!btn) return;
+
+        var active = picker.querySelector('.icon-picker__item--active');
+        if (active) active.classList.remove('icon-picker__item--active');
+
+        btn.classList.add('icon-picker__item--active');
+        hidden.value = btn.getAttribute('data-icon') || '';
+    });
+</script>
 
 <div class="modal-backdrop" id="categoryModal">
     <div class="modal">
@@ -567,6 +681,26 @@ if ($currentCategoryId && $token) {
             <div class="login-group">
                 <label>Название категории</label>
                 <input type="text" name="name" id="categoryName" required>
+            </div>
+
+            <div class="login-group">
+                <label>Иконка</label>
+                <input type="hidden" name="icon" id="categoryIcon">
+                <div class="icon-picker" id="categoryIconPicker">
+                    <?php foreach ($icons as $icon): ?>
+                        <?php
+                        $iconName = $icon['name'] ?? '';
+                        $iconUrl  = $icon['url'] ?? '';
+                        ?>
+                        <button type="button"
+                                class="icon-picker__item"
+                                data-icon="<?= htmlspecialchars((string)$iconName, ENT_QUOTES, 'UTF-8') ?>">
+                            <img src="<?= htmlspecialchars((string)$iconUrl, ENT_QUOTES, 'UTF-8') ?>"
+                                 alt=""
+                                 style="width:32px;height:32px;">
+                        </button>
+                    <?php endforeach; ?>
+                </div>
             </div>
 
             <div class="modal-footer">
@@ -592,7 +726,7 @@ if ($currentCategoryId && $token) {
                 <select name="category_id" id="articleCategoryId" required>
                     <?php foreach ($categories as $cat): ?>
                         <option value="<?= htmlspecialchars((string)$cat['id'], ENT_QUOTES, 'UTF-8') ?>"
-                            <?= (int)$cat['id'] === $currentCategoryId ? 'selected' : '' ?>>
+                                <?= (int)$cat['id'] === $currentCategoryId ? 'selected' : '' ?>>
                             <?= htmlspecialchars($cat['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>
                         </option>
                     <?php endforeach; ?>
@@ -607,6 +741,26 @@ if ($currentCategoryId && $token) {
             <div class="login-group">
                 <label>Контент</label>
                 <textarea name="content" id="articleContent" rows="8" required></textarea>
+            </div>
+
+            <div class="login-group">
+                <label>Иконка</label>
+                <input type="hidden" name="icon" id="articleIcon">
+                <div class="icon-picker" id="articleIconPicker">
+                    <?php foreach ($icons as $icon): ?>
+                        <?php
+                        $iconName = $icon['name'] ?? '';
+                        $iconUrl  = $icon['url'] ?? '';
+                        ?>
+                        <button type="button"
+                                class="icon-picker__item"
+                                data-icon="<?= htmlspecialchars((string)$iconName, ENT_QUOTES, 'UTF-8') ?>">
+                            <img src="<?= htmlspecialchars((string)$iconUrl, ENT_QUOTES, 'UTF-8') ?>"
+                                 alt=""
+                                 style="width:32px;height:32px;">
+                        </button>
+                    <?php endforeach; ?>
+                </div>
             </div>
 
             <div class="login-group">
