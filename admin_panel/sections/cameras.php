@@ -413,6 +413,5 @@ function complexNameById(array $complexes, $id): string
         cameraEls().modal.classList.remove('modal-open');
     }
 </script>
-<script src="/include/scripts.js"></script>
 </body>
 </html>

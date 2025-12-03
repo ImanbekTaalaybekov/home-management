@@ -889,3 +889,26 @@ body {
     display: block;
 }
 
+.icon-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.icon-picker__item {
+    border: 1px solid #ccc;
+    padding: 6px;
+    background: #f7f7f7;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.icon-picker__item:hover {
+    background: #eaeaea;
+}
+
+.icon-picker__item--active {
+    background: #007bff !important;
+    border-color: #0056b3 !important;
+}
