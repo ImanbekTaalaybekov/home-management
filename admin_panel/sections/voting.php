@@ -403,7 +403,7 @@ function pollStatusLabel(?string $start, ?string $end): string
 
             <div class="login-group">
                 <label>Описание</label>
-                <textarea name="description" id="pollDescription" rows="5"></textarea>
+                <textarea name="description" id="pollDescription" rows="5" class="hundred-percent-width"></textarea>
             </div>
 
             <div class="login-group">

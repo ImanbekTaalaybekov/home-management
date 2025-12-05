@@ -172,19 +172,19 @@ if ($token) {
 </div>
 
 <div class="modal-backdrop" id="categoryModal">
-    <div class="modal">
+    <div class="modal-master-add">
         <form method="post">
             <input type="hidden" name="action" id="catAction">
             <input type="hidden" name="id" id="catId">
-            <input type="text" name="name" id="catName" placeholder="Key name">
-            <input type="text" name="name_rus" id="catNameRus" placeholder="Название">
+            <input type="text" name="name" id="catName" placeholder="Названеи на русском">
+            <input type="text" name="name_rus" id="catNameRus" placeholder="Название на английском">
             <button>Сохранить</button>
         </form>
     </div>
 </div>
 
 <div class="modal-backdrop" id="masterModal">
-    <div class="modal">
+    <div class="modal-master-add">
         <form method="post">
             <input type="hidden" name="action" id="masterAction">
             <input type="hidden" name="id" id="masterId">

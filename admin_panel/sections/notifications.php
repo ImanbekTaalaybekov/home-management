@@ -529,7 +529,7 @@ $categoryLabels = [
 
             <div class="login-group">
                 <label>Текст уведомления</label>
-                <textarea name="message" id="notifMessage" placeholder="Текст уведомления" required></textarea>
+                <textarea name="message" id="notifMessage" placeholder="Текст уведомления" required class="hundred-percent-width"></textarea>
             </div>
 
             <div class="login-group">
