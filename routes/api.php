@@ -211,7 +211,6 @@ Route::prefix('admin')->group(function () {
     Route::get('/analytics/balance-summary', [DebtAnalyticsAdminController::class, 'balanceSummary'])->middleware('auth:sanctum');
     Route::get('/analytics/periods-map', [DebtAnalyticsAdminController::class, 'periodsMap'])->middleware('auth:sanctum');
     Route::get('/analytics/accrual-dynamics', [DebtAnalyticsAdminController::class, 'accrualDynamics'])->middleware('auth:sanctum');
-    Route::get('/analytics/balance-dynamics', [DebtAnalyticsAdminController::class, 'balanceDynamics'])->middleware('auth:sanctum');
 
     Route::get('/cameras', [CameraAdminController::class, 'index'])->middleware('auth:sanctum');
     Route::post('/cameras', [CameraAdminController::class, 'store'])->middleware('auth:sanctum');
