@@ -263,6 +263,7 @@ body {
     cursor: pointer;
     font-weight: 500;
     transition: background .15s ease, transform .08s ease;
+    margin-bottom: 10px;
 }
 
 .button-primary:hover,
@@ -568,6 +569,13 @@ body {
     padding: 18px 18px 20px;
     max-width: 420px;
     width: calc(100% - 32px);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.55);
+}
+
+.modal-master-add {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 18px 18px 20px;
     box-shadow: 0 18px 40px rgba(15, 23, 42, 0.55);
 }
 
@@ -912,3 +920,36 @@ body {
     background: #007bff !important;
     border-color: #0056b3 !important;
 }
+
+.admins-center {
+    margin: auto;
+    border-radius: 30px;
+}
+
+.utilities-upload-input {
+    height: 36px;
+    border-radius: 10px;
+    padding-left: 5px;
+}
+
+.button-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 16px;
+    border-radius: var(--radius-full);
+    border: none;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background .15s
+    ease, transform .08s
+    ease;
+}
+
+.hundred-percent-width {
+    width: 100%;
+}
+

@@ -194,12 +194,12 @@ function complexNameById(array $complexes, $id): string
                             <?php endforeach; ?>
                         </select>
                         <button type="submit" class="button-primary button-xs">Фильтр</button>
-                        <a href="<?= htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') ?>" class="button-secondary button-xs">Сброс</a>
-                    </form>
+                        <a href="<?= htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') ?>" class="button-primary button-xs button-danger ">Сброс</a>
 
-                    <button type="button" class="button-primary button-xs" onclick="openCameraCreateModal()">
-                        + Камера
-                    </button>
+                        <button type="button" class="button-primary button-xs btn-success" onclick="openCameraCreateModal()">
+                            + Камера
+                        </button>
+                    </form>
                 </div>
             </div>
 

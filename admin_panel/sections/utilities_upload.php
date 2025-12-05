@@ -135,8 +135,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
     <?php include __DIR__ . '/../include/header.php'; ?>
     <aside class="sidebar"><?php include __DIR__ . '/../include/sidebar.php'; ?></aside>
 
-    <main class="content">
-        <h1 class="content__title">Загрузка коммунальных услуг</h1>
+    <main class="content admins-center">
+        <h1 class="content__title">Загрузка файлов коммунальных услу Alseco</h1>
 
         <?php if ($successMessage): ?>
             <div class="alert alert-success"><?= htmlspecialchars($successMessage, ENT_QUOTES, 'UTF-8') ?></div>
@@ -145,22 +145,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token) {
             <div class="alert alert-error"><?= htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') ?></div>
         <?php endif; ?>
 
-        <div class="card">
-            <h2 class="utilities-section-title">Загрузка файла Alseco</h2>
+        <div class="card admins-center">
+            <h3 class="utilities-section-title">Укажите период</h3>
             <form method="post" enctype="multipart/form-data" class="utilities-form">
                 <div class="utilities-row">
                     <div class="utilities-field">
                         <label for="month">Месяц</label>
-                        <input type="number" id="month" name="month" placeholder="1–12" min="1" max="12" required>
+                        <input type="number" id="month" name="month" placeholder="1–12" min="1" max="12" required class="utilities-upload-input">
                     </div>
                     <div class="utilities-field">
                         <label for="year">Год</label>
-                        <input type="number" id="year" name="year" placeholder="2025" required>
+                        <input type="number" id="year" name="year" placeholder="2025" required class="utilities-upload-input">
                     </div>
                 </div>
 
                 <div class="utilities-field">
-                    <label for="file">Файл выгрузки Alseco (.xls / .xlsx)</label>
+                    <h3 class="utilities-section-title">Укажите файл сальдовой ведомости Alseco</h3>
                     <input type="file" id="file" name="file" accept=".xls,.xlsx" required>
                     <div class="utilities-note">Размер файла может быть большим, загрузка займёт время.</div>
                 </div>

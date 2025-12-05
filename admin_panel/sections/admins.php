@@ -367,7 +367,6 @@ $adminsPage  = array_slice($admins, $offset, $perPage);
                         $clientId = $admin['client_id'] ?? '';
                         $accesses = $admin['accesses']  ?? '';
 
-                        // Преобразуем accesses в человекочитаемый вид
                         if (is_array($accesses)) {
                             $accessesReadable = [];
                             foreach ($accesses as $acc) {
