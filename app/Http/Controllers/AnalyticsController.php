@@ -18,61 +18,136 @@ class AnalyticsController extends Controller
         $month = is_numeric($month) ? (int)$month : null;
         $year  = is_numeric($year) ? (int)$year : null;
 
-        $file = $request->file('file');
-        $spreadsheet = IOFactory::load($file->getPathname());
-        $sheet = $spreadsheet->getActiveSheet();
-        $rows = $sheet->toArray(null, true, false, true);
-
-        foreach (array_slice($rows, 5) as $row) {
-            if (empty($row['A']) && empty($row['E']) && empty($row['K'])) {
-                continue;
-            }
-
-            $localityPart = self::str($row['H']);
-
-            $exists = AnalyticsAlsecoData::where('month', $month)
-                ->where('year', $year)
-                ->where('locality_part', $localityPart)
-                ->exists();
-
-            if ($exists) {
-                continue;
-            }
-
-            AnalyticsAlsecoData::create([
-                'account_number'         => self::str($row['A']),
-                'management_code'        => self::str($row['B']),
-                'management_name'        => self::str($row['C']),
-                'supplier_code'          => self::str($row['D']),
-                'supplier_name'          => self::str($row['E']),
-                'region'                 => self::str($row['F']),
-                'locality'               => self::str($row['G']),
-                'locality_part'          => $localityPart,
-                'house'                  => self::str($row['I']),
-                'apartment'              => self::str($row['J']),
-                'full_name'              => self::str($row['K']),
-                'people_count'           => self::intOrNull($row['L']),
-                'supplier_people_count'  => self::intOrNull($row['M']),
-                'area'                   => self::num($row['N']),
-                'tariff'                 => self::num($row['O']),
-                'service'                => self::str($row['P']),
-                'balance_start'          => self::num($row['Q']),
-                'balance_change'         => self::num($row['R']),
-                'initial_accrual'        => self::num($row['S']),
-                'accrual_change'         => self::num($row['T']),
-                'accrual_end'            => self::num($row['U']),
-                'payment_date'           => self::str($row['V']),
-                'payment'                => self::num($row['W']),
-                'payment_transfer'       => self::num($row['X']),
-                'balance_end'            => self::num($row['Y']),
-                'note'                   => self::str($row['Z']),
-                'month'                  => $month,
-                'year'                   => $year,
-            ]);
+        if ($month === null || $year === null) {
+            return response()->json([
+                'message' => 'Нужно передать query-параметры month и year (числа)',
+            ], 422);
         }
 
-        return response()->json(['message' => 'Файл успешно импортирован']);
+        $file = $request->file('file');
+        if (!$file) {
+            return response()->json([
+                'message' => 'Нужно передать файл в поле "file" (form-data, key=file, type=file)',
+            ], 422);
+        }
+
+        try {
+            @set_time_limit(0);
+
+            $existingKeys = AnalyticsAlsecoData::query()
+                ->where('month', $month)
+                ->where('year', $year)
+                ->get(['account_number', 'service'])
+                ->map(function ($row) {
+                    return $row->account_number.'|'.$row->service;
+                })
+                ->all();
+
+            $seen = [];
+            foreach ($existingKeys as $k) {
+                if ($k !== null && $k !== '') {
+                    $seen[$k] = true;
+                }
+            }
+
+            $spreadsheet = IOFactory::load($file->getPathname());
+            $sheet = $spreadsheet->getActiveSheet();
+            $rowIterator = $sheet->getRowIterator();
+
+            $inserted = 0;
+
+            foreach ($rowIterator as $row) {
+                $rowIndex = $row->getRowIndex();
+
+                if ($rowIndex <= 5) {
+                    continue;
+                }
+
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(false);
+
+                $data = [];
+                foreach ($cellIterator as $cell) {
+                    $col = $cell->getColumn();
+                    $data[$col] = $cell->getValue();
+                }
+
+                if (
+                    (empty($data['A']) || $data['A'] === null) &&
+                    (empty($data['E']) || $data['E'] === null) &&
+                    (empty($data['K']) || $data['K'] === null)
+                ) {
+                    continue;
+                }
+
+                $accountNumber = self::str($data['A'] ?? null);
+                $service       = self::str($data['P'] ?? null);
+                $localityPart  = self::str($data['H'] ?? null);
+
+                if ($accountNumber === null || $accountNumber === '' ||
+                    $service === null || $service === '') {
+                    continue;
+                }
+
+                $key = $accountNumber.'|'.$service;
+
+                if (isset($seen[$key])) {
+                    continue;
+                }
+
+                $seen[$key] = true;
+
+                AnalyticsAlsecoData::create([
+                    'account_number'         => $accountNumber,
+                    'management_code'        => self::str($data['B'] ?? null),
+                    'management_name'        => self::str($data['C'] ?? null),
+                    'supplier_code'          => self::str($data['D'] ?? null),
+                    'supplier_name'          => self::str($data['E'] ?? null),
+                    'region'                 => self::str($data['F'] ?? null),
+                    'locality'               => self::str($data['G'] ?? null),
+                    'locality_part'          => $localityPart,
+                    'house'                  => self::str($data['I'] ?? null),
+                    'apartment'              => self::str($data['J'] ?? null),
+                    'full_name'              => self::str($data['K'] ?? null),
+                    'people_count'           => self::intOrNull($data['L'] ?? null),
+                    'supplier_people_count'  => self::intOrNull($data['M'] ?? null),
+                    'area'                   => self::num($data['N'] ?? null),
+                    'tariff'                 => self::num($data['O'] ?? null),
+                    'service'                => $service,
+                    'balance_start'          => self::num($data['Q'] ?? null),
+                    'balance_change'         => self::num($data['R'] ?? null),
+                    'initial_accrual'        => self::num($data['S'] ?? null),
+                    'accrual_change'         => self::num($data['T'] ?? null),
+                    'accrual_end'            => self::num($data['U'] ?? null),
+                    'payment_date'           => self::str($data['V'] ?? null),
+                    'payment'                => self::num($data['W'] ?? null),
+                    'payment_transfer'       => self::num($data['X'] ?? null),
+                    'balance_end'            => self::num($data['Y'] ?? null),
+                    'note'                   => self::str($data['Z'] ?? null),
+                    'month'                  => $month,
+                    'year'                   => $year,
+                ]);
+
+                $inserted++;
+            }
+
+            return response()->json([
+                'message'  => 'Файл успешно импортирован',
+                'inserted' => $inserted,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Alseco upload error: '.$e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'message' => 'Ошибка при обработке файла',
+                'error'   => app()->environment('local') ? $e->getMessage() : null,
+            ], 500);
+        }
     }
+
 
     protected static function str($v): ?string
     {
