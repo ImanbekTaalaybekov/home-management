@@ -361,7 +361,7 @@ function complexNameById(array $complexes, $id): string
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var sidebarGroup = document.getElementById('sidebar-admin');
+        var sidebarGroup = document.getElementById('sidebar-information');
         if (sidebarGroup) {
             sidebarGroup.classList.add('sidebar__group--open');
         }
