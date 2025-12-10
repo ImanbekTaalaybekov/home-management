@@ -16,8 +16,7 @@ yarn-error.log
 .fleet
 .vscode
 /vendor/
-/bootstrap/cache
-bootstrap/cache/
+bootstrap/cache/*
 .idea/
 workspace.xml
 /input_report_data/
