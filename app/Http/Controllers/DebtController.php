@@ -60,6 +60,7 @@ class DebtController extends Controller
     {
         $user = Auth::user();
         $total = Debt::where('user_id', $user->id)->sum('amount');
+        $total = ABS($total);
 
         return response()->json(['total_debt' => $total]);
     }

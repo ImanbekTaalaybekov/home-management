@@ -60,12 +60,12 @@ class DebtImportController extends Controller
                     'account_number',
                     'service',
                 ])
-                ->selectRaw('SUM(ABS(COALESCE(balance_start, 0)))   AS period_start_balance')
-                ->selectRaw('SUM(ABS(COALESCE(balance_end, 0)))     AS amount')
-                ->selectRaw('SUM(ABS(COALESCE(accrual_change, 0)))  AS current_charges')
-                ->selectRaw('SUM(ABS(COALESCE(payment, 0)))         AS payment_amount')
-                ->selectRaw('SUM(ABS(COALESCE(initial_accrual, 0))) AS initial_amount')
-                ->selectRaw("MAX(NULLIF(payment_date, ''))          AS due_date")
+                ->selectRaw('SUM(COALESCE(balance_start,   0)) AS period_start_balance')
+                ->selectRaw('SUM(COALESCE(balance_end,     0)) AS amount')
+                ->selectRaw('SUM(COALESCE(accrual_change,  0)) AS current_charges')
+                ->selectRaw('SUM(COALESCE(payment,         0)) AS payment_amount')
+                ->selectRaw('SUM(COALESCE(initial_accrual, 0)) AS initial_amount')
+                ->selectRaw("MAX(NULLIF(payment_date, ''))    AS due_date")
                 ->groupBy('account_number', 'service')
                 ->get()
                 ->groupBy('account_number');

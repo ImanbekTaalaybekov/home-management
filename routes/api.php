@@ -112,7 +112,6 @@ Route::get('/company-documents/privacy-policy', [PrivacyDocumentController::clas
 Route::get('/company-report/show', [CompanyReportController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/company-report/show/{id}', [CompanyReportController::class, 'show'])->middleware('auth:sanctum');
 
-Route::post('/analytics/upload-data-alseco', [AnalyticsController::class, 'uploadAlseco']);
 Route::get('/analytics/periods-by-account', [AnalyticsController::class, 'periodsByAccount']);
 Route::get('/analytics/monthly-service-summary', [AnalyticsController::class, 'monthlyServiceSummary']);
 

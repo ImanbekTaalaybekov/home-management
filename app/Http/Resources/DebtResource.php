@@ -19,7 +19,7 @@ class DebtResource extends JsonResource
             'user_id' => $this->user_id,
             'type' => $this->type,
             'name' => $this->name,
-            'amount' => $this->amount,
+            'amount' => ABS($this->amount),
             'current_charges' => $this->current_charges,
             'opening_balance' => round($this->amount - $this->current_charges, 2),
             'due_date' => $this->due_date,
