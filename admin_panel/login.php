@@ -7,6 +7,7 @@ if (!empty($_SESSION['auth_token'])) {
 }
 
 $apiBaseUrl = 'https://home-folder.wires.kz/api/admin';
+// if local dev set $apiBaseUrl = 'https://127.0.0.1:8000/api/admin
 $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
