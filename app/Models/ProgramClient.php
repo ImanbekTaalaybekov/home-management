@@ -7,4 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class ProgramClient extends Model
 {
     protected $fillable = ['name', 'start_date', 'end_date', 'status'];
+
+    public function complexes()
+    {
+        return $this->hasMany(ResidentialComplex::class,'client_id');
+    }
 }
