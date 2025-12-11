@@ -42,7 +42,7 @@ class UserSeeder extends Seeder
                 'personal_account' => $user['personal_account'],
                 'name' => $user['name'],
                 'password' => Hash::make('1234'),
-                'residential_complex_id' => rand(1, 100),
+                'residential_complex_id' => 1,
                 'block_number' => rand(1, 100),
                 'apartment_number' => rand(1, 100),
                 'phone_number' => 1234,

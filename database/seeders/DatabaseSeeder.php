@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Admin;
+use App\Models\ResidentialComplex;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -14,6 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        ResidentialComplex::create([
+        'name' => 'Test Complex',
+        'address' => 'some address',
+        'client_id' => '1',
+        ]);
         User::create([
             'name' => 'Test User',
             'personal_account' => '12345',
@@ -25,6 +31,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Admin::create([
+            'name' => 'Test Admin',
             'username' => 'admin',
             'password' => '1234',
             'role' => 'admin',
