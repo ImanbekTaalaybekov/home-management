@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Complaint;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -68,7 +69,7 @@ class ComplaintAdminController extends Controller
         return response()->json($complaint);
     }
 
-    public function updateStatus($id)
+    public function updateStatus($id, NotificationService $notificationService)
     {
         $admin = Auth::guard('sanctum')->user();
 
@@ -81,13 +82,23 @@ class ComplaintAdminController extends Controller
                 $q->where('client_id', $admin->client_id);
             })
             ->first();
-
         if (!$complaint) {
             return response()->json(['message' => 'Complaint not found'], 404);
         }
 
         $complaint->status = 'done';
         $complaint->save();
+
+        //Отправка уведомления
+        $notificationService->sendPersonalNotification(
+            $admin->client_id,
+            $complaint->user->personal_account,
+            "Статус жалобы обновлён",
+            "Ваша жалоба №{$complaint->id} была обработана.",
+            [],
+            null,
+            "technical"
+        );
 
         return response()->json([
             'message'   => 'Complaint status updated to done',
