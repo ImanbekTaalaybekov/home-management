@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained();
             $table->foreignId('residential_complex_id')->nullable()->constrained();
             $table->string('document')->nullable();
-            $table->enum('type', ['technical', 'common']);
+            $table->enum('category', ['technical', 'common']);
             $table->integer('client_id')->nullable();
             $table->timestamps();
         });
