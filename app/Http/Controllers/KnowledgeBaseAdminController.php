@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\KnowledgeBase;
 use App\Models\KnowledgeBaseCategory;
+use App\Models\ProgramClient;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -22,7 +24,7 @@ class KnowledgeBaseAdminController extends Controller
         $icons = collect($files)->map(function ($path) {
             return [
                 'name' => basename($path),
-                'url'  => asset('storage/' . $path),
+                'url' => asset('storage/' . $path),
             ];
         });
 
@@ -46,9 +48,9 @@ class KnowledgeBaseAdminController extends Controller
         ]);
 
         $category = KnowledgeBaseCategory::create([
-            'name'      => $request->name,
+            'name' => $request->name,
             'client_id' => $admin->client_id,
-            'icon'      => $request->icon,
+            'icon' => $request->icon,
         ]);
 
         return response()->json($category, 201);
@@ -113,7 +115,7 @@ class KnowledgeBaseAdminController extends Controller
         return response()->json(['message' => 'Category deleted successfully']);
     }
 
-    public function storeArticle(Request $request)
+    public function storeArticle(Request $request, NotificationService $notificationService)
     {
         $admin = Auth::guard('sanctum')->user();
         if (!$admin) {
@@ -125,12 +127,12 @@ class KnowledgeBaseAdminController extends Controller
         }
 
         $request->validate([
-            'title'       => 'required|string|max:255',
-            'content'     => 'required',
+            'title' => 'required|string|max:255',
+            'content' => 'required',
             'category_id' => 'required|exists:knowledge_base_categories,id',
-            'icon'        => 'nullable|string',
-            'photos'      => 'nullable|array',
-            'photos.*'    => 'image|mimes:jpeg,png,jpg,gif'
+            'icon' => 'nullable|string',
+            'photos' => 'nullable|array',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif'
         ]);
 
         $category = KnowledgeBaseCategory::where('id', $request->category_id)
@@ -142,17 +144,40 @@ class KnowledgeBaseAdminController extends Controller
         }
 
         $article = KnowledgeBase::create([
-            'title'       => $request->title,
-            'content'     => $request->input('content'),
+            'title' => $request->title,
+            'content' => $request->input('content'),
             'category_id' => $category->id,
-            'client_id'   => $admin->client_id,
-            'icon'        => $request->icon,
+            'client_id' => $admin->client_id,
+            'icon' => $request->icon,
         ]);
 
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
                 $path = $photo->store('photos/knowledge-base', 'public');
                 $article->photos()->create(['path' => $path]);
+            }
+        }
+
+        // Отправка уведомлений всем пользователям клиента
+        $programClient = \App\Models\ProgramClient::where('id', $admin->client_id)->first();
+
+        if ($programClient) {
+            $complexes = $programClient->complexes;
+
+            foreach ($complexes as $complex) {
+                $notificationService->sendComplexNotification(
+                    clientId: $admin->client_id,
+                    complexId: $complex->complex_id,
+                    title: "Новая статья в базе знаний",
+                    message: "Добавлена статья: {$article->title}",
+                    photos: [],
+                    document: null,
+                    category: "knowledge",
+                    data: [
+                        "path" => "/knowledge-base/articles/{$article->id}",
+                        "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+                    ]
+                );
             }
         }
 
@@ -222,12 +247,12 @@ class KnowledgeBaseAdminController extends Controller
         }
 
         $request->validate([
-            'title'       => 'nullable|string|max:255',
-            'content'     => 'nullable|string',
+            'title' => 'nullable|string|max:255',
+            'content' => 'nullable|string',
             'category_id' => 'nullable|exists:knowledge_base_categories,id',
-            'icon'        => 'nullable|string',
-            'photos'      => 'nullable|array',
-            'photos.*'    => 'image|mimes:jpeg,png,jpg,gif'
+            'icon' => 'nullable|string',
+            'photos' => 'nullable|array',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif'
         ]);
 
         $data = $request->only(['title', 'content', 'icon']);
