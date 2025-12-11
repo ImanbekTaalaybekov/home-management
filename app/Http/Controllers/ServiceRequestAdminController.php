@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ServiceRequest;
 use App\Models\ServiceRequestCategory;
 use App\Models\ServiceRequestMaster;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -50,7 +51,7 @@ class ServiceRequestAdminController extends Controller
         return response()->json($requests);
     }
 
-    public function assignMaster(Request $request, $id)
+    public function assignMaster(Request $request, $id,NotificationService $notificationService)
     {
         $admin = Auth::guard('sanctum')->user();
         if (!$admin) {
@@ -93,6 +94,23 @@ class ServiceRequestAdminController extends Controller
 
         $serviceRequest->save();
 
+        // Отправка уведомления пользователю о назначении мастера
+
+        $notificationService->sendPersonalNotification(
+            clientId: $admin->client_id,
+            personalAccount: $serviceRequest->user->personal_account,
+            title: "Мастер назначен",
+            message: "На вашу заявку назначен мастер: {$master->name}" .
+            ($master->phone_number ? ", тел: {$master->phone_number}" : ""),
+            photos: [],
+            document: null,
+            category: "service_request",
+            data: [
+                "path" => "/service-requests/{$serviceRequest->id}",
+                "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+            ]
+        );
+
         return response()->json([
             'message' => 'Master assigned successfully',
             'data'    => $serviceRequest,
@@ -124,7 +142,7 @@ class ServiceRequestAdminController extends Controller
         return response()->json(['message' => 'Service request deleted successfully']);
     }
 
-    public function updateRequestStatus(Request $request, $id)
+    public function updateRequestStatus(Request $request, $id,NotificationService $notificationService)
     {
         $admin = Auth::guard('sanctum')->user();
 
@@ -149,10 +167,32 @@ class ServiceRequestAdminController extends Controller
         if (!$serviceRequest) {
             return response()->json(['message' => 'Service request not found'], 404);
         }
+        $oldStatus = $serviceRequest->status;
+        $newStatus = $request->status;
 
-        $serviceRequest->status = $request->status;
+        $serviceRequest->status = $newStatus;
         $serviceRequest->save();
 
+        // Отправка уведомления пользователю об изменении статуса
+        $statusMessages = [
+            'pending' => 'Ваша заявка ожидает обработки',
+            'in_progress' => 'Ваша заявка взята в работу',
+            'done' => 'Ваша заявка выполнена',
+        ];
+
+        $notificationService->sendPersonalNotification(
+            clientId: $admin->client_id,
+            personalAccount: $serviceRequest->user->personal_account,
+            title: "Статус заявки изменен",
+            message: $statusMessages[$newStatus] ?? "Статус заявки обновлен: {$newStatus}",
+            photos: [],
+            document: null,
+            category: "service_request",
+            data: [
+                "path" => "/service-requests/{$serviceRequest->id}",
+                "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+            ]
+        );
         return response()->json([
             'message' => 'Статус успешно обновлён',
             'data'    => $serviceRequest,
