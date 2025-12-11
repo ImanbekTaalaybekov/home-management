@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Suggestion;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -68,7 +69,7 @@ class SuggestionAdminController extends Controller
         return response()->json($suggestion);
     }
 
-    public function updateStatus($id)
+    public function updateStatus($id,NotificationService $notificationService)
     {
         $admin = Auth::guard('sanctum')->user();
 
@@ -88,6 +89,21 @@ class SuggestionAdminController extends Controller
 
         $suggestion->status = 'done';
         $suggestion->save();
+
+        //Отправка уведомления
+        $notificationService->sendPersonalNotification(
+            $admin->client_id,
+            $suggestion->user->personal_account,
+            "Статус предложения обновлён",
+            "Ваше предложение №{$suggestion->id} было обработано.",
+            [],
+            null,
+            "technical",
+            [
+                "path" => "/suggestion/{$suggestion->id}",
+                "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+            ]
+        );
 
         return response()->json([
             'message'    => 'Suggestion status updated to done',
