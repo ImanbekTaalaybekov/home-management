@@ -97,7 +97,11 @@ class ComplaintAdminController extends Controller
             "Ваша жалоба №{$complaint->id} была обработана.",
             [],
             null,
-            "technical"
+            "technical",
+            [
+                "path" => "/complaint/{$complaint->id}",
+                "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+            ]
         );
 
         return response()->json([

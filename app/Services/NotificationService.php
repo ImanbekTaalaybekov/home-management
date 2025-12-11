@@ -9,23 +9,30 @@ use Illuminate\Http\UploadedFile;
 
 class NotificationService
 {
-    public function sendGlobalNotification( $clientId, string $title, string $message, array $photos = [], $document = null, string $category): void
+    public function sendGlobalNotification(
+        $clientId,
+        string $title,
+        string $message,
+        array $photos = [],
+        $document = null,
+        string $category,
+        array $data = []
+    ): void
     {
         $notification = Notification::create([
             'client_id' => $clientId,
-            'title' => $title,
-            'message' => $message,
-            'type' => 'global',
-            'document' => $document,
-            'category' => $category,
+            'title'     => $title,
+            'message'   => $message,
+            'type'      => 'global',
+            'document'  => $document,
+            'category'  => $category,
         ]);
 
         $this->attachPhotos($notification, $photos);
 
         $userIds = User::whereHas('residentialComplex', function ($q) use ($clientId) {
             $q->where('client_id', $clientId);
-        })
-            ->pluck('id');
+        })->pluck('id');
 
         $tokens = FcmUserToken::whereIn('user_id', $userIds)
             ->pluck('fcm_token')
@@ -33,19 +40,28 @@ class NotificationService
             ->values()
             ->all();
 
-        $this->sendPushNotification($title, $message, $tokens);
+        $this->sendPushNotification($title, $message, $tokens, $data);
     }
 
-    public function sendComplexNotification($clientId, int    $complexId, string $title, string $message, array  $photos = [],$document = null, string $category): void
+    public function sendComplexNotification(
+        $clientId,
+        int $complexId,
+        string $title,
+        string $message,
+        array $photos = [],
+        $document = null,
+        string $category,
+        array $data = []
+    ): void
     {
         $notification = Notification::create([
-            'client_id' => $clientId,
-            'title' => $title,
-            'message' => $message,
-            'type' => 'complex',
+            'client_id'              => $clientId,
+            'title'                  => $title,
+            'message'                => $message,
+            'type'                   => 'complex',
             'residential_complex_id' => $complexId,
-            'document' => $document,
-            'category' => $category,
+            'document'               => $document,
+            'category'               => $category,
         ]);
 
         $this->attachPhotos($notification, $photos);
@@ -58,10 +74,20 @@ class NotificationService
             ->values()
             ->all();
 
-        $this->sendPushNotification($title, $message, $tokens);
+        $this->sendPushNotification($title, $message, $tokens, $data);
     }
 
-    public function sendPersonalNotification ($clientId, string $personalAccount, string $title, string $message, array  $photos = [], $document = null, string $category): ?Notification
+
+    public function sendPersonalNotification(
+        $clientId,
+        string $personalAccount,
+        string $title,
+        string $message,
+        array $photos = [],
+        $document = null,
+        string $category,
+        array $data = []
+    ): ?Notification
     {
         $user = User::where('personal_account', $personalAccount)->first();
 
@@ -74,6 +100,7 @@ class NotificationService
         }
 
         $documentPath = null;
+
         if ($document instanceof UploadedFile) {
             $documentPath = $document->store('notifications', 'public');
         } elseif (is_string($document) && $document !== '') {
@@ -81,14 +108,13 @@ class NotificationService
         }
 
         $notification = Notification::create([
-            'client_id' => $clientId,
-            'title' => $title,
-            'message' => $message,
-            'type' => 'personal',
-            'category' => $category,
-            'user_id' => $user->id,
-            'residential_complex_id' => null,
-            'document' => $documentPath,
+            'client_id'              => $clientId,
+            'title'                  => $title,
+            'message'                => $message,
+            'type'                   => 'personal',
+            'category'               => $category,
+            'user_id'                => $user->id,
+            'document'               => $documentPath,
         ]);
 
         $this->attachPhotos($notification, $photos);
@@ -99,10 +125,11 @@ class NotificationService
             ->values()
             ->all();
 
-        $this->sendPushNotification($title, $message, $tokens);
+        $this->sendPushNotification($title, $message, $tokens, $data);
 
         return $notification;
     }
+
 
     private function attachPhotos(Notification $notification, array $photos): void
     {
@@ -111,15 +138,17 @@ class NotificationService
         }
     }
 
-    private function sendPushNotification(string $title, string $message, array $tokens): void
+
+    private function sendPushNotification(string $title, string $message, array $tokens, array $data = []): void
     {
         $tokens = array_values(array_unique(array_filter($tokens)));
+
         if (empty($tokens)) {
             return;
         }
 
         foreach (array_chunk($tokens, 500) as $chunk) {
-            app(FcmV1Service::class)->send($chunk, $title, $message);
+            app(FcmV1Service::class)->send($chunk, $title, $message, $data);
         }
     }
 }
