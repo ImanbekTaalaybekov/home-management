@@ -167,7 +167,7 @@ class KnowledgeBaseAdminController extends Controller
             foreach ($complexes as $complex) {
                 $notificationService->sendComplexNotification(
                     clientId: $admin->client_id,
-                    complexId: $complex->complex_id,
+                    complexId: $complex->id,
                     title: "Новая статья в базе знаний",
                     message: "Добавлена статья: {$article->title}",
                     photos: [],
