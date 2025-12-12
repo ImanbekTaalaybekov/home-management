@@ -15,7 +15,7 @@ use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\DebtAdminController;
 use App\Http\Controllers\DebtAnalyticsAdminController;
 use App\Http\Controllers\DebtController;
-use App\Http\Controllers\DebtImportController;
+use App\Http\Controllers\DebtImportAdminController;
 use App\Http\Controllers\InputDebtDataController;
 use App\Http\Controllers\KnowledgeBaseAdminController;
 use App\Http\Controllers\KnowledgeBaseController;
@@ -99,7 +99,6 @@ Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])
 
 Route::post('/upload-debt-data-alseco', [InputDebtDataController::class, 'uploadAlseco']);
 
-Route::post('/debt-import', [DebtImportController::class, 'importDebt']);
 
 Route::get('/knowledge-base/categories', [KnowledgeBaseController::class, 'indexCategories']);
 Route::get('/knowledge-base/articles', [KnowledgeBaseController::class, 'indexArticles']);
@@ -201,7 +200,7 @@ Route::prefix('admin')->group(function () {
     Route::delete('/announcements/{id}', [AnnouncementAdminController::class, 'remove'])->middleware('auth:sanctum');
 
     Route::post('/analytics/upload-data-alseco', [AnalyticsController::class, 'uploadAlseco']);
-    Route::post('/debt-import', [DebtImportController::class, 'importDebt']);
+    Route::post('/debt-import', [DebtImportAdminController::class, 'importDebt'])->middleware('auth:sanctum');
 
     Route::get('/dashboard', [DashboardAdminController::class, 'index'])->middleware('auth:sanctum');
 

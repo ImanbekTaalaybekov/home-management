@@ -53,7 +53,7 @@ class   PollAdminController extends Controller
                 clientId: $admin->client_id,
                 complexId: (int)$validated['residential_complex_id'],
                 title: 'Новое голосование',
-                message: "Открыт новый опрос: {$poll->title}",
+                message: "Открыто новое голосование: {$poll->title}",
                 photos: [],
                 document: null,
                 category: 'poll',
@@ -67,7 +67,7 @@ class   PollAdminController extends Controller
             $notificationService->sendGlobalNotification(
                 clientId: $admin->client_id,
                 title: 'Новое голосование',
-                message: "Открыт новый опрос: {$poll->title}",
+                message: "Открыто новое голосование: {$poll->title}",
                 photos: [],
                 document: null,
                 category: 'poll',
@@ -77,6 +77,7 @@ class   PollAdminController extends Controller
                 ]
             );
         }
+
 
         return response()->json([
             'message' => 'Опрос успешно создан',
