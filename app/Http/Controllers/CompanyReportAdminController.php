@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CompanyReport;
 use App\Models\ResidentialComplex;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 
 class CompanyReportAdminController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request,NotificationService $notificationService)
     {
         $admin = Auth::guard('sanctum')->user();
         if (!$admin) {
@@ -47,6 +48,43 @@ class CompanyReportAdminController extends Controller
             'document'               => $documentPath,
             'residential_complex_id' => $request->residential_complex_id,
         ]);
+        // Отправка уведомлений всем пользователям жк
+        if (is_null($request->residential_complex_id)) {
+            // всем ЖК этой УК
+            $complexIds = ResidentialComplex::where('client_id', $admin->client_id)->pluck('id');
+
+            foreach ($complexIds as $complexId) {
+                $notificationService->sendComplexNotification(
+                    clientId: $admin->client_id,
+                    complexId: $complexId,
+                    title: "Новый отчёт",
+                    message: "Добавлен отчёт: {$report->title}",
+                    photos: [],
+                    document: null,
+                    category: "company-report",
+                    data: [
+                        "path" => "/company-report/show/{$report->id}",
+                        "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+                    ]
+                );
+            }
+        } else {
+            // только выбранному ЖК
+            $notificationService->sendComplexNotification(
+                clientId: $admin->client_id,
+                complexId: $complex->id,
+                title: "Новый отчёт",
+                message: "Добавлен отчёт: {$report->title}",
+                photos: [],
+                document: null,
+                category: "company-report",
+                data: [
+                    "path" => "/company-report/show/{$report->id}",
+                    "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+                ]
+            );
+        }
+
 
         $report->document_url = $report->document ? asset('storage/' . $report->document) : null;
 
