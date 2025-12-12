@@ -4,14 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Poll;
 use App\Models\ResidentialComplex;
+use App\Services\NotificationService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use setasign\Fpdi\Fpdi;
 
-class PollAdminController extends Controller
+class   PollAdminController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request,NotificationService $notificationService)
     {
         $admin = Auth::guard('sanctum')->user();
 
@@ -20,11 +21,11 @@ class PollAdminController extends Controller
         }
 
         $request->validate([
-            'title'                  => 'required|string|max:255',
-            'description'            => 'nullable|string',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'residential_complex_id' => 'nullable',
-            'start_date'             => 'required|date',
-            'end_date'               => 'required|date',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
         ]);
 
         if ($request->filled('residential_complex_id')) {
@@ -40,16 +41,46 @@ class PollAdminController extends Controller
         }
 
         $poll = Poll::create([
-            'title'                  => $request->title,
-            'description'            => $request->description,
+            'title' => $request->title,
+            'description' => $request->description,
             'residential_complex_id' => $request->residential_complex_id,
-            'start_date'             => $request->start_date,
-            'end_date'               => $request->end_date,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
         ]);
+        // Уведы всем пользователям жк (residential_complex_id) при создании нового голосования
+        if (!empty($validated['residential_complex_id'])) {
+            $notificationService->sendComplexNotification(
+                clientId: $admin->client_id,
+                complexId: (int)$validated['residential_complex_id'],
+                title: 'Новое голосование',
+                message: "Открыт новый опрос: {$poll->title}",
+                photos: [],
+                document: null,
+                category: 'poll',
+                data: [
+                    'path' => "/polls/{$poll->id}",
+                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                ]
+            );
+        } else {
+            // Если ЖК не указан — можно разослать всем пользователям клиента (по всем ЖК клиента)
+            $notificationService->sendGlobalNotification(
+                clientId: $admin->client_id,
+                title: 'Новое голосование',
+                message: "Открыт новый опрос: {$poll->title}",
+                photos: [],
+                document: null,
+                category: 'poll',
+                data: [
+                    'path' => "/polls/{$poll->id}",
+                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                ]
+            );
+        }
 
         return response()->json([
             'message' => 'Опрос успешно создан',
-            'data'    => $poll,
+            'data' => $poll,
         ], 201);
     }
 
