@@ -10,6 +10,7 @@ class ResidentialComplex extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'name',
         'address',
         'client_id'
