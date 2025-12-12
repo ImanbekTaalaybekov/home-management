@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\AnalyticsAlsecoData;
 use App\Models\Debt;
 use App\Models\DebtPaymentCheck;
+use App\Models\ResidentialComplex;
 use App\Models\User;
+use App\Services\NotificationService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-class DebtImportController extends Controller
+class DebtImportAdminController extends Controller
 {
-    public function importDebt()
+    public function importDebt(Request $request,NotificationService $notificationService)
     {
         set_time_limit(3600);
 
@@ -95,6 +99,25 @@ class DebtImportController extends Controller
                     $totalWritten++;
                 }
             }
+        }
+        $admin = Auth::guard('sanctum')->user();
+
+        $complexIds = ResidentialComplex::where('client_id', $admin->client_id)->pluck('id');
+
+        foreach ($complexIds as $complexId) {
+            $notificationService->sendComplexNotification(
+                clientId: $admin->client_id,
+                complexId: $complexId,
+                title: "Новые данные по коммунальным услугам",
+                message: "Добавлены новые данные по коммунальным услугам",
+                photos: [],
+                document: null,
+                category: "debt-import",
+                data: [
+                    "path" => "/debts/{id}",
+                    "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+                ]
+            );
         }
 
         return response()->json([
