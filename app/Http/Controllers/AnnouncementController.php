@@ -89,6 +89,7 @@ class AnnouncementController extends Controller
         $announcements = Announcement::with('photos')
             ->where('residential_complex_id', $user->residential_complex_id)
             ->where('created_by', $user->id)
+            ->where('created_at', '>=', Carbon::now()->subDays(30))
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
