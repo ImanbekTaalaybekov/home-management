@@ -57,7 +57,7 @@ class CompanyReportAdminController extends Controller
                 $notificationService->sendComplexNotification(
                     clientId: $admin->client_id,
                     complexId: $complexId,
-                    title: "Новый отчёт",
+                    title: "Новый отчёт управляющей компании",
                     message: "Добавлен отчёт: {$report->title}",
                     photos: [],
                     document: null,
@@ -73,7 +73,7 @@ class CompanyReportAdminController extends Controller
             $notificationService->sendComplexNotification(
                 clientId: $admin->client_id,
                 complexId: $complex->id,
-                title: "Новый отчёт",
+                title: "Новый отчёт управляющей компании",
                 message: "Добавлен отчёт: {$report->title}",
                 photos: [],
                 document: null,
